@@ -29,9 +29,19 @@ class ParamIO(dict):
         with open(self.file_name, mode='w') as file:
             json.dump(self, file, ensure_ascii=False, indent=4)
 
-    def fromDict(self, rdict):
+    def from_dict(self, rdict):
         for key, value in rdict.items():
             self[key] = value
+
+    def to_attr(self, obj):
+        """
+        Dumps the parameter dictionary in the object (obj)
+        as attributes of said object
+        :param obj:
+        :return:
+        """
+        for key, value in self.items():
+            obj.__setattr__(str(key), value)
 
 
 class DynStateIO:
