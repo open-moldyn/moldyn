@@ -12,21 +12,22 @@ class ParamIO(dict):
 
     def __enter__(self):
         try:
-            with open(self.file_name, mode='r') as file:
-                params = json.load(self.file_name,
-                                   parse_float=True, parse_int=True)
-
-            for key, value in params.items():
-                self[key] = value
-
+            try:
+                with open(self.file_name, mode='r') as file:
+                    params = json.load(self.file_name,
+                                       parse_float=True, parse_int=True)
+                for key, value in params.items():
+                    self[key] = value
+            except json.decoder.JSONDecodeError:
+                print("File corrupted")
         except FileNotFoundError:
             print("File does not YET exists")
-            pass
+
         return self
 
     def __exit__(self, exc_type, exc_val, exc_tb):
         with open(self.file_name, mode='w') as file:
-            json.dump(dict(self), file, ensure_ascii=False, indent=4)
+            json.dump(self, file, ensure_ascii=False, indent=4)
 
     def fromDict(self, rdict):
         for key, value in rdict.items():
