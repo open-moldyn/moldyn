@@ -34,7 +34,13 @@ class Model:
         }
 
     def __getattr__(self, item):
-        if item in self.params:
+        derived_values=[
+            "T",
+            "EC"
+        ]
+        if item in derived_values:
+            return eval("self.get_"+item+"()")
+        elif item in self.params:
             return self.params[item]
         else:
             raise AttributeError
@@ -93,41 +99,37 @@ class Model:
         self.params["length_x"] = self.x_lim_sup - self.x_lim_inf
         self.params["length_y"] = self.y_lim_sup - self.y_lim_inf
 
-        #self.params["volume"] = self.length_x*self.length_y
-
-    def shuffle_atoms(self):
+    def shuffle_atoms(self): # mélange les atomes aléatoirement pour répartir les 2 espèces dans l'espace
         np.random.shuffle(self.pos)
 
-    def random_speed(self):
-        vx = np.random.normal(size=self.npart)
-        vy = np.random.normal(size=self.npart)
-        self.v = np.transpose([vx, vy])
+    def random_speed(self): # donne une vitesse aléatoire aux atomes pour une température non nulle
+        self.v = np.random.normal(size=(self.npart,2))
 
     def _m(self): # vecteur de masses
-        m = np.concatenate((self.m_a * np.ones(self.n_a), self.m_b * np.ones(self.npart - self.n_a)))
+        m = np.concatenate((self.m_a*np.ones(self.n_a), self.m_b*np.ones(self.npart - self.n_a)))
         self.m = np.transpose([m,m])
         return self.m
 
-    def EC(self): # énergie cinétique
+    def get_EC(self): # énergie cinétique
         v = self.v
         m = self.m
         return 0.5*ne.evaluate("sum(m*v**2)")
 
-    def T(self):
-        return self.EC()/(self.kB*self.npart)
+    def get_T(self):
+        return self.EC/(self.kB*self.npart)
 
     def set_T(self, T):
-        if not self.T():
+        if not self.T:
             self.random_speed()
-        self.v *= np.sqrt(T/self.T())
+        self.v *= np.sqrt(T/self.T)
 
     def set_periodic_boundary(self,x=1,y=1): # conditions périodiques de bord : 1, sinon 0
         self.params["x_periodic"] = x
         self.params["y_periodic"] = y
 
     def set_timestep(self, dt=None):
-        if not dt: # periode d'oscillation pour pouvoir calibrer le pas de temps
-            freq0 = np.sqrt((57.1464 * self.epsilon_a / (self.sigma_a ** 2.0)) / self.m_a) / (2.0*np.pi)
+        if not dt: # période d'oscillation pour pouvoir calibrer le pas de temps
+            freq0 = np.sqrt((57.1464 * self.epsilon_a / (self.sigma_a**2)) / self.m_a) / (2*np.pi)
             peri0 = 1 / freq0
             dt = peri0 / 75
 
