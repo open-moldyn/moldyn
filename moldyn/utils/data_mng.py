@@ -1,7 +1,17 @@
 from datreant import *
 import numpy as np
 import json
+import datetime
 
+CATEGORY_LIST = [
+    "npart",
+    "spc1",
+    "spc2",
+    "x_a",
+    "timestep",
+    "border_x_type",
+    "border_y_type"
+]
 
 class ParamIO(dict):
 
@@ -26,8 +36,20 @@ class ParamIO(dict):
         return self
 
     def __exit__(self, exc_type, exc_val, exc_tb):
-        with open(self.file_name, mode='w') as file:
-            json.dump(self, file, ensure_ascii=False, indent=4)
+        try:
+            try:
+                with open(self.file_name, mode='r') as file:
+                    params = json.load(self.file_name,
+                                       parse_float=True, parse_int=True)
+            except json.decoder.JSONDecodeError:
+                print("File corrupted")
+        except FileNotFoundError:
+            print("File does not YET exists")
+        if self != params:
+            with open(self.file_name, mode='w') as file:
+                json.dump(self, file, ensure_ascii=False, indent=4)
+            self.dynState.categories['last modified'] = datetime.datetime.now().strftime('%d/%m/%Y-%X')
+        self._update_categories()
 
     def from_dict(self, rdict):
         for key, value in rdict.items():
@@ -43,6 +65,12 @@ class ParamIO(dict):
         for key, value in self.items():
             obj.__setattr__(str(key), value)
 
+    def _update_categories(self):
+        if self["x_a"] != 0:
+            self.dynState.categories["nb_species"] = 2
+        for key, value in self.items():
+            if key in CATEGORY_LIST:
+                self.dynState.categories[key] = value
 
 class DynStateIO:
     def __init__(self, dynState, file : Leaf, mode):
@@ -55,6 +83,8 @@ class DynStateIO:
         return self
 
     def __exit__(self, exc_type, exc_val, exc_tb):
+        if self.file.readable():
+            self.dynState.categories['last modified'] = datetime.datetime.now().strftime('%d/%m/%Y-%X')
         self.file.close()
 
     def save(self, arr, **kwargs):
@@ -67,9 +97,11 @@ class DynStateIO:
 
 
 class DynState(Treant):
-    POS = "pos.npy"
-    VEL = "velocities.npy"
-    PAR = "parameters.json"
+    POS = "pos.npy" # position at each timestep
+    POS0 = "pos0.npy" # initial position
+    POSF = "posF.npy" # final position
+    VEL = "velocities.npy" # final velocities
+    PAR = "parameters.json" # parameters of model and simulation
 
     def __init__(self, treant):
         super().__init__(treant)
@@ -81,6 +113,13 @@ class DynState(Treant):
             return DynStateIO(self, self.leafloc[file], mode)
         elif file.endswith(".json"):
             return ParamIO(self, self.leafloc[file])
+        else:
+            return open(self.leafloc[file].abspath, mode)
+
+    def add_tag(self,*tags):
+        self.tags.add(*tags)
+
+
 
 
 t = 0
