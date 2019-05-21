@@ -102,3 +102,12 @@ venv.bak/
 
 # mypy
 .mypy_cache/
+
+# bazar de pycharm
+.idea/
+
+# vidéos
+*.mp4
+
+# numpy (trop gros :'(((()
+*.npy

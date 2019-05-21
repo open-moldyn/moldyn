@@ -93,3 +93,8 @@ def test(dirpath):
     with t.open(t.POS, 'r') as IO:
         print(IO.load())
 
+    IO = t.open(t.POS, 'w')
+    IO.__enter__()
+
+    IO.__exit__()
+
