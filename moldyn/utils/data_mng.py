@@ -1,7 +1,7 @@
-from datreant import *
 import numpy as np
 import json
 import datetime
+import datreant as dt
 
 CATEGORY_LIST = [
     "npart",
@@ -15,7 +15,7 @@ CATEGORY_LIST = [
 
 class ParamIO(dict):
 
-    def __init__(self, dynState, file: str, **kwargs):
+    def __init__(self, dynState, file: dt.Leaf, **kwargs):
         super().__init__(**kwargs)
         self.dynState = dynState
         self.file_name = file
@@ -57,10 +57,14 @@ class ParamIO(dict):
 
     def to_attr(self, obj):
         """
-        Dumps the parameter dictionary in the object (obj)
-        as attributes of said object
-        :param obj:
-        :return:
+        Dump the parameter dictionary in the object (obj) as attributes of said object.
+        Parameters
+        ----------
+        obj : an object
+
+        Returns
+        -------
+
         """
         for key, value in self.items():
             obj.__setattr__(str(key), value)
@@ -73,7 +77,7 @@ class ParamIO(dict):
                 self.dynState.categories[key] = value
 
 class DynStateIO:
-    def __init__(self, dynState, file : Leaf, mode):
+    def __init__(self, dynState, file : dt.Leaf, mode):
         self.dynState = dynState
         self.mode = mode
         self.file_name = file
@@ -96,7 +100,7 @@ class DynStateIO:
         return np.load(self.file, allow_pickle=True)
 
 
-class DynState(Treant):
+class DynState(dt.Treant):
     POS = "pos.npy" # position at each timestep
     POS0 = "pos0.npy" # initial position
     POSF = "posF.npy" # final position
@@ -120,6 +124,8 @@ class DynState(Treant):
         self.tags.add(*tags)
 
 
+def discover(dirpath='./data', *args, **kwargs):
+    return dt.discover(dirpath=dirpath, *args, **kwargs)
 
 
 t = 0
