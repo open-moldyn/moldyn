@@ -14,7 +14,8 @@ class Simulation:
         self.npart = np.shape(model.pos)[0]
 
         # Découpage de la liste en segments de taille acceptable par le GPU
-        max_layout_size = gl_util.testMaxSizes()
+        #max_layout_size = gl_util.testMaxSizes()
+        max_layout_size = 256 # Probablement optimal (en tout cas d'après essais et guides de bonnes pratiques)
         self.groups_number = int(np.ceil(self.npart / max_layout_size))
         self.layout_size = int(np.ceil(self.npart / self.groups_number))
 
