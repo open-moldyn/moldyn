@@ -19,10 +19,10 @@
 #define SIGMA_B %%SIGMA_B%%
 #define SIGMA_AB %%SIGMA_AB%%
 
-#define SHIFT_X %%SHIFT_X%%
-#define SHIFT_Y %%SHIFT_Y%%
 #define LENGTH_X %%LENGTH_X%%
 #define LENGTH_Y %%LENGTH_Y%%
+#define SHIFT_X LENGTH_X/2 // générique et logique
+#define SHIFT_Y LENGTH_Y/2
 
 #define X_PERIODIC %%X_PERIODIC%%
 #define Y_PERIODIC %%Y_PERIODIC%%

@@ -9,19 +9,17 @@ class Simulation:
 
     def __init__(self, model):
 
-        self.model = model
-
-        self.npart = np.shape(model.pos)[0]
+        self.model = model.copy()
 
         # Découpage de la liste en segments de taille acceptable par le GPU
         #max_layout_size = gl_util.testMaxSizes()
         max_layout_size = 256 # Probablement optimal (en tout cas d'après essais et guides de bonnes pratiques)
-        self.groups_number = int(np.ceil(self.npart / max_layout_size))
-        self.layout_size = int(np.ceil(self.npart / self.groups_number))
+        self.groups_number = int(np.ceil(self.model.npart / max_layout_size))
+        self.layout_size = int(np.ceil(self.model.npart / self.groups_number))
 
         self.elements_number = np.array([self.layout_size] * self.groups_number)
-        if self.npart % self.layout_size:
-            self.elements_number[-1] = self.npart % self.layout_size
+        if self.model.npart % self.layout_size:
+            self.elements_number[-1] = self.model.npart % self.layout_size
 
         # Chargement et paramétrage du compute shader
         consts = {
@@ -36,28 +34,74 @@ class Simulation:
         self.compute_shader = self.context.compute_shader(gl_util.source('templates/moldyn.glsl', consts))
 
         # Buffer de positions 1
-        self.BUFFER_P = self.context.buffer(reserve=2*4 * self.layout_size)
-        self.BUFFER_P.bind_to_storage_buffer(0);
+        self.BUFFER_P = self.context.buffer(reserve=2*4 * self.model.npart)
+        self.BUFFER_P.bind_to_storage_buffer(0)
 
         # Buffer de forces
-        self.BUFFER_F = self.context.buffer(reserve=2*4 * self.layout_size)
-        self.BUFFER_F.bind_to_storage_buffer(1);
+        self.BUFFER_F = self.context.buffer(reserve=2*4 * self.model.npart)
+        self.BUFFER_F.bind_to_storage_buffer(1)
 
         # Buffer d'énergies potentielles
-        self.BUFFER_E = self.context.buffer(reserve=4 * self.layout_size)
-        self.BUFFER_E.bind_to_storage_buffer(2);
+        self.BUFFER_E = self.context.buffer(reserve=4 * self.model.npart)
+        self.BUFFER_E.bind_to_storage_buffer(2)
 
         # Buffer de compteurs de liaisons
-        self.BUFFER_COUNT = self.context.buffer(reserve=4 * self.layout_size)
-        self.BUFFER_COUNT.bind_to_storage_buffer(3);
+        self.BUFFER_COUNT = self.context.buffer(reserve=4 * self.model.npart)
+        self.BUFFER_COUNT.bind_to_storage_buffer(3)
 
         # Buffer de paramètres
         self.BUFFER_PARAMS = self.context.buffer(reserve=4 * 5)
         self.BUFFER_PARAMS.bind_to_storage_buffer(4)
 
-    def iters(self,n):
-        for i in range(n):
-            self.iter()
+        self.current_iter = 0
 
-    def iter(self):
-        pass
+    def iter(self, n=1):
+
+        self.current_iter += n
+
+        betaC = False # Contrôle de la température, à délocaliser
+
+        v = self.model.v
+        pos = self.model.pos
+        dt = self.model.dt
+        m = self.model.m
+        dt2m = dt/(2*m)
+        knparts = self.model.kB * self.model.npart
+
+        limInf = self.model.lim_inf
+        limSup = self.model.lim_sup
+        length = self.model.length
+
+        F = np.zeros(pos.shape)
+
+        for i in range(n):
+
+            v2 = ne.evaluate("v + F*dt2m")
+            pos = ne.evaluate("pos + v2*dt")
+
+            # conditions périodiques de bord, donc à modifier
+            pos = ne.evaluate("pos + (pos<limInf)*length - (pos>limSup)*length")
+
+            self.BUFFER_P.write(pos.astype('f4').tobytes())
+
+            self.compute_shader.run(group_x=self.groups_number)
+
+            # Énergie cinétique, à mettre au conditionnel
+            EC = 0.5 * ne.evaluate("sum(m*v*v)")
+            T = EC / knparts
+
+            F = np.frombuffer(self.BUFFER_F.read(), dtype=np.float32).reshape(pos.shape)
+
+            # Énergie potentielle, à mettre au conditionnel
+            EPgl = np.frombuffer(self.BUFFER_E.read(), dtype=np.float32)
+            EP = 0.5 * ne.evaluate("sum(EPgl)")
+
+            # Thermostat
+            if betaC:
+                beta = np.sqrt(1+self.model.gamma*(TVOULUE/T-1))
+                v = ne.evaluate("(v2 + (F*dt2m))*beta")
+            else:
+                v = ne.evaluate("v2 + (F*dt2m)")
+
+        self.model.pos = pos
+        self.model.v = v
