@@ -29,26 +29,59 @@ class Model:
 
         self.params = {
             "npart":npart,
-            "x_a":x_a,
-            "n_a":int(x_a*npart),
+            "n_a":npart,
+            "rcut_fact":2.0,
+            "x_periodic":0,
+            "y_periodic":0,
+            "x_lim_inf":0,
+            "y_lim_inf":0,
         }
 
+        self.x_lim_sup = 0
+        self.y_lim_sup = 0
+        self.set_ab((1,1,1),(1,1,1))
+        self.x_a = 1.0
+        self.set_timestep()
+        self.set_periodic_boundary(0,0)
+
     def __getattr__(self, item):
-        derived_values=[
+        derived_values=[ # Les valeurs calculables à partir des autres
             "T",
-            "EC"
+            "EC",
+            "mass",
         ]
         if item in derived_values:
             return eval("self.get_"+item+"()")
         elif item in self.params:
             return self.params[item]
         else:
-            raise AttributeError
+            raise AttributeError(item)
+
+    def __setattr__(self, key, value):
+        special_values=[ # Les valeurs à vérifier ou  à transformer avant enregistrement
+            "T",
+            "x_a",
+            "n_a",
+            "x_periodic",
+            "y_periodic",
+            "x_lim_sup",
+            "x_lim_inf",
+            "y_lim_sup",
+            "y_lim_inf",
+            "length_x",
+            "length_y",
+        ]
+        if key in special_values:
+            f = eval("self.set_"+key)
+            f(value)
+        else:
+            super(Model, self).__setattr__(key, value)
 
     def set_species(self, epsilon, sigma, m, sp):
         self.params["epsilon_"+sp] = epsilon
         self.params["sigma_"+sp] = sigma
         self.params["re_"+sp] = 2.0**(1.0/6.0)*sigma
+        self.params["rcut_"+sp] = self.rcut_fact*self.params["re_"+sp]
         self.params["m_"+sp] = m
 
     def set_a(self, epsilon, sigma, m):
@@ -69,7 +102,6 @@ class Model:
         self.set_species(epsilon_ab, sigma_ab, 0, "ab")
 
         self.params["re"] = max(self.re_a, self.re_b)
-        self.params["rcut"] = 2.0*self.re
 
         self._m()
 
@@ -78,6 +110,9 @@ class Model:
         self.set_b(*b)
 
         self.calc_ab()
+
+    def set_n_a(self,value):
+        pass
 
     def atom_grid(self, n_x, n_y, d):
         self.params["npart"] = n_x*n_y
@@ -91,13 +126,32 @@ class Model:
 
         self._m()
 
-        self.params["x_lim_sup"] = (n_x - 0.5)*d
-        self.params["y_lim_sup"] = (n_y - 0.5)*d
-        self.params["x_lim_inf"] = -0.5*d
-        self.params["y_lim_inf"] = -0.5*d
+        self.x_lim_sup = (n_x - 0.5)*d
+        self.y_lim_sup = (n_y - 0.5)*d
+        self.x_lim_inf = -0.5*d
+        self.y_lim_inf = -0.5*d
 
+    def set_x_lim_inf(self,x_lim_inf):
+        self.params["x_lim_inf"] = x_lim_inf
         self.params["length_x"] = self.x_lim_sup - self.x_lim_inf
+
+    def set_y_lim_inf(self,y_lim_inf):
+        self.params["y_lim_inf"] = y_lim_inf
         self.params["length_y"] = self.y_lim_sup - self.y_lim_inf
+
+    def set_x_lim_sup(self,x_lim_sup):
+        self.params["x_lim_sup"] = x_lim_sup
+        self.params["length_x"] = self.x_lim_sup - self.x_lim_inf
+
+    def set_y_lim_sup(self,y_lim_sup):
+        self.params["y_lim_sup"] = y_lim_sup
+        self.params["length_y"] = self.y_lim_sup - self.y_lim_inf
+
+    def set_length_x(self,length_x):
+        self.x_lim_sup = self.x_lim_inf + length_x
+
+    def set_length_y(self,length_y):
+        self.y_lim_sup = self.y_lim_inf + length_y
 
     def shuffle_atoms(self): # mélange les atomes aléatoirement pour répartir les 2 espèces dans l'espace
         np.random.shuffle(self.pos)
@@ -123,9 +177,23 @@ class Model:
             self.random_speed()
         self.v *= np.sqrt(T/self.T)
 
-    def set_periodic_boundary(self,x=1,y=1): # conditions périodiques de bord : 1, sinon 0
+    def get_mass(self):
+        return self.n_a*self.m_a + (self.npart-self.n_a)*self.m_b
+
+    def set_x_a(self,x_a):
+        self.params["x_a"] = min(max(x_a,0.0),1.0)
+        self.params["n_a"] = int(x_a*self.npart)
+        self._m()
+
+    def set_x_periodic(self,x=1):
         self.params["x_periodic"] = x
+
+    def set_y_periodic(self,y=1):
         self.params["y_periodic"] = y
+
+    def set_periodic_boundary(self,x=1,y=1): # conditions périodiques de bord : 1, sinon 0
+        self.x_periodic = x
+        self.y_periodic = y
 
     def set_timestep(self, dt=None):
         if not dt: # période d'oscillation pour pouvoir calibrer le pas de temps

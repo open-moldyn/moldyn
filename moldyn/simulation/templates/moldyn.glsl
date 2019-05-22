@@ -6,7 +6,10 @@
 #define LAYOUT_SIZE %%LAYOUT_SIZE%%
 #define NPART %%NPART%%
 #define N_A %%N_A%%
-#define RCUT %%RCUT%%
+
+#define RCUT_A %%RCUT_A%%
+#define RCUT_B %%RCUT_B%%
+#define RCUT_AB %%RCUT_AB%%
 
 #define EPSILON_A %%EPSILON_A%%
 #define EPSILON_B %%EPSILON_B%%
@@ -24,8 +27,6 @@
 #define X_PERIODIC %%X_PERIODIC%%
 #define Y_PERIODIC %%Y_PERIODIC%%
 
-
-#define RCUT2 RCUT*RCUT
 
 layout (local_size_x=LAYOUT_SIZE, local_size_y=1, local_size_z=1) in;
 
@@ -62,7 +63,7 @@ float energy(float dist,float p, float epsilon) {
 	return epsilon*(4.0*(p*p-p)+127.0/4096.0);
 }
 
-void iterate(vec2 pos, uint a, uint b, float epsilon, float sigma) {
+void iterate(vec2 pos, uint a, uint b, float epsilon, float sigma, float rcut) {
 	// a et b les bornes, pos la position de l'atome associé à l'instance
 	const uint x = gl_GlobalInvocationID.x;
 
@@ -71,6 +72,9 @@ void iterate(vec2 pos, uint a, uint b, float epsilon, float sigma) {
 			vec2 distxy = pos - inxs[i];
 
 			// Conditions périodiques de bord
+			/* On trouvera des tutos sur le net qui disent de vectoriser les tests suivants à la main
+             * mais le compilateur est malin et le fait tout seul.
+             */
 			#if X_PERIODIC
 				if (distxy.x<(-SHIFT_X)) {
 					distxy.x+=LENGTH_X;
@@ -93,11 +97,11 @@ void iterate(vec2 pos, uint a, uint b, float epsilon, float sigma) {
 			/* Ce test accélère d'environ 15%, puisqu'on saute les étapes de multipication+somme du calcul de distance
 			 * pour voir si on est dans la sphère
 			 */
-			if(abs(distxy.x)<RCUT && abs(distxy.y)<RCUT) {
+			if(abs(distxy.x)<rcut && abs(distxy.y)<rcut) {
 
 				float dist = length(distxy);
 
-				if (dist<RCUT) {
+				if (dist<rcut) {
 					const float p=pow(sigma/dist, 6);
 
 					outfs[x] += force(dist, p, epsilon)*distxy;
@@ -121,11 +125,11 @@ void main()
 	if(x < NPART) { // On vérifie qu'on est bien associé à un atome
 
 		if(x < N_A) { // si on est de l'espèce A
-			iterate(pos, 0, N_A, EPSILON_A, SIGMA_A); // on s'occupe d'abord des forces avec les autres A
-			iterate(pos, N_A, NPART, EPSILON_AB, SIGMA_AB); // on finit par les forces avec les B
+			iterate(pos, 0, N_A, EPSILON_A, SIGMA_A, RCUT_A); // on s'occupe d'abord des forces avec les autres A
+			iterate(pos, N_A, NPART, EPSILON_AB, SIGMA_AB, RCUT_AB); // on finit par les forces avec les B
 		} else { // si on est de l'espèce B, même chose
-			iterate(pos, 0, N_A, EPSILON_AB, SIGMA_AB);
-			iterate(pos, N_A, NPART, EPSILON_B, SIGMA_B);
+			iterate(pos, 0, N_A, EPSILON_AB, SIGMA_AB, RCUT_AB);
+			iterate(pos, N_A, NPART, EPSILON_B, SIGMA_B, RCUT_B);
 		}
 
 	}
