@@ -7,11 +7,11 @@ builder
 Simulation and model builder.
 
 .. automodule:: moldyn.simulation.builder
-   :members:
+  :members:
 
 runner
 ++++++
 Runs the simulation from a model.
 
 .. automodule:: moldyn.simulation.runner
-   :members:
+  :members:

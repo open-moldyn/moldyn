@@ -8,6 +8,7 @@ Data management
 +++++++++++++++
 .. automodule:: moldyn.utils.data_mng
    :members:
+   :special-members: __enter__, __exit__
 
 GLSL utility tools
 ++++++++++++++++++

@@ -33,6 +33,18 @@ class ParamIO(dict):
         The treant that support the leaf (file) associated with it.
     file_name : datreant.Leaf
         The file name of the json file associated with it.
+
+    Example
+    -------
+    .. code-block:: python
+
+        t = DynState(dirpath)
+        # here t.open returns a ParamIO object as the file is .json
+        with t.open("params.json") as IO:
+            IO["my_key"] = "my_value"
+            random_var = IO[some_key]
+        # upon exiting the with block, the content of IO is stored
+        # in the .json file
     """
 
     def __init__(self, dynState : dt.Treant, file: dt.Leaf, **kwargs):
@@ -49,6 +61,17 @@ class ParamIO(dict):
         self.file_name = file
 
     def __enter__(self):
+        """
+        Try to load hte content of the json file into itself
+
+        Try to open the json file from file_name and load the informtions
+        it contains into itself.
+        Will catch FileNotFoundError and JSONDecodeError
+
+        Returns
+        -------
+        self : ParamIO
+        """
         try:
             try:
                 with open(self.file_name, mode='r') as file:
@@ -64,6 +87,19 @@ class ParamIO(dict):
         return self
 
     def __exit__(self, exc_type, exc_val, exc_tb):
+        """
+        Open the json file file_name and dump itself into it.
+
+        Open the json file file_name and dump itself into it +
+        update the tags and categories of dynState according to
+        the CATEGORY_LIST of the module.
+
+        Parameters
+        ----------
+        exc_type
+        exc_val
+        exc_tb
+        """
         try:
             try:
                 with open(self.file_name, mode='r') as file:
@@ -121,6 +157,11 @@ class ParamIO(dict):
                 self.dynState.categories[key] = value
 
 class DynStateIO:
+    """
+    An interface to interact with numpy save files with a context manager.
+
+
+    """
     def __init__(self, dynState, file : dt.Leaf, mode):
         self.dynState = dynState
         self.mode = mode
