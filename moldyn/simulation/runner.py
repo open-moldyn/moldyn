@@ -56,10 +56,22 @@ class Simulation:
         self.current_iter = 0
 
     def iter(self, n=1):
+        """
+
+        Parameters
+        ----------
+        n
+            number of iterations to perform, faster than calling iter several times
+
+        Returns void
+        -------
+
+        """
 
         self.current_iter += n
 
         betaC = False # Contrôle de la température, à délocaliser
+        regEP = False
 
         v = self.model.v
         pos = self.model.pos
@@ -74,6 +86,8 @@ class Simulation:
 
         F = np.zeros(pos.shape)
         v2 = np.zeros(pos.shape)
+
+        TVOULUE = 0
 
         for i in range(n):
 
@@ -94,8 +108,9 @@ class Simulation:
             F = np.frombuffer(self.BUFFER_F.read(), dtype=np.float32).reshape(pos.shape)
 
             # Énergie potentielle, à mettre au conditionnel
-            EPgl = np.frombuffer(self.BUFFER_E.read(), dtype=np.float32)
-            EP = 0.5 * ne.evaluate("sum(EPgl)")
+            if regEP:
+                EPgl = np.frombuffer(self.BUFFER_E.read(), dtype=np.float32)
+                EP = 0.5 * ne.evaluate("sum(EPgl)")
 
             # Thermostat
             if betaC:
