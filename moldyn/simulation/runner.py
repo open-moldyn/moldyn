@@ -73,14 +73,15 @@ class Simulation:
         length = self.model.length
 
         F = np.zeros(pos.shape)
+        v2 = np.zeros(pos.shape)
 
         for i in range(n):
 
-            v2 = ne.evaluate("v + F*dt2m")
-            pos = ne.evaluate("pos + v2*dt")
+            ne.evaluate("v + F*dt2m", out=v2)
+            ne.evaluate("pos + v2*dt", out=pos)
 
             # conditions périodiques de bord, donc à modifier
-            pos = ne.evaluate("pos + (pos<limInf)*length - (pos>limSup)*length")
+            ne.evaluate("pos + (pos<limInf)*length - (pos>limSup)*length", out=pos)
 
             self.BUFFER_P.write(pos.astype('f4').tobytes())
 
@@ -99,9 +100,9 @@ class Simulation:
             # Thermostat
             if betaC:
                 beta = np.sqrt(1+self.model.gamma*(TVOULUE/T-1))
-                v = ne.evaluate("(v2 + (F*dt2m))*beta")
+                ne.evaluate("(v2 + (F*dt2m))*beta", out=v)
             else:
-                v = ne.evaluate("v2 + (F*dt2m)")
+                ne.evaluate("v2 + (F*dt2m)", out=v)
 
         self.model.pos = pos
         self.model.v = v
