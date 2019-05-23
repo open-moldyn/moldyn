@@ -1,4 +1,6 @@
-# Classe effectuant les simulations
+"""
+Classe effectuant les simulations.
+"""
 
 from ..utils import gl_util
 import moderngl
@@ -6,8 +8,24 @@ import numpy as np
 import numexpr as ne
 
 class Simulation:
+    """
+    Simulator for a model.
+
+    Attributes
+    ----------
+    model : builder.Model
+        model that is simulated
+    """
 
     def __init__(self, model):
+        """
+
+        Parameters
+        ----------
+        model : builder.Model
+            Model to simulate. The original model object is preserved during the simulation, and thus can be used to
+            compare the simulation results and initial conditions.
+        """
 
         self.model = model.copy()
 
@@ -57,14 +75,25 @@ class Simulation:
 
     def iter(self, n=1):
         """
+        iterates one or more simulation steps
 
         Parameters
         ----------
-        n
-            number of iterations to perform, faster than calling iter several times
+        n: int
+            number of iterations to perform
 
-        Returns void
+        Returns
         -------
+
+        Notes
+        -----
+        setting n is faster than calling iter several times
+
+        Example
+        -------
+        .. code-block:: python
+
+            print('hello world')
 
         """
 
