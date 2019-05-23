@@ -14,8 +14,36 @@ CATEGORY_LIST = [
 ]
 
 class ParamIO(dict):
+    """
+    An interface to interact with json files as a dictionary.
 
-    def __init__(self, dynState, file: dt.Leaf, **kwargs):
+    Designed to be used with context manager (the with statement)
+    and datreant.
+    Upon entering the with statement it will attempt to load the json
+    file at self.file_name into itself (as a dict).
+    When leaving this context, it will store itself into the json file.
+
+    Inherits dict.
+
+    It will try to update the tags and categories of the treant dynState.
+
+    Attributes
+    ----------
+    dynState : datreant.Treant
+        The treant that support the leaf (file) associated with it.
+    file_name : datreant.Leaf
+        The file name of the json file associated with it.
+    """
+
+    def __init__(self, dynState : dt.Treant, file: dt.Leaf, **kwargs):
+        """
+
+        Parameters
+        ----------
+        dynState
+        file
+        kwargs
+        """
         super().__init__(**kwargs)
         self.dynState = dynState
         self.file_name = file
@@ -51,19 +79,35 @@ class ParamIO(dict):
             self.dynState.categories['last modified'] = datetime.datetime.now().strftime('%d/%m/%Y-%X')
         self._update_categories()
 
-    def from_dict(self, rdict):
+    def from_dict(self, rdict : dict):
+        """
+        Copy rdict into itself
+
+        Parameters
+        ----------
+        rdict : dict
+            The remote dictionary from which to copy
+
+        Returns
+        -------
+
+        """
         for key, value in rdict.items():
             self[key] = value
 
     def to_attr(self, obj):
         """
         Dump the parameter dictionary in the object (obj) as attributes of said object.
+
+        Warning
+        -------
+        Will change the value of each attribute of obj that have a name
+        corresponding to a key of ParamIO.
+
         Parameters
         ----------
         obj : an object
-
-        Returns
-        -------
+            The object to which it will dump its content as attributes
 
         """
         for key, value in self.items():
