@@ -1,9 +1,84 @@
-# Modèles à simuler
+"""
+Model builder.
+Stores and defines physical properties of a group of atoms.
+"""
 
 import numpy as np
 import numexpr as ne
 
 class Model:
+    """
+
+    Attributes
+    ----------
+    T : float
+        Temperature.
+        Is calculated from the average kinetic energy of the atoms.
+        May be set to any value, in which case atoms' speed will be scaled to match the desired temperature.
+    EC : float
+        Total kinetic energy. Cannot be changed as-is.
+    kB : float
+        Boltzmann constant. If changed, will affect the way the model behaves regarding temperature.
+    pos
+    v : np.array
+        List of atom positions and speeds. First axis represents the atom, second axis the dimension (x or y).
+    dt : float
+        Timestep used for simulation.
+        An acceptable value is calculated when species are defined, but it may be set to anything else.
+    npart : int
+        Total number of atoms.
+    x_a : float
+        Mole fraction of species A.
+    n_a : int
+        Atom number for species A, calculated from `x_a` and `npart` If set, `x_a` will be recalculated.
+    epsilon_a
+    epsilon_b : float
+        Epsilon value (J, in Lennard-Jones potential) for species a or b.
+    sigma_a
+    sigma_b : float
+        Sigma value (m, in Lennard-Jones potential) for species a or b.
+    epsilon_ab
+    sigma_ab : float
+        Interspecies epsilon and sigma values. Cannot be set as-is. If you want to change these values, modify the
+        corresponding items in the `params` dict.
+    re_a
+    re_b
+    re_ab : float
+        Estimated radius of minimum potential energy.
+    rcut_fact : float
+        When the model is simulated, atoms further than :code:`rcut_fact*re` do not interact. Defaults to 2.0.
+    params : dict
+        Model parameters, needed for the simulation. Changing directly these values may lead to unpredicted behaviour
+        if ot documented.
+    kong : dict
+        Kong rules to estimate interspecies sigma and epsilon parameters.
+    interspecies_rule : dict
+        Rules to automatically estimate interspecies sigma and epsilon parameters. Defaluts to kong.
+    x_lim_inf
+    y_lim_inf : float
+        Lower x and y position of the box boundaries.
+    x_lim_sup
+    y_lim_sup : float
+        Upper x and y position of the box boundaries.
+    length_x
+    length_y : float
+        Size of the box along x and y axis. Those parameter are tied with `*_lim_***` and any change on one of them is
+        correctly taken in account.
+    lim_inf
+    lim_sup
+    length : np.array
+        2 elements wide array containing corresponding :code:`(x_*, y_*)` values. Cannot be changed as-is.
+    x_periodic
+    y_periodic : int
+        Defines periodic conditions for x and y axis. Set to 1 to define periodic boundary condition or 0 to live in
+        an infinite empty space.
+    mass : float
+        Total mass in the model. Cannot be changed as-is.
+    m : np.array
+        Mass of each atom. Shape is :code:`(npart, 2)` in order to facilitate calculations of kinetic energy and
+        Newton's second law. You should not change those values unless you know what you are doing.
+
+    """
 
     kong = {
         "sigma":"(  (epsilon_a * sigma_a**12 * (1 + ((epsilon_b*sigma_b**12)/(epsilon_a*sigma_a**12))**(1/13))**13)  /   (2**13 * np.sqrt(epsilon_b*sigma_b**6*epsilon_a*sigma_a**6)) )**(1/6)",
@@ -44,11 +119,18 @@ class Model:
         self.set_dt()
         self.set_periodic_boundary(0,0)
 
-        self.derived_values_f = {}
-        for f in self.derived_values:
-            self.derived_values_f[f] = eval("self.get_" + f)
+        self._derived_values_f = {}
+        for f in self._derived_values:
+            self._derived_values_f[f] = eval("self.get_" + f)
 
     def copy(self):
+        """
+
+        Returns
+        -------
+        model.Model
+            Copy of the current model
+        """
         m = Model()
         m.pos = self.pos.copy()
         m.v = self.v.copy()
@@ -58,7 +140,7 @@ class Model:
 
     __copy__ = copy
 
-    derived_values = [  # Les valeurs calculables à partir des autres
+    _derived_values = [  # Les valeurs calculables à partir des autres
         "T",
         "EC",
         "mass",
@@ -68,14 +150,14 @@ class Model:
     ]
 
     def __getattr__(self, item):
-        if item in self.derived_values:
-            return self.derived_values_f[item]()
+        if item in self._derived_values:
+            return self._derived_values_f[item]()
         elif item in self.params:
             return self.params[item]
         else:
             raise AttributeError(item)
 
-    special_values=[ # Les valeurs à vérifier ou  à transformer avant enregistrement
+    _special_values=[ # Les valeurs à vérifier ou  à transformer avant enregistrement
         "T",
         "x_a",
         "n_a",
@@ -91,13 +173,13 @@ class Model:
     ]
 
     def __setattr__(self, key, value):
-        if key in self.special_values:
+        if key in self._special_values:
             f = eval("self.set_"+key)
             f(value)
         else:
             super(Model, self).__setattr__(key, value)
 
-    def set_species(self, epsilon : float, sigma : float, m : float, sp : str):
+    def _set_species(self, epsilon : float, sigma : float, m : float, sp : str):
         self.params["epsilon_"+sp] = epsilon
         self.params["sigma_"+sp] = sigma
         self.params["re_"+sp] = 2.0**(1.0/6.0)*sigma
@@ -105,10 +187,33 @@ class Model:
         self.params["m_"+sp] = m
 
     def set_a(self, epsilon : float, sigma : float, m : float):
-        self.set_species(epsilon, sigma, m, "a")
+        """
+        Sets species a parameters.
+
+        Parameters
+        ----------
+        epsilon : float
+            Epsilon in Lennard-Jones potential.
+        sigma : float
+            Sigma in Lennard-Jones potential.
+        m : float
+            Mass of the atom.
+
+        Returns
+        -------
+
+        """
+        self._set_species(epsilon, sigma, m, "a")
 
     def set_b(self, epsilon : float, sigma : float, m : float):
-        self.set_species(epsilon, sigma, m, "b")
+        """
+        Same as `set_a`.
+
+        Returns
+        -------
+
+        """
+        self._set_species(epsilon, sigma, m, "b")
 
     def calc_ab(self):
         epsilon_a = self.epsilon_a
@@ -119,13 +224,26 @@ class Model:
         rule = self.interspecies_rule
         sigma_ab = eval(rule["sigma"]) # on en a besoin pour le calcul d'epsilon_ab
         epsilon_ab = eval(rule["epsilon"])
-        self.set_species(epsilon_ab, sigma_ab, 0, "ab")
+        self._set_species(epsilon_ab, sigma_ab, 0, "ab")
 
         self.params["re"] = max(self.re_a, self.re_b)
 
         self._m()
 
     def set_ab(self, a : tuple, b : tuple):
+        """
+        Sets species a and b parameters, and calculates interspecies parameters.
+
+        Parameters
+        ----------
+        a : tuple
+            First species parameters, under the form :code:`(epsilon, sigma, mass)`
+        b : tuple
+            Seconde species parameters, under the same form.
+        Returns
+        -------
+
+        """
         self.set_a(*a)
         self.set_b(*b)
 
@@ -135,6 +253,22 @@ class Model:
         self.x_a = n_a/self.npart
 
     def atom_grid(self, n_x : int, n_y : int, d : float):
+        """
+        Creates a grid containing :code:`n_x*n_y` atoms.
+
+        Parameters
+        ----------
+        n_x : int
+            number of columns
+        n_y : int
+            number of rows
+        d : float
+            interatom distandc
+
+        Returns
+        -------
+
+        """
         self.params["npart"] = n_x*n_y
         self.params["n_a"] = int(self.x_a*self.npart)
 
@@ -185,9 +319,24 @@ class Model:
         return np.array([self.length_x, self.length_y])
 
     def shuffle_atoms(self): # mélange les atomes aléatoirement pour répartir les 2 espèces dans l'espace
+        """
+        Shuffle atoms' position in order to easily create a homogeneous repartition of the two species.
+        Should be called just right after the positions are defined. Atoms' speed is not taken in account.
+
+        Returns
+        -------
+
+        """
         np.random.shuffle(self.pos)
 
     def random_speed(self): # donne une vitesse aléatoire aux atomes pour une température non nulle
+        """
+        Gives a random speed to the atoms, following a normal law, in order to have a striclty positive temperature.
+
+        Returns
+        -------
+
+        """
         self.v = np.random.normal(size=(self.npart,2))
 
     def _m(self): # vecteur de masses

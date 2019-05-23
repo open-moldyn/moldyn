@@ -93,7 +93,7 @@ class Simulation:
         -------
         .. code-block:: python
 
-            print('hello world')
+            model.iter(5)
 
         """
 
