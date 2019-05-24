@@ -14,7 +14,10 @@ class Simulation:
     Attributes
     ----------
     model : builder.Model
-        model that is simulated
+        Model that is simulated. Works as usual, but changing its properties will not affect the simulation as intended.
+        You should construct another simulation from this model to correctly take in account the changes.
+    current_iter : int
+
     """
 
     def __init__(self, model):
@@ -87,13 +90,13 @@ class Simulation:
 
         Notes
         -----
-        setting n is faster than calling iter several times
+        Setting n is significantly faster than calling `iter` several times.
 
         Example
         -------
         .. code-block:: python
 
-            print('hello world')
+            model.iter(5)
 
         """
 
