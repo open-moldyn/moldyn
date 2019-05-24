@@ -62,7 +62,7 @@ class ParamIO(dict):
 
     def __enter__(self):
         """
-        Try to load hte content of the json file into itself
+        Try to load the content of the json file into itself
 
         Try to open the json file from file_name and load the informtions
         it contains into itself.

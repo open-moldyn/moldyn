@@ -1,6 +1,6 @@
-=================
-Simulation runner
-=================
+=========
+Simulator
+=========
 
 .. automodule:: moldyn.simulation.runner
    :members:

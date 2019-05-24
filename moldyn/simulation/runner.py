@@ -1,5 +1,6 @@
 """
-Classe effectuant les simulations.
+Simulator.
+Simulates the dynamics of a model on the GPU.
 """
 
 from ..utils import gl_util
@@ -11,26 +12,31 @@ class Simulation:
     """
     Simulator for a model.
 
+    Parameters
+    ----------
+    model : builder.Model
+        Model to simulate.
+        The original model object is copied, and thus preserved, which allows it to serve as a reference.
+
     Attributes
     ----------
     model : builder.Model
-        Model that is simulated. Works as usual, but changing its properties will not affect the simulation as intended.
+        Model that is simulated.
+
+        -------
+        Warning
+        -------
+        Works as usual, but changing its properties will not affect the simulation as intended.
         You should construct another simulation from this model to correctly take in account the changes.
     current_iter : int
         Number of iterations already computed, since initialisation.
     context : moderngl.Context
         ModernGL context used to build and run compute shader.
+    F
+        Last computed forces applied to atoms.
     """
 
     def __init__(self, model):
-        """
-
-        Parameters
-        ----------
-        model : builder.Model
-            Model to simulate. The original model object is preserved during the simulation, and thus can be used to
-            compare the simulation results and initial conditions.
-        """
 
         self.model = model.copy()
 
@@ -78,6 +84,8 @@ class Simulation:
 
         self.current_iter = 0
 
+        self.F = np.zeros(self.model.pos.shape) # Doit être initialisé et conservé d'une itération à l'autre
+
     def iter(self, n=1):
         """
         iterates one or more simulation steps
@@ -107,6 +115,7 @@ class Simulation:
         betaC = False # Contrôle de la température, à délocaliser
         regEP = False
 
+        # on crée des alias aux valeurs du modèles pour numexpr
         v = self.model.v
         pos = self.model.pos
         dt = self.model.dt
@@ -118,7 +127,8 @@ class Simulation:
         limSup = self.model.lim_sup
         length = self.model.length
 
-        F = np.zeros(pos.shape)
+        F = self.F
+
         v2 = np.zeros(pos.shape)
 
         periodic = self.model.x_periodic or self.model.y_periodic
@@ -160,5 +170,3 @@ class Simulation:
             else:
                 ne.evaluate("v2 + (F*dt2m)", out=v)
 
-        self.model.pos = pos
-        self.model.v = v

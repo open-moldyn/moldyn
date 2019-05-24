@@ -1,6 +1,10 @@
 """
 Model builder.
 Stores and defines physical properties of a group of atoms.
+
+The model handles two species of atom (one of them can be ignored by setting the correct mole fraction).
+The first species values are stored in the first part of arrays (lower indices), the second species in what lasts
+(higher indices). This is meant to facilitate computation of inter-atomic forces and potential energy.
 """
 
 import numpy as np
@@ -9,14 +13,46 @@ import numexpr as ne
 class Model:
     """
 
+    Parameters
+    ----------
+    pos : np.array
+        Atoms' position.
+
+        ----
+        Note
+        ----
+        If `v` is not set, it is initialized as an array full of zeros.
+    v : np.array
+        Atoms' speed.
+
+        ----
+        Note
+        ----
+        Taken in account only if `pos` is set.
+    npart : int
+        Total number of atoms.
+
+        ----
+        Note
+        ----
+        Setting `pos` overrides this.
+    x_a : float
+        Mole fraction of species A.
+
     Attributes
     ----------
+
     T : float
         Temperature.
         Is calculated from the average kinetic energy of the atoms.
         May be set to any value, in which case atoms' speed will be scaled to match the desired temperature.
     EC : float
-        Total kinetic energy. Cannot be changed as-is.
+        Total kinetic energy.
+
+        ----
+        Note
+        ----
+        Cannot be changed as-is, but setting temperature is one way to do so.
     kB : float
         Boltzmann constant. If changed, will affect the way the model behaves regarding temperature.
     pos
@@ -39,8 +75,13 @@ class Model:
         Sigma value (m, in Lennard-Jones potential) for species a or b.
     epsilon_ab
     sigma_ab : float
-        Inter-species epsilon and sigma values. Cannot be set as-is. If you want to change these values, modify the
-        corresponding items in the `params` dict.
+        Inter-species epsilon and sigma values.
+
+        ----
+        Note
+        ----
+        Cannot be changed as-is. If you want to change these values, modify the corresponding items in the `params`
+        dictionary.
     re_a
     re_b
     re_ab : float
@@ -48,8 +89,12 @@ class Model:
     rcut_fact : float
         When the model is simulated, atoms further than :code:`rcut_fact*re` do not interact. Defaults to 2.0.
     params : dict
-        Model parameters, needed for the simulation. Changing directly these values may lead to unpredicted behaviour
-        if ot documented.
+        Model parameters, needed for the simulation.
+
+        ------
+        Warning
+        -------
+        Changing directly these values may lead to unpredicted behaviour if not documented.
     kong : dict
         Kong rules to estimate inter-species sigma and epsilon parameters.
     inter_species_rule : dict
@@ -67,16 +112,31 @@ class Model:
     lim_inf
     lim_sup
     length : np.array
-        2 elements wide array containing corresponding :code:`(x_*, y_*)` values. Cannot be changed as-is.
+        2 elements wide array containing corresponding :code:`(x_*, y_*)` values.
+
+        ----
+        Note
+        ----
+        Cannot be changed as-is.
     x_periodic
     y_periodic : int
         Defines periodic conditions for x and y axis. Set to 1 to define periodic boundary condition or 0 to live in
         an infinite empty space.
     mass : float
-        Total mass in the model. Cannot be changed as-is.
+        Total mass in the model.
+
+        ----
+        Note
+        ----
+        Cannot be changed as-is.
     m : np.array
         Mass of each atom. Shape is :code:`(npart, 2)` in order to facilitate calculations of kinetic energy and
-        Newton's second law. You should not change those values unless you know what you are doing.
+        Newton's second law.
+
+        -------
+        Warning
+        -------
+        You should not change those values unless you know what you are doing.
 
     """
 
@@ -329,7 +389,12 @@ class Model:
     def shuffle_atoms(self): # mélange les atomes aléatoirement pour répartir les 2 espèces dans l'espace
         """
         Shuffle atoms' position in order to easily create a homogeneous repartition of the two species.
-        Should be called just right after the positions are defined. Atoms' speed is not taken in account.
+        Should be called just right after the positions are defined.
+
+        ----
+        Note
+        ----
+        Atoms' speed is not shuffled.
 
         Returns
         -------
@@ -339,7 +404,7 @@ class Model:
 
     def random_speed(self): # donne une vitesse aléatoire aux atomes pour une température non nulle
         """
-        Gives a random speed to the atoms, following a normal law, in order to have a striclty positive temperature.
+        Gives a random speed to the atoms, following a normal law, in order to have a strictly positive temperature.
 
         Returns
         -------
@@ -349,7 +414,7 @@ class Model:
 
     def _m(self): # vecteur de masses
         """
-        Constructs `m`
+        Constructs `m`.
 
         Returns
         -------
@@ -400,6 +465,17 @@ class Model:
         self.y_periodic = y
 
     def set_dt(self, dt : int = None):
+        """
+        Defines the timestep used for simulation.
+
+        Parameters
+        ----------
+        dt : int
+
+        Returns
+        -------
+
+        """
         if not dt: # période d'oscillation pour pouvoir calibrer le pas de temps
             freq0 = np.sqrt((57.1464 * self.epsilon_a / (self.sigma_a**2)) / self.m_a) / (2*np.pi)
             peri0 = 1 / freq0
