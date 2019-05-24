@@ -287,13 +287,21 @@ class Model:
 
         self.set_dt()
 
+    def _ord_lim_x(self): # s'assure que la taille de la boîte est positive
+        self.params["x_lim_inf"], self.params["x_lim_sup"] = sorted((self.x_lim_inf, self.x_lim_sup))
+        self.params["length_x"] = self.x_lim_sup - self.x_lim_inf
+
+    def _ord_lim_y(self):
+        self.params["y_lim_inf"], self.params["y_lim_sup"] = sorted((self.y_lim_inf, self.y_lim_sup))
+        self.params["length_y"] = self.y_lim_sup - self.y_lim_inf
+
     def set_x_lim_inf(self,x_lim_inf : float):
         self.params["x_lim_inf"] = x_lim_inf
-        self.params["length_x"] = self.x_lim_sup - self.x_lim_inf
+        self._ord_lim_x()
 
     def set_y_lim_inf(self,y_lim_inf : float):
         self.params["y_lim_inf"] = y_lim_inf
-        self.params["length_y"] = self.y_lim_sup - self.y_lim_inf
+        self._ord_lim_y()
 
     def get_lim_inf(self):
         return np.array([self.x_lim_inf, self.y_lim_inf])
@@ -303,11 +311,11 @@ class Model:
 
     def set_x_lim_sup(self,x_lim_sup : float):
         self.params["x_lim_sup"] = x_lim_sup
-        self.params["length_x"] = self.x_lim_sup - self.x_lim_inf
+        self._ord_lim_x()
 
     def set_y_lim_sup(self,y_lim_sup : float):
         self.params["y_lim_sup"] = y_lim_sup
-        self.params["length_y"] = self.y_lim_sup - self.y_lim_inf
+        self._ord_lim_y()
 
     def set_length_x(self,length_x : float):
         self.x_lim_sup = self.x_lim_inf + length_x
@@ -360,6 +368,7 @@ class Model:
         return self.EC/(self.kB*self.npart)
 
     def set_T(self, T : float):
+        T = max(0,T)
         if not self.T:
             self.random_speed()
         self.v *= np.sqrt(T/self.T)
@@ -373,9 +382,17 @@ class Model:
         self._m()
 
     def set_x_periodic(self, x : int = 1):
+        if x: # pour être certains de la valeur de x
+            x = 1
+        else:
+            x = 0
         self.params["x_periodic"] = x
 
     def set_y_periodic(self, y : int = 1):
+        if y:
+            y = 1
+        else:
+            y = 0
         self.params["y_periodic"] = y
 
     def set_periodic_boundary(self, x : int = 1, y : int = 1): # conditions périodiques de bord : 1, sinon 0

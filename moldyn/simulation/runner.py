@@ -17,7 +17,9 @@ class Simulation:
         Model that is simulated. Works as usual, but changing its properties will not affect the simulation as intended.
         You should construct another simulation from this model to correctly take in account the changes.
     current_iter : int
-
+        Number of iterations already computed, since initialisation.
+    context : moderngl.Context
+        ModernGL context used to build and run compute shader.
     """
 
     def __init__(self, model):
@@ -119,6 +121,12 @@ class Simulation:
         F = np.zeros(pos.shape)
         v2 = np.zeros(pos.shape)
 
+        periodic = self.model.x_periodic or self.model.y_periodic
+
+        if periodic:
+            length *= (self.model.x_periodic, self.model.y_periodic)
+            # on n'applique les conditions périodiques que selon le(s) axe(s) spécifié(s)
+
         TVOULUE = 0
 
         for i in range(n):
@@ -126,8 +134,9 @@ class Simulation:
             ne.evaluate("v + F*dt2m", out=v2)
             ne.evaluate("pos + v2*dt", out=pos)
 
-            # conditions périodiques de bord, donc à modifier
-            ne.evaluate("pos + (pos<limInf)*length - (pos>limSup)*length", out=pos)
+            # conditions périodiques de bord
+            if periodic:
+                ne.evaluate("pos + (pos<limInf)*length - (pos>limSup)*length", out=pos)
 
             self.BUFFER_P.write(pos.astype('f4').tobytes())
 
@@ -139,7 +148,7 @@ class Simulation:
 
             F = np.frombuffer(self.BUFFER_F.read(), dtype=np.float32).reshape(pos.shape)
 
-            # Énergie potentielle, à mettre au conditionnel
+            # Énergie potentielle, à mettre au conditionnel, y compris dans le shader
             if regEP:
                 EPgl = np.frombuffer(self.BUFFER_E.read(), dtype=np.float32)
                 EP = 0.5 * ne.evaluate("sum(EPgl)")
