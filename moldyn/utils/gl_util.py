@@ -1,7 +1,23 @@
 import moderngl
 
 def source(uri, consts={}):
-    ''' read gl code '''
+    """
+    Reads and replaces constants in a text file.
+
+    Parameters
+    ----------
+    uri : str
+        URI of the file to read.
+    consts : dict
+        Dictionary containing the values to replace.
+
+    Returns
+    -------
+
+    str
+        File contents with replacements
+
+    """
     with open(uri, 'r') as fp:
         content = fp.read()
 
@@ -10,10 +26,20 @@ def source(uri, consts={}):
         content = content.replace(f"%%{key}%%", str(value))
     return content
 
-def testMaxSizes(data_size=8):
+def testMaxSizes():
+    """
+    Finds the maximum layout size for openGL compute shaders.
+
+    Returns
+    -------
+
+    int
+        Maximum layout size
+
+    """
     context = moderngl.create_standalone_context(require=430)
 
-    buffer_size = 1024
+    buffer_size = 1024 # garanti par la spec
     try:
         while True:
             context.compute_shader(source('./dummy.glsl', {"X":buffer_size}))

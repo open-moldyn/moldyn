@@ -2,6 +2,24 @@ import numpy as np
 import numexpr as ne
 
 def PDF(pos, nb_samples, rcut, bin_count):
+    """
+    Pair Distribution Function. Returns normalized histogram of distance between atoms.
+
+    Parameters
+    ----------
+    pos : np.array
+        Array containing atoms position
+    nb_samples : int
+        Number of atoms from which to generate the histogram
+    rcut : number
+        Maximum distance to consider
+    bin_count : int
+        Number of bins of the histogram
+
+    Returns
+    -------
+
+    """
     bins = np.linspace(0, rcut, bin_count)
     samples = np.random.choice(range(len(pos)), nb_samples)
     hist = np.zeros(len(bins)-1)
