@@ -39,7 +39,7 @@ class Model:
         Sigma value (m, in Lennard-Jones potential) for species a or b.
     epsilon_ab
     sigma_ab : float
-        Interspecies epsilon and sigma values. Cannot be set as-is. If you want to change these values, modify the
+        Inter-species epsilon and sigma values. Cannot be set as-is. If you want to change these values, modify the
         corresponding items in the `params` dict.
     re_a
     re_b
@@ -51,9 +51,9 @@ class Model:
         Model parameters, needed for the simulation. Changing directly these values may lead to unpredicted behaviour
         if ot documented.
     kong : dict
-        Kong rules to estimate interspecies sigma and epsilon parameters.
-    interspecies_rule : dict
-        Rules to automatically estimate interspecies sigma and epsilon parameters. Defaluts to kong.
+        Kong rules to estimate inter-species sigma and epsilon parameters.
+    inter_species_rule : dict
+        Rules to automatically estimate inter-species sigma and epsilon parameters. Defaults to `kong`.
     x_lim_inf
     y_lim_inf : float
         Lower x and y position of the box boundaries.
@@ -100,7 +100,7 @@ class Model:
         else:
             self.v = np.zeros((npart,2))
 
-        self.interspecies_rule = self.kong
+        self.inter_species_rule = self.kong
 
         self.params = {
             "npart":npart,
@@ -221,7 +221,7 @@ class Model:
         sigma_a = self.sigma_a
         sigma_b = self.sigma_b
 
-        rule = self.interspecies_rule
+        rule = self.inter_species_rule
         sigma_ab = eval(rule["sigma"]) # on en a besoin pour le calcul d'epsilon_ab
         epsilon_ab = eval(rule["epsilon"])
         self._set_species(epsilon_ab, sigma_ab, 0, "ab")
@@ -232,14 +232,14 @@ class Model:
 
     def set_ab(self, a : tuple, b : tuple):
         """
-        Sets species a and b parameters, and calculates interspecies parameters.
+        Sets species a and b parameters, and calculates inter-species parameters.
 
         Parameters
         ----------
         a : tuple
             First species parameters, under the form :code:`(epsilon, sigma, mass)`
         b : tuple
-            Seconde species parameters, under the same form.
+            Second species parameters, under the same form.
         Returns
         -------
 
@@ -263,7 +263,7 @@ class Model:
         n_y : int
             number of rows
         d : float
-            interatom distandc
+            inter-atomic distance
 
         Returns
         -------
@@ -340,6 +340,13 @@ class Model:
         self.v = np.random.normal(size=(self.npart,2))
 
     def _m(self): # vecteur de masses
+        """
+        Constructs `m`
+
+        Returns
+        -------
+        m : np.array
+        """
         m = np.concatenate((self.m_a*np.ones(self.n_a), self.m_b*np.ones(self.npart - self.n_a)))
         self.m = np.transpose([m,m])
         return self.m
