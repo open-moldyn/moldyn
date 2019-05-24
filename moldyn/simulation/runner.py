@@ -32,8 +32,12 @@ class Simulation:
         Number of iterations already computed, since initialisation.
     context : moderngl.Context
         ModernGL context used to build and run compute shader.
-    F
-        Last computed forces applied to atoms.
+    F : np.array
+        Last computed forces applied to atoms. Initialized to zeros.
+
+        Warning
+        -------
+        Changing the values will affect behavior of the model.
     """
 
     def __init__(self, model):
@@ -88,25 +92,28 @@ class Simulation:
 
     def iter(self, n=1):
         """
-        iterates one or more simulation steps
+        Iterates one or more simulation steps.
+
+        Basically, follows the verlet velocity method to update positions and speeds, and computes inter-atomic forces
+        derived from Lennard-Jones potential.
 
         Parameters
         ----------
         n: int
             number of iterations to perform
 
-        Returns
-        -------
-
-        Notes
-        -----
-        Setting n is significantly faster than calling `iter` several times.
+        Note
+        ----
+        Setting n is significantly faster than calling :py:meth:`iter` several times.
 
         Example
         -------
         .. code-block:: python
 
             model.iter(5)
+
+        Returns
+        -------
 
         """
 
@@ -141,8 +148,12 @@ class Simulation:
 
         for i in range(n):
 
-            ne.evaluate("v + F*dt2m", out=v2)
-            ne.evaluate("pos + v2*dt", out=pos)
+            #
+            # CHANGER POUR POSITION VERLET
+            #
+
+            ne.evaluate("v + F*dt2m", out=v2)#half-kick
+            ne.evaluate("pos + v2*dt", out=pos)#drift
 
             # conditions périodiques de bord
             if periodic:
@@ -166,7 +177,7 @@ class Simulation:
             # Thermostat
             if betaC:
                 beta = np.sqrt(1+self.model.gamma*(TVOULUE/T-1))
-                ne.evaluate("(v2 + (F*dt2m))*beta", out=v)
+                ne.evaluate("(v2 + (F*dt2m))*beta", out=v)#half-kick
             else:
-                ne.evaluate("v2 + (F*dt2m)", out=v)
+                ne.evaluate("v2 + (F*dt2m)", out=v)#half-kick
 

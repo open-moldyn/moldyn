@@ -18,21 +18,18 @@ class Model:
     pos : np.array
         Atoms' position.
 
-        ----
         Note
         ----
         If `v` is not set, it is initialized as an array full of zeros.
     v : np.array
         Atoms' speed.
 
-        ----
         Note
         ----
         Taken in account only if `pos` is set.
     npart : int
         Total number of atoms.
 
-        ----
         Note
         ----
         Setting `pos` overrides this.
@@ -49,10 +46,9 @@ class Model:
     EC : float
         Total kinetic energy.
 
-        ----
         Note
         ----
-        Cannot be changed as-is, but setting temperature is one way to do so.
+        Cannot be changed as-is, but setting :py:attr:`T` is one way to do so.
     kB : float
         Boltzmann constant. If changed, will affect the way the model behaves regarding temperature.
     pos
@@ -60,13 +56,17 @@ class Model:
         List of atom positions and speeds. First axis represents the atom, second axis the dimension (x or y).
     dt : float
         Timestep used for simulation.
+
+        Note
+        ----
         An acceptable value is calculated when species are defined, but it may be set to anything else.
     npart : int
         Total number of atoms.
     x_a : float
         Mole fraction of species A.
     n_a : int
-        Atom number for species A, calculated from `x_a` and `npart` If set, `x_a` will be recalculated.
+        Atom number for species A, calculated from :py:attr:`x_a` and :py:attr:`npart` If set, :py:attr:`x_a` will be
+        recalculated.
     epsilon_a
     epsilon_b : float
         Epsilon value (J, in Lennard-Jones potential) for species a or b.
@@ -77,21 +77,19 @@ class Model:
     sigma_ab : float
         Inter-species epsilon and sigma values.
 
-        ----
         Note
         ----
-        Cannot be changed as-is. If you want to change these values, modify the corresponding items in the `params`
-        dictionary.
+        Cannot be changed as-is. If you want to change these values, modify the corresponding items in the
+        :py:attr:`params` dictionary.
     re_a
     re_b
     re_ab : float
         Estimated radius of minimum potential energy.
     rcut_fact : float
-        When the model is simulated, atoms further than :code:`rcut_fact*re` do not interact. Defaults to 2.0.
+        When the model is simulated, atoms further than :code:`rcut_fact*re` do not interact. Defaults to `2.0`.
     params : dict
         Model parameters, needed for the simulation.
 
-        ------
         Warning
         -------
         Changing directly these values may lead to unpredicted behaviour if not documented.
@@ -114,7 +112,6 @@ class Model:
     length : np.array
         2 elements wide array containing corresponding :code:`(x_*, y_*)` values.
 
-        ----
         Note
         ----
         Cannot be changed as-is.
@@ -122,10 +119,10 @@ class Model:
     y_periodic : int
         Defines periodic conditions for x and y axis. Set to 1 to define periodic boundary condition or 0 to live in
         an infinite empty space.
+        Defaults to `0`.
     mass : float
         Total mass in the model.
 
-        ----
         Note
         ----
         Cannot be changed as-is.
@@ -133,7 +130,6 @@ class Model:
         Mass of each atom. Shape is :code:`(npart, 2)` in order to facilitate calculations of kinetic energy and
         Newton's second law.
 
-        -------
         Warning
         -------
         You should not change those values unless you know what you are doing.
@@ -267,7 +263,7 @@ class Model:
 
     def set_b(self, epsilon : float, sigma : float, m : float):
         """
-        Same as `set_a`.
+        Same as :py:attr:`set_a`.
 
         Returns
         -------
@@ -315,6 +311,8 @@ class Model:
     def atom_grid(self, n_x : int, n_y : int, d : float):
         """
         Creates a grid containing :code:`n_x*n_y` atoms.
+
+        Sets :py:attr:`npart`, :py:attr:`pos`, :py:attr:`dt`, :py:attr:`v` and :py:attr:`m`.
 
         Parameters
         ----------
@@ -391,7 +389,6 @@ class Model:
         Shuffle atoms' position in order to easily create a homogeneous repartition of the two species.
         Should be called just right after the positions are defined.
 
-        ----
         Note
         ----
         Atoms' speed is not shuffled.
@@ -414,11 +411,12 @@ class Model:
 
     def _m(self): # vecteur de masses
         """
-        Constructs `m`.
+        Constructs :py:attr:`m`.
 
         Returns
         -------
         m : np.array
+
         """
         m = np.concatenate((self.m_a*np.ones(self.n_a), self.m_b*np.ones(self.npart - self.n_a)))
         self.m = np.transpose([m,m])
@@ -461,6 +459,20 @@ class Model:
         self.params["y_periodic"] = y
 
     def set_periodic_boundary(self, x : int = 1, y : int = 1): # conditions périodiques de bord : 1, sinon 0
+        """
+        Set periodic boundaries on both axis.
+
+        Parameters
+        ----------
+        x : int
+            see :py:attr:`x_periodic`
+        y : int
+            see :py:attr:`y_periodic`
+
+        Returns
+        -------
+
+        """
         self.x_periodic = x
         self.y_periodic = y
 
@@ -470,8 +482,8 @@ class Model:
 
         Parameters
         ----------
-        dt : int
-
+        dt : float
+            Desired timestep. If not set, will be calculated from species a's properties.
         Returns
         -------
 
