@@ -28,6 +28,8 @@ class Simulation:
         -------
         Works as usual, but changing its properties will not affect the simulation as intended.
         You should construct another simulation from this model to correctly take in account the changes.
+        This is due to the fact that some values (eg. Lennard-Jones parameters) are treated as constants during shader
+        initialisation, in order to speed up the calculations.
     current_iter : int
         Number of iterations already computed, since initialisation.
     context : moderngl.Context
@@ -94,7 +96,7 @@ class Simulation:
         """
         Iterates one or more simulation steps.
 
-        Basically, follows the verlet velocity method to update positions and speeds, and computes inter-atomic forces
+        Basically, follows the Position-Verlet method to update positions and speeds, and computes inter-atomic forces
         derived from Lennard-Jones potential.
 
         Parameters
@@ -126,8 +128,9 @@ class Simulation:
         v = self.model.v
         pos = self.model.pos
         dt = self.model.dt
+        dt2 = dt/2.0
         m = self.model.m
-        dt2m = dt/(2*m)
+        dtm = dt/m
         knparts = self.model.kB * self.model.npart
 
         limInf = self.model.lim_inf
@@ -135,8 +138,6 @@ class Simulation:
         length = self.model.length
 
         F = self.F
-
-        v2 = np.zeros(pos.shape)
 
         periodic = self.model.x_periodic or self.model.y_periodic
 
@@ -148,12 +149,7 @@ class Simulation:
 
         for i in range(n):
 
-            #
-            # CHANGER POUR POSITION VERLET
-            #
-
-            ne.evaluate("v + F*dt2m", out=v2)#half-kick
-            ne.evaluate("pos + v2*dt", out=pos)#drift
+            ne.evaluate("pos + v*dt2", out=pos)  # half drift
 
             # conditions périodiques de bord
             if periodic:
@@ -177,7 +173,10 @@ class Simulation:
             # Thermostat
             if betaC:
                 beta = np.sqrt(1+self.model.gamma*(TVOULUE/T-1))
-                ne.evaluate("(v2 + (F*dt2m))*beta", out=v)#half-kick
+                ne.evaluate("(v + (F*dtm))*beta", out=v) # kick
+
             else:
-                ne.evaluate("v2 + (F*dt2m)", out=v)#half-kick
+                ne.evaluate("v + (F*dtm)", out=v)  # kick
+
+            ne.evaluate("pos + v*dt2", out=pos)  # half drift
 

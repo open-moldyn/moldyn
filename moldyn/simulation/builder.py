@@ -42,7 +42,7 @@ class Model:
     T : float
         Temperature.
         Is calculated from the average kinetic energy of the atoms.
-        May be set to any value, in which case atoms' speed will be scaled to match the desired temperature.
+        May be set to any positive value, in which case atoms' speed will be scaled to match the desired temperature.
     EC : float
         Total kinetic energy.
 
@@ -96,7 +96,7 @@ class Model:
     kong : dict
         Kong rules to estimate inter-species sigma and epsilon parameters.
     inter_species_rule : dict
-        Rules to automatically estimate inter-species sigma and epsilon parameters. Defaults to `kong`.
+        Rules to automatically estimate inter-species sigma and epsilon parameters. Defaults to :py:attr:`kong`.
     x_lim_inf
     y_lim_inf : float
         Lower x and y position of the box boundaries.
@@ -184,7 +184,7 @@ class Model:
 
         Returns
         -------
-        model.Model
+        builder.Model
             Copy of the current model
         """
         m = Model()
