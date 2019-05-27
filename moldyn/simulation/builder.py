@@ -11,6 +11,7 @@ import numpy as np
 import numexpr as ne
 from ..utils.data_mng import *
 
+
 class Model:
     """
 

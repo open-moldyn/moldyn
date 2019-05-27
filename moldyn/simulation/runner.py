@@ -3,10 +3,13 @@ Simulator.
 Simulates the dynamics of a model on the GPU.
 """
 
+import os
+
 from ..utils import gl_util
 import moderngl
 import numpy as np
 import numexpr as ne
+import scipy.interpolate as inter
 
 class Simulation:
     """
@@ -66,7 +69,7 @@ class Simulation:
             consts[k.upper()] = model.params[k]
 
         self.context = moderngl.create_standalone_context(require=430)
-        self.compute_shader = self.context.compute_shader(gl_util.source('templates/moldyn.glsl', consts))
+        self.compute_shader = self.context.compute_shader(gl_util.source(os.path.dirname(__file__)+'/templates/moldyn.glsl', consts))
 
         # Buffer de positions 1
         self.BUFFER_P = self.context.buffer(reserve=2*4 * self.model.npart)
@@ -89,6 +92,8 @@ class Simulation:
         self.BUFFER_PARAMS.bind_to_storage_buffer(4)
 
         self.current_iter = 0
+
+        self.T_cntl = False
 
         self.F = np.zeros(self.model.pos.shape) # Doit être initialisé et conservé d'une itération à l'autre
 
@@ -122,7 +127,7 @@ class Simulation:
 
         """
 
-        betaC = False # Contrôle de la température, à délocaliser
+        betaC = self.T_cntl # Contrôle de la température
         regEP = False
 
         # on crée des alias aux valeurs du modèles pour numexpr
@@ -164,7 +169,7 @@ class Simulation:
             EC = 0.5 * ne.evaluate("sum(m*v*v)")
             T = EC / knparts
 
-            F = np.frombuffer(self.BUFFER_F.read(), dtype=np.float32).reshape(pos.shape)
+            F[:] = np.frombuffer(self.BUFFER_F.read(), dtype=np.float32).reshape(pos.shape)
 
             # Énergie potentielle, à mettre au conditionnel, y compris dans le shader
             if regEP:
@@ -186,3 +191,28 @@ class Simulation:
 
             self.current_iter += 1
 
+    def set_T_f(self, f):
+        """
+        Sets function that controls temperature.
+
+        Parameters
+        ----------
+        f : callable
+            Must take time (float) as an argument and return temperature (in K, float).
+        Returns
+        -------
+
+        """
+        self.T_cntl = True
+        self.T_f = f
+
+    def set_T_ramps(self, t, T):
+        f2 = inter.interp1d(t, T)
+        def f(x):
+            if x<t[0]:
+                return T[0]
+            elif x>t[-1]:
+                return T[-1]
+            else:
+                return f2(x)
+        self.set_T_f(f)
