@@ -9,6 +9,7 @@ The first species values are stored in the first part of arrays (lower indices),
 
 import numpy as np
 import numexpr as ne
+from ..utils.data_mng import *
 
 class Model:
     """
@@ -494,3 +495,24 @@ class Model:
             dt = peri0 / 75
 
         self.params["dt"] = abs(dt)
+
+    def save_state(self, dynState : DynState):
+        """
+        Save the state of the model (position, velocity, parameters) to dynState
+
+        Parameters
+        ----------
+        dynState : utils.data_mng.DynState
+
+        Returns
+        -------
+
+        """
+        with dynState.open(dynState.POSF, 'w') as IO:
+            IO.save(self.pos)
+
+        with dynState.open(dynState.VEL, 'w') as IO:
+            IO.save(self.v)
+
+        with dynState.open(dynState.PAR) as IO:
+            IO.from_dict(self.params)

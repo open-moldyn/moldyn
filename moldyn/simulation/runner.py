@@ -92,7 +92,7 @@ class Simulation:
 
         self.F = np.zeros(self.model.pos.shape) # Doit être initialisé et conservé d'une itération à l'autre
 
-    def iter(self, n=1):
+    def iter(self, n=1, callback=None):
         """
         Iterates one or more simulation steps.
 
@@ -102,7 +102,10 @@ class Simulation:
         Parameters
         ----------
         n: int
-            number of iterations to perform
+            Number of iterations to perform.
+        callback : callable
+            A callback function that must take the Simulation object as first argument.
+            It is called at the end of each iteration.
 
         Note
         ----
@@ -118,8 +121,6 @@ class Simulation:
         -------
 
         """
-
-        self.current_iter += n
 
         betaC = False # Contrôle de la température, à délocaliser
         regEP = False
@@ -179,4 +180,9 @@ class Simulation:
                 ne.evaluate("v + (F*dtm)", out=v)  # kick
 
             ne.evaluate("pos + v*dt2", out=pos)  # half drift
+
+            if callback:
+                callback(self)
+
+            self.current_iter += 1
 
