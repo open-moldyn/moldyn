@@ -207,6 +207,22 @@ class Simulation:
         self.T_f = f
 
     def set_T_ramps(self, t, T):
+        """
+        Creates a function based on ramps and uses it for temperature control.
+        Values of the function are interpolated between points given in `t` and `T`.
+        Temperature is supposed constant before the first point and after the last one.
+
+        Parameters
+        ----------
+        t
+            1d array with time
+        T
+            1d array with associated temperatures
+
+        Returns
+        -------
+
+        """
         f2 = inter.interp1d(t, T)
         def f(x):
             if x<t[0]:
