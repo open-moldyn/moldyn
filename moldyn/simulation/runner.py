@@ -199,6 +199,7 @@ class Simulation:
         ----------
         f : callable
             Must take time (float) as an argument and return temperature (in K, float).
+
         Returns
         -------
 
@@ -214,10 +215,10 @@ class Simulation:
 
         Parameters
         ----------
-        t
-            1d array with time
-        T
-            1d array with associated temperatures
+        t : array
+            Time.
+        T : array
+            Associated temperatures.
 
         Returns
         -------
@@ -226,9 +227,9 @@ class Simulation:
         f2 = inter.interp1d(t, T)
         def f(x):
             if x<t[0]:
-                return T[0]
+                return np.array(T[0]) # pour la consistance des types
             elif x>t[-1]:
-                return T[-1]
+                return np.array(T[-1])
             else:
                 return f2(x)
         self.set_T_f(f)

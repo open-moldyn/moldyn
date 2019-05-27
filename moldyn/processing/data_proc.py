@@ -18,6 +18,8 @@ def PDF(pos, nb_samples, rcut, bin_count):
 
     Returns
     -------
+    bins, hist : tuple(np.array, np.array)
+        `bins` being the distances, `hist` the normalized (regarding radius) histogram
 
     """
     bins = np.linspace(0, rcut, bin_count)

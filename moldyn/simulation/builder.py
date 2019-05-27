@@ -499,11 +499,12 @@ class Model:
 
     def save_state(self, dynState : DynState):
         """
-        Save the state of the model (position, velocity, parameters) to dynState
+        Save the state of the model (position, velocity, parameters) to dynState.
 
         Parameters
         ----------
         dynState : utils.data_mng.DynState
+
 
         Returns
         -------
