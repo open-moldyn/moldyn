@@ -17,6 +17,7 @@ class CreateModelDialog(QWizard):
         self.ui.keepRatioCheckBox.stateChanged.connect(self.keepRatio)
 
         self.ui.gridWidth.valueChanged.connect(self.gridWChanged)
+        self.ui.gridHeight.valueChanged.connect(self.gridHChanged)
 
         self.show()
 
@@ -27,6 +28,10 @@ class CreateModelDialog(QWizard):
     def gridWChanged(self, v):
         if self.ui.gridHeight.isReadOnly():
             self.ui.gridHeight.setValue(v)
+        self.ui.label_atom_number.setText(str(v * self.ui.gridHeight.value()))
+
+    def gridHChanged(self, v):
+        self.ui.label_atom_number.setText(str(v * self.ui.gridWidth.value()))
 
 # pour test
 app = QApplication(sys.argv)
