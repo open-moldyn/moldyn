@@ -134,7 +134,7 @@
        <item row="2" column="0">
         <widget class="QLabel" name="keepRatioLabel">
          <property name="text">
-          <string>Keep ratio</string>
+          <string>Keep equal ratio</string>
          </property>
         </widget>
        </item>

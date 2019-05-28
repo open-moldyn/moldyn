@@ -15,13 +15,6 @@ class Ui_MainWindow(object):
         MainWindow.setWindowTitle("OpenMoldyn")
         self.centralwidget = QtWidgets.QWidget(MainWindow)
         self.centralwidget.setObjectName("centralwidget")
-        self.progressBar = QtWidgets.QProgressBar(self.centralwidget)
-        self.progressBar.setGeometry(QtCore.QRect(80, 350, 381, 31))
-        self.progressBar.setMaximum(10000)
-        self.progressBar.setProperty("value", 3500)
-        self.progressBar.setOrientation(QtCore.Qt.Horizontal)
-        self.progressBar.setInvertedAppearance(False)
-        self.progressBar.setObjectName("progressBar")
         MainWindow.setCentralWidget(self.centralwidget)
         self.menubar = QtWidgets.QMenuBar(MainWindow)
         self.menubar.setGeometry(QtCore.QRect(0, 0, 499, 21))
@@ -34,7 +27,13 @@ class Ui_MainWindow(object):
         MainWindow.setStatusBar(self.statusbar)
         self.actionNew = QtWidgets.QAction(MainWindow)
         self.actionNew.setObjectName("actionNew")
+        self.actionOpen_model = QtWidgets.QAction(MainWindow)
+        self.actionOpen_model.setObjectName("actionOpen_model")
+        self.actionNew_simulation = QtWidgets.QAction(MainWindow)
+        self.actionNew_simulation.setObjectName("actionNew_simulation")
         self.menuFile.addAction(self.actionNew)
+        self.menuFile.addAction(self.actionOpen_model)
+        self.menuFile.addAction(self.actionNew_simulation)
         self.menubar.addAction(self.menuFile.menuAction())
 
         self.retranslateUi(MainWindow)
@@ -42,7 +41,8 @@ class Ui_MainWindow(object):
 
     def retranslateUi(self, MainWindow):
         _translate = QtCore.QCoreApplication.translate
-        self.progressBar.setFormat(_translate("MainWindow", "%v/%m"))
         self.menuFile.setTitle(_translate("MainWindow", "File"))
-        self.actionNew.setText(_translate("MainWindow", "New"))
+        self.actionNew.setText(_translate("MainWindow", "New model"))
+        self.actionOpen_model.setText(_translate("MainWindow", "Open model"))
+        self.actionNew_simulation.setText(_translate("MainWindow", "New simulation"))
 

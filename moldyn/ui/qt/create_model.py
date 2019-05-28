@@ -215,7 +215,7 @@ class Ui_CreateModel(object):
         self.groupBox.setTitle(_translate("CreateModel", "Grid"))
         self.gridWidthNumberOfAtomsLabel.setText(_translate("CreateModel", "Grid width (number of atoms)"))
         self.gridHeightNumberOfAtomsLabel.setText(_translate("CreateModel", "Grid height (number of atoms)"))
-        self.keepRatioLabel.setText(_translate("CreateModel", "Keep ratio"))
+        self.keepRatioLabel.setText(_translate("CreateModel", "Keep equal ratio"))
         self.distanceBetweenAtomsLabel.setText(_translate("CreateModel", "Distance between atoms"))
         self.label.setText(_translate("CreateModel", "Box size (WxH)"))
         self.groupBox_4.setTitle(_translate("CreateModel", "Boundaries"))
