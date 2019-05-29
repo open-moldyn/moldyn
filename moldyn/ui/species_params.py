@@ -21,3 +21,11 @@ class species_params(QWidget):
             self.ui.epsilonJLineEdit.setText(str(atoms[a][0]))
             self.ui.sigmaMLineEdit.setText(str(atoms[a][1]))
             self.ui.massKgLineEdit.setText(str(atoms[a][2]))
+
+    def get_values(self):
+        vals = (
+            self.ui.epsilonJLineEdit.text(),
+            self.ui.sigmaMLineEdit.text(),
+            self.ui.massKgLineEdit.text(),
+        )
+        return (float(val) for val in vals)

@@ -4,69 +4,98 @@ from PyQt5.QtCore import pyqtSignal
 from .qt.create_model import Ui_CreateModel
 from .species_params import species_params
 
+from ..simulation.builder import Model
+
 import  matplotlib
 matplotlib.use('Qt5Agg')
 import matplotlib.pyplot as plt
 
-from ..simulation.builder import Model
 
 class CreateModelDialog(QWizard):
+
     def __init__(self):
         super().__init__()
         self.ui = Ui_CreateModel()
         self.ui.setupUi(self)
-        species_a_params = species_params()
-        species_b_params = species_params()
-        self.ui.layout_a.addWidget(species_a_params)
-        self.ui.layout_b.addWidget(species_b_params)
+
+        # Premier panneau (espèces)
+        self.species_a_params = species_params()
+        self.species_b_params = species_params()
+        self.ui.layout_a.addWidget(self.species_a_params)
+        self.ui.layout_b.addWidget(self.species_b_params)
 
         self.model = Model()
 
-        self.ui.keepRatioCheckBox.stateChanged.connect(self.keepRatio)
+        # Second panneau (conf spatiale)
+        self.ui.wizardPage1.validatePage =  self.to_spatial_conf
 
-        self.ui.gridWidth.valueChanged.connect(self.gridWChanged)
-        self.ui.gridHeight.valueChanged.connect(self.gridHChanged)
+        self.ui.keepRatioCheckBox.stateChanged.connect(self.keep_ratio)
+
+        self.ui.gridWidth.valueChanged.connect(self.grid_w_changed)
+        self.ui.gridHeight.valueChanged.connect(self.grid_h_changed)
 
         self.ui.previewButton.clicked.connect(self.preview)
 
-        self.ui.distanceBetweenAtoms.editingFinished.connect(self.checkDistance)
+        self.ui.distanceBetweenAtoms.editingFinished.connect(self.checked_distance)
 
         self.ui.firstSpeciesMoleFraction.valueChanged.connect(self.model.set_x_a)
 
+        # Troisième panneau (paramètres divers)
+        self.ui.wizardPage2.validatePage = self.set_parameters
+
         self.show()
 
-    def keepRatio(self, b):
+    # Second panneau
+
+    def to_spatial_conf(self):
+        self.model.set_ab(
+            self.species_a_params.get_values(),
+            self.species_b_params.get_values()
+        )
+        self.ui.distanceBetweenAtoms.setText(str(self.model.re_ab))
+        return True
+
+    def keep_ratio(self, b):
         b = bool(b)
         self.ui.gridHeight.setReadOnly(b)
         self.ui.gridHeight.setValue(self.ui.gridWidth.value())
 
-    def gridWChanged(self, v):
+    def grid_w_changed(self, v):
         if self.ui.gridHeight.isReadOnly():
             self.ui.gridHeight.setValue(v)
         self.ui.label_atom_number.setText(str(v * self.ui.gridHeight.value()))
 
-    def gridHChanged(self, v):
+    def grid_h_changed(self, v):
         self.ui.label_atom_number.setText(str(v * self.ui.gridWidth.value()))
 
-    def checkDistance(self):
-        try:
-            self.ui.distanceBetweenAtoms.setText(str(float(self.ui.distanceBetweenAtoms.text())))
-        except:
-            QMessageBox.warning(self, "Distance error", "Distance must be a number", QMessageBox.Ok)
-            self.ui.distanceBetweenAtoms.setFocus()
-
-
-    def preview(self, b):
+    def checked_distance(self):
         try:
             d = float(self.ui.distanceBetweenAtoms.text())
         except:
-            self.checkDistance()
-        else:
-            self.model.atom_grid(self.ui.gridWidth.value(), self.ui.gridHeight.value(), d)
-            self.model.shuffle_atoms()
-            plt.axis("equal")
-            plt.ylim(self.model.y_lim_inf, self.model.y_lim_sup)
-            plt.xlim(self.model.x_lim_inf, self.model.x_lim_sup)
-            plt.plot(*self.model.pos[:self.model.n_a,:].T, "ro", markersize=1)
-            plt.plot(*self.model.pos[self.model.n_a:,:].T, "bo", markersize=1)
-            plt.show()
+            d = self.model.re_ab
+        self.ui.distanceBetweenAtoms.setText(str(d))
+        return d
+
+    def preview(self, b):
+        self.model.atom_grid(self.ui.gridWidth.value(), self.ui.gridHeight.value(), self.checked_distance())
+        self.model.shuffle_atoms()
+
+        plt.axis("equal")
+        plt.ylim(self.model.y_lim_inf, self.model.y_lim_sup)
+        plt.xlim(self.model.x_lim_inf, self.model.x_lim_sup)
+        plt.plot(*self.model.pos[:self.model.n_a,:].T, "ro", markersize=1)
+        plt.plot(*self.model.pos[self.model.n_a:,:].T, "bo", markersize=1)
+        plt.show()
+
+    # Troisième panneau
+
+    def set_parameters(self):
+        self.model.T = 1.0
+
+        self.model.atom_grid(self.ui.gridWidth.value(), self.ui.gridHeight.value(), self.checked_distance())
+        self.model.shuffle_atoms()
+
+        self.ui.epsilonJLineEdit.setText(str(self.model.epsilon_ab))
+        self.ui.sigmaMLineEdit.setText(str(self.model.sigma_ab))
+
+        return True

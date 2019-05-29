@@ -266,7 +266,7 @@
     </item>
    </layout>
   </widget>
-  <widget class="QWizardPage" name="wizardPage">
+  <widget class="QWizardPage" name="wizardPage3">
    <property name="title">
     <string>Other parameters</string>
    </property>
