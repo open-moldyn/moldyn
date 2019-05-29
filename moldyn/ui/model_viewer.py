@@ -7,7 +7,6 @@ class ModelView():
         self.model = model
 
         plt.ion()
-        self.show()
 
         plt.pause(1e-6)
 

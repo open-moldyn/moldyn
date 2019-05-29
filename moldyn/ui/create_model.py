@@ -1,4 +1,3 @@
-import sys
 from PyQt5.QtWidgets import QDialog, QApplication, QWizard, QMessageBox
 from PyQt5.QtCore import pyqtSignal
 from .qt.create_model import Ui_CreateModel
@@ -7,17 +6,18 @@ from .species_params import species_params
 from ..simulation.builder import Model
 from .model_viewer import ModelView
 
-import  matplotlib
+import matplotlib
 matplotlib.use('Qt5Agg')
 import matplotlib.pyplot as plt
 
-
 class CreateModelDialog(QWizard):
 
-    def __init__(self):
+    def __init__(self, parent_window=None):
         super().__init__()
         self.ui = Ui_CreateModel()
         self.ui.setupUi(self)
+
+        self.parent_window = parent_window
 
         # Premier panneau (espèces)
         self.species_a_params = species_params()
@@ -58,6 +58,11 @@ class CreateModelDialog(QWizard):
     # Second panneau
 
     def to_spatial_conf(self):
+        self.model.params["display_name"] = " ".join([
+            self.species_a_params.ui.nameLineEdit.text(),
+            "and",
+            self.species_b_params.ui.nameLineEdit.text(),
+        ])
         self.model.set_ab(
             self.species_a_params.get_values(),
             self.species_b_params.get_values()
@@ -90,7 +95,8 @@ class CreateModelDialog(QWizard):
         self.model.atom_grid(self.ui.gridWidth.value(), self.ui.gridHeight.value(), self.checked_distance())
         self.model.shuffle_atoms()
 
-        ModelView(self.model)
+        self.mv=ModelView(self.model)
+        self.mv.show()
 
     # Troisième panneau
 
@@ -120,3 +126,8 @@ class CreateModelDialog(QWizard):
         self.ui.timestepLineEdit.setText(str(dt))
         self.model.dt = dt
         return dt
+
+    def accept(self):
+        if self.parent_window:
+            self.parent_window.set_model(self.model)
+        super().accept()
