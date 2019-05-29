@@ -34,14 +34,23 @@ class CreateModelDialog(QWizard):
         self.ui.gridWidth.valueChanged.connect(self.grid_w_changed)
         self.ui.gridHeight.valueChanged.connect(self.grid_h_changed)
 
-        self.ui.previewButton.clicked.connect(self.preview)
-
         self.ui.distanceBetweenAtoms.editingFinished.connect(self.checked_distance)
+
+        self.ui.xPeriodicBoundariesCheckBox.stateChanged.connect(self.model.set_x_periodic)
+        self.ui.yPeriodicBoudariesCheckBox.stateChanged.connect(self.model.set_y_periodic)
 
         self.ui.firstSpeciesMoleFraction.valueChanged.connect(self.model.set_x_a)
 
+        self.ui.previewButton.clicked.connect(self.preview)
+
         # Troisième panneau (paramètres divers)
         self.ui.wizardPage2.validatePage = self.set_parameters
+
+        self.ui.reset_ia_LJ.clicked.connect(self.reset_es_ab)
+
+        self.ui.temperatureKDoubleSpinBox.valueChanged.connect(self.model.set_T)
+
+        self.ui.timestepLineEdit.editingFinished.connect(self.checked_timestep)
 
         self.show()
 
@@ -89,13 +98,29 @@ class CreateModelDialog(QWizard):
 
     # Troisième panneau
 
-    def set_parameters(self):
-        self.model.T = 1.0
-
-        self.model.atom_grid(self.ui.gridWidth.value(), self.ui.gridHeight.value(), self.checked_distance())
-        self.model.shuffle_atoms()
-
+    def reset_es_ab(self):
         self.ui.epsilonJLineEdit.setText(str(self.model.epsilon_ab))
         self.ui.sigmaMLineEdit.setText(str(self.model.sigma_ab))
 
+    def set_parameters(self):
+        self.model.atom_grid(self.ui.gridWidth.value(), self.ui.gridHeight.value(), self.checked_distance())
+        self.model.shuffle_atoms()
+        self.model.set_dt()
+
+        self.model.T = 1.0
+        self.ui.temperatureKDoubleSpinBox.setValue(1.0)
+
+        self.reset_es_ab()
+
+        self.ui.timestepLineEdit.setText(str(self.model.dt))
+
         return True
+
+    def checked_timestep(self):
+        try:
+            dt = float(self.ui.timestepLineEdit.text())
+        except:
+            dt = self.model.dt
+        self.ui.timestepLineEdit.setText(str(dt))
+        self.model.dt = dt
+        return dt
