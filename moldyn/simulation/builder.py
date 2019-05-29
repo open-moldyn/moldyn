@@ -175,7 +175,7 @@ class Model:
         self.set_ab((1,1,1),(1,1,1))
         self.x_a = x_a
         self.set_dt()
-        self.set_periodic_boundary(0,0)
+        self.set_periodic_boundary()
 
         self._derived_values_f = {}
         for f in self._derived_values:
