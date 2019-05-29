@@ -5,6 +5,7 @@ from .qt.create_model import Ui_CreateModel
 from .species_params import species_params
 
 from ..simulation.builder import Model
+from .model_viewer import ModelView
 
 import  matplotlib
 matplotlib.use('Qt5Agg')
@@ -89,12 +90,7 @@ class CreateModelDialog(QWizard):
         self.model.atom_grid(self.ui.gridWidth.value(), self.ui.gridHeight.value(), self.checked_distance())
         self.model.shuffle_atoms()
 
-        plt.axis("equal")
-        plt.ylim(self.model.y_lim_inf, self.model.y_lim_sup)
-        plt.xlim(self.model.x_lim_inf, self.model.x_lim_sup)
-        plt.plot(*self.model.pos[:self.model.n_a,:].T, "ro", markersize=1)
-        plt.plot(*self.model.pos[self.model.n_a:,:].T, "bo", markersize=1)
-        plt.show()
+        ModelView(self.model)
 
     # Troisième panneau
 
