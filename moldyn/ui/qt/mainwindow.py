@@ -121,7 +121,7 @@ class Ui_MainWindow(object):
         self.tabWidget.setTabText(self.tabWidget.indexOf(self.tab_model), _translate("MainWindow", "Model"))
         self.groupBox_2.setTitle(_translate("MainWindow", "Progress"))
         self.simuProgressBar.setFormat(_translate("MainWindow", "%v/%m"))
-        self.RTViewBtn.setText(_translate("MainWindow", "Real time view"))
+        self.RTViewBtn.setText(_translate("MainWindow", "View current state"))
         self.simuBtn.setText(_translate("MainWindow", "Launch simulation"))
         self.iterationsLabel.setText(_translate("MainWindow", "Iterations"))
         self.simulationTimeLabel.setText(_translate("MainWindow", "Simulation time (s)"))

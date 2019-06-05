@@ -11,6 +11,8 @@ from ..simulation.runner import Simulation
 
 
 class MoldynMainWindow(QMainWindow):
+    updated_signal = pyqtSignal(int)
+
     def __init__(self):
         super().__init__()
 
@@ -28,6 +30,8 @@ class MoldynMainWindow(QMainWindow):
         self.ui.simulationTimeLineEdit.editingFinished.connect(self.update_iters)
 
         self.ui.simuBtn.clicked.connect(self.simulate)
+
+        self.ui.gotoProcessBtn.clicked.connect(self.goto_process)
 
         self.show()
 
@@ -52,7 +56,10 @@ class MoldynMainWindow(QMainWindow):
 
         self.update_simu_time()
 
-        self.ui.RTViewBtn.clicked.connect(self.model_view.show)
+        self.ui.RTViewBtn.clicked.connect(self.show_model)
+
+    def show_model(self):
+        self.model_view.show() # bidon mais nécessaire pour que ça marche
 
     def create_model(self):
         self.cmd = CreateModelDialog(self)
@@ -61,16 +68,26 @@ class MoldynMainWindow(QMainWindow):
     def goto_simu(self):
         self.ui.tabWidget.setCurrentWidget(self.ui.tab_simu)
 
-    def simulate(self): # NE FONCTIONNE PAS
+    def simulate(self):
         self.ui.simuBtn.setEnabled(False)
-        updated_signal = pyqtSignal(int)
+        self.enable_process_tab(False)
+        self.updated_signal.connect(self.ui.simuProgressBar.setValue)
+        self.ui.simuProgressBar.setValue(0)
         def run():
             self.simulation = Simulation(self.model)
             self.model_view = ModelView(self.simulation.model)
             def up(s):
-                updated_signal.emit(s.current_iter)
+                self.updated_signal.emit(s.current_iter+1)
             self.simulation.iter(self.ui.iterationsSpinBox.value(), up)
             self.ui.simuBtn.setEnabled(True)
+            self.enable_process_tab(True)
         self.simu_thr = QThread()
         self.simu_thr.run = run
         self.simu_thr.start()
+
+    def enable_process_tab(self, b):
+        self.ui.tab_processing.setEnabled(b)
+        self.ui.gotoProcessBtn.setEnabled(b)
+
+    def goto_process(self):
+        self.ui.tabWidget.setCurrentWidget(self.ui.tab_processing)

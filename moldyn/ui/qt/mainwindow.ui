@@ -107,7 +107,7 @@
            <item row="0" column="1">
             <widget class="QToolButton" name="RTViewBtn">
              <property name="text">
-              <string>Real time view</string>
+              <string>View current state</string>
              </property>
             </widget>
            </item>
