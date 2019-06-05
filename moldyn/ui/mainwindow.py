@@ -15,7 +15,7 @@ from ..simulation.runner import Simulation
 
 
 class MoldynMainWindow(QMainWindow):
-    updated_signal = pyqtSignal(int)
+    updated_signal = pyqtSignal(int, float)
 
     def __init__(self):
         super().__init__()
@@ -84,8 +84,10 @@ class MoldynMainWindow(QMainWindow):
     def goto_simu(self):
         self.ui.tabWidget.setCurrentWidget(self.ui.tab_simu)
 
-    def update_progress(self, v):
+    def update_progress(self, v, new_t):
         self.ui.simuProgressBar.setValue(v)
+        self.t_deque.append(1/(new_t - self.last_t))
+        self.last_t = new_t
         self.progress_gr.setData(self.t_deque)
 
     def simulate(self):
@@ -99,10 +101,7 @@ class MoldynMainWindow(QMainWindow):
             self.simulation = Simulation(self.model)
             self.model_view = ModelView(self.simulation.model)
             def up(s):
-                self.updated_signal.emit(s.current_iter+1)
-                new_t = time.perf_counter()
-                self.t_deque.append(1/(new_t - self.last_t))
-                self.last_t = new_t
+                self.updated_signal.emit(s.current_iter+1, time.perf_counter())
             self.simulation.iter(self.ui.iterationsSpinBox.value(), up)
             self.ui.simuBtn.setEnabled(True)
             self.enable_process_tab(True)

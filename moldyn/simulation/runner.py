@@ -166,8 +166,9 @@ class Simulation:
             self.compute_shader.run(group_x=self.groups_number)
 
             # Énergie cinétique, à mettre au conditionnel
-            EC = 0.5 * ne.evaluate("sum(m*v*v)")
-            T = EC / knparts
+            if betaC:
+                EC = 0.5 * ne.evaluate("sum(m*v*v)")
+                T = EC / knparts
 
             F[:] = np.frombuffer(self.BUFFER_F.read(), dtype=np.float32).reshape(pos.shape)
 
