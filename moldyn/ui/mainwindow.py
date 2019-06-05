@@ -40,6 +40,8 @@ class MoldynMainWindow(QMainWindow):
         self.progress_plt = PlotWidget(self.ui.progress_groupBox)
         self.ui.progress_groupBox.layout().addWidget(self.progress_plt, 1, 0, 1, 2)
         self.progress_plt.setXRange(0,1)
+        self.progress_plt.setLabel('bottom',text='Iteration')
+        self.progress_plt.setLabel('left',text='Speed', units='I/s')
         self.progress_gr = self.progress_plt.plot(pen='y')
 
         self.t_deque = deque()
@@ -84,10 +86,6 @@ class MoldynMainWindow(QMainWindow):
 
     def update_progress(self, v):
         self.ui.simuProgressBar.setValue(v)
-        new_t = time.perf_counter()
-        dt = new_t - self.last_t
-        self.last_t = new_t
-        self.t_deque.append(1/dt)
         self.progress_gr.setData(self.t_deque)
 
     def simulate(self):
@@ -96,11 +94,15 @@ class MoldynMainWindow(QMainWindow):
         self.ui.simuProgressBar.setValue(0)
         self.last_t = time.perf_counter()
         self.t_deque.clear()
+        self.t_deque.append(0)
         def run():
             self.simulation = Simulation(self.model)
             self.model_view = ModelView(self.simulation.model)
             def up(s):
                 self.updated_signal.emit(s.current_iter+1)
+                new_t = time.perf_counter()
+                self.t_deque.append(1/(new_t - self.last_t))
+                self.last_t = new_t
             self.simulation.iter(self.ui.iterationsSpinBox.value(), up)
             self.ui.simuBtn.setEnabled(True)
             self.enable_process_tab(True)
