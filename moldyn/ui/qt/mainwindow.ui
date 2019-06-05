@@ -43,6 +43,30 @@
           <property name="title">
            <string>Current model</string>
           </property>
+          <layout class="QHBoxLayout" name="horizontalLayout">
+           <item>
+            <widget class="QTreeWidget" name="paramsTreeWidget">
+             <property name="indentation">
+              <number>10</number>
+             </property>
+             <column>
+              <property name="text">
+               <string>Property</string>
+              </property>
+             </column>
+             <column>
+              <property name="text">
+               <string>Value</string>
+              </property>
+             </column>
+             <column>
+              <property name="text">
+               <string>Unit</string>
+              </property>
+             </column>
+            </widget>
+           </item>
+          </layout>
          </widget>
         </item>
         <item row="1" column="1">

@@ -1,4 +1,4 @@
-from PyQt5.QtWidgets import QMainWindow
+from PyQt5.QtWidgets import QMainWindow, QTreeWidgetItem, QHeaderView
 from PyQt5.QtCore import QThread, pyqtSignal
 from pyqtgraph import PlotWidget
 import time
@@ -16,6 +16,7 @@ from ..simulation.runner import Simulation
 
 class MoldynMainWindow(QMainWindow):
     updated_signal = pyqtSignal(int, float)
+    displayed_properties = dict()
 
     def __init__(self):
         super().__init__()
@@ -27,6 +28,54 @@ class MoldynMainWindow(QMainWindow):
         self.ui.newModelBtn.clicked.connect(self.create_model)
 
         self.ui.gotoSimuBtn.clicked.connect(self.goto_simu)
+
+        self.displayed_properties_list = {
+            "display_name" : ["Name"],
+            "T" : ["Temperature", "K"],
+            "Lennard-Jones and mass" : {
+                "First species" : {
+                    "sigma_a" : ["Sigma", "m"],
+                    "epsilon_a" : ["Epsilon", "J"],
+                    "m_a" : ["Atomic mass", "kg"],
+                },
+                "Second species" : {
+                    "sigma_b" : ["Sigma", "m"],
+                    "epsilon_b" : ["Epsilon", "J"],
+                    "m_b" : ["Atomic mass", "kg"],
+                },
+                "Inter-species" : {
+                    "sigma_ab" : ["Sigma", "m"],
+                    "epsilon_ab" : ["Epsilon", "J"],
+                },
+            },
+            "npart" : ["Atom number"],
+            "x_a" : ["First species mole fraction"],
+            "dt" : ["Timestep", "s"],
+            "Spatial configuration" : {
+                "length_x" : ["Width", "m"],
+                "length_y" : ["Height", "m"],
+                "x_periodic" : ["Periodic condition on x"],
+                "y_periodic" : ["Periodic condition on y"],
+            }
+        }
+
+        def subItems(item, parent):
+            for k in item:
+                if type(item[k]) == list:
+                    if len(item[k])>1:
+                        item[k][1:] = ["", item[k][-1]]
+                    currentItem = QTreeWidgetItem(item[k])
+                    self.displayed_properties[k] = currentItem
+                else:
+                    currentItem = QTreeWidgetItem([k])
+                    subItems(item[k], currentItem)
+                parent.addChild(currentItem)
+
+        self.ui.paramsTreeWidget.addChild = self.ui.paramsTreeWidget.addTopLevelItem
+        self.ui.paramsTreeWidget.header().setResizeMode(QHeaderView.ResizeToContents)
+
+        subItems(self.displayed_properties_list, self.ui.paramsTreeWidget)
+
 
         # Panneau simu
 
@@ -41,7 +90,7 @@ class MoldynMainWindow(QMainWindow):
         self.ui.progress_groupBox.layout().addWidget(self.progress_plt, 1, 0, 1, 2)
         self.progress_plt.setXRange(0,1)
         self.progress_plt.setLabel('bottom',text='Iteration')
-        self.progress_plt.setLabel('left',text='Speed', units='I/s')
+        self.progress_plt.setLabel('left',text='Speed', units='Iteration/s')
         self.progress_gr = self.progress_plt.plot(pen='y')
 
         self.t_deque = deque()
@@ -65,10 +114,15 @@ class MoldynMainWindow(QMainWindow):
 
     def set_model(self, model):
         self.model = model
+
         self.ui.gotoSimuBtn.setEnabled(True)
         self.ui.tab_simu.setEnabled(True)
+
         self.simulation = Simulation(self.model)
         self.model_view = ModelView(self.simulation.model)
+
+        for dp in self.displayed_properties:
+            self.displayed_properties[dp].setText(1, str(self.model.__getattr__(dp)))
 
         self.update_simu_time()
 
