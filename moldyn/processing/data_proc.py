@@ -101,6 +101,7 @@ def density(model, refinement=0):
     if refinement:
         tri2.set_mask(TriAnalyzer(tri2).get_flat_tri_mask(0.1))
         refiner = UniformTriRefiner(tri2)
+        print(len(tri2.neighbors), vert_density.shape)
         tri, vert_density = refiner.refine_field(vert_density, subdiv=refinement)
     else:
         tri, vert_density = tri2, vert_density
