@@ -129,7 +129,7 @@ class MoldynMainWindow(QMainWindow):
         self.ui.RTViewBtn.clicked.connect(self.show_model)
 
     def show_model(self):
-        self.model_view.show() # bidon mais nécessaire pour que ça marche
+        self.model_view.show() # bidon mais nécessaire pour que ça marche : on risque de redéfinir model donc model_view
 
     def create_model(self):
         self.cmd = CreateModelDialog(self)
@@ -139,7 +139,7 @@ class MoldynMainWindow(QMainWindow):
         self.ui.tabWidget.setCurrentWidget(self.ui.tab_simu)
 
     def update_progress(self, v, new_t):
-        self.ui.simuProgressBar.setValue(v)
+        self.ui.simuProgressBar.setValue(v+1)
         self.t_deque.append(1/(new_t - self.last_t))
         self.last_t = new_t
         self.progress_gr.setData(self.t_deque)
@@ -152,10 +152,14 @@ class MoldynMainWindow(QMainWindow):
         self.t_deque.clear()
         self.t_deque.append(0)
         def run():
-            self.simulation = Simulation(self.model)
+            # Pour continuer la simu précedente. On est obligés d'en créer une nouvelle pour des questions de scope.
+            # Dans l'idéal, il faudrait créer et conserver le thread une bonne fois pour toutes, pour que ce bricolage cesse.
+            c_i = self.simulation.current_iter
+            self.simulation = Simulation(self.simulation.model)
+            self.simulation.current_iter = c_i # pour savoir où on en est
             self.model_view = ModelView(self.simulation.model)
             def up(s):
-                self.updated_signal.emit(s.current_iter+1, time.perf_counter())
+                self.updated_signal.emit(s.current_iter, time.perf_counter())
             self.simulation.iter(self.ui.iterationsSpinBox.value(), up)
             self.ui.simuBtn.setEnabled(True)
             self.enable_process_tab(True)
