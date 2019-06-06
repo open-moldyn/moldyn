@@ -1,4 +1,4 @@
-from PyQt5.QtWidgets import QMainWindow, QTreeWidgetItem, QHeaderView
+from PyQt5.QtWidgets import QMainWindow, QTreeWidgetItem, QHeaderView, QProgressBar
 from PyQt5.QtCore import QThread, pyqtSignal
 from pyqtgraph import PlotWidget
 import time
@@ -104,8 +104,8 @@ class MoldynMainWindow(QMainWindow):
 
         # Panneau processing
 
-        self.ui.PDFButton.clicked.connect(self.PDF)
-        self.ui.densityMapButton.clicked.connect(self.density_map)
+        self.ui.PDFButton.clicked.connect(lambda:self.process(self.PDF))
+        self.ui.densityMapButton.clicked.connect(lambda:self.process(self.density_map))
 
         # Misc
 
@@ -200,21 +200,20 @@ class MoldynMainWindow(QMainWindow):
     def goto_process(self):
         self.ui.tabWidget.setCurrentWidget(self.ui.tab_processing)
 
-    def set_waiting_status(self, s):
+    def process(self, p):
         self.old_status = self.ui.statusbar.currentMessage()
-        self.ui.statusbar.showMessage(s)
+        self.ui.statusbar.showMessage("Computing " + p.__doc__ + "...")
 
-    def restore_status(self):
+        p()
+
         self.ui.statusbar.showMessage(self.old_status)
 
     def PDF(self):
-        self.set_waiting_status("Computing PDF...")
+        """Pair Distance Function"""
         visu.plt.ion()
         visu.plt.plot(*PDF(self.simulation.model.pos, 1000, 1.5*max(self.model.rcut_a, self.model.rcut_b), 100))
         visu.plt.show()
-        self.restore_status()
 
     def density_map(self):
-        self.set_waiting_status("Computing density map...")
+        """Density map"""
         visu.plot_densityf(self.simulation.model)
-        self.restore_status()

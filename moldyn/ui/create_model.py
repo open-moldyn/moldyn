@@ -52,6 +52,8 @@ class CreateModelDialog(QWizard):
         self.ui.temperatureKDoubleSpinBox.valueChanged.connect(self.model.set_T)
 
         self.ui.timestepLineEdit.editingFinished.connect(self.checked_timestep)
+        self.ui.epsilonJLineEdit.editingFinished.connect(self.check_es_ab)
+        self.ui.sigmaMLineEdit.editingFinished.connect(self.check_es_ab)
 
         self.show()
 
@@ -104,6 +106,18 @@ class CreateModelDialog(QWizard):
         self.ui.epsilonJLineEdit.setText(str(self.model.epsilon_ab))
         self.ui.sigmaMLineEdit.setText(str(self.model.sigma_ab))
 
+    def check_es_ab(self):
+        try:
+            epsilon_ab = float(self.ui.epsilonJLineEdit.text())
+        except:
+            epsilon_ab = self.model.epsilon_ab
+        try:
+            sigma_ab = float(self.ui.sigmaMLineEdit.text())
+        except:
+            sigma_ab = self.model.sigma_ab
+        self.ui.epsilonJLineEdit.setText(str(epsilon_ab))
+        self.ui.sigmaMLineEdit.setText(str(sigma_ab))
+
     def set_parameters(self):
         self.model.atom_grid(self.ui.gridWidth.value(), self.ui.gridHeight.value(), self.checked_distance())
         self.model.shuffle_atoms()
@@ -128,6 +142,8 @@ class CreateModelDialog(QWizard):
         return dt
 
     def accept(self):
+        self.model.params["epsilon_ab"] = float(self.ui.epsilonJLineEdit.text())
+        self.model.params["sigma_ab"] = float(self.ui.sigmaMLineEdit.text())
         if self.parent_window:
             self.parent_window.set_model(self.model)
         super().accept()
