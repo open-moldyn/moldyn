@@ -13,6 +13,9 @@ from .model_viewer import ModelView
 from ..simulation.builder import Model
 from ..simulation.runner import Simulation
 
+from ..processing import visualisation as visu
+from ..processing.data_proc import PDF
+
 
 class MoldynMainWindow(QMainWindow):
     updated_signal = pyqtSignal(int, float)
@@ -99,6 +102,11 @@ class MoldynMainWindow(QMainWindow):
 
         self.ui.RTViewBtn.clicked.connect(self.show_model)
 
+        # Panneau processing
+
+        self.ui.PDFButton.clicked.connect(self.PDF)
+        self.ui.densityMapButton.clicked.connect(self.density_map)
+
         # Misc
 
         self.ui.statusbar.showMessage("Please choose a model.")
@@ -152,6 +160,8 @@ class MoldynMainWindow(QMainWindow):
 
     def simulate(self):
         self.ui.simuBtn.setEnabled(False)
+        self.ui.iterationsSpinBox.setEnabled(False)
+        self.ui.simulationTimeLineEdit.setEnabled(False)
         self.enable_process_tab(False)
         self.ui.simuProgressBar.setValue(0)
         self.last_t = time.perf_counter()
@@ -167,13 +177,15 @@ class MoldynMainWindow(QMainWindow):
             self.simulation.current_iter = c_i # pour savoir où on en est
             self.model_view = ModelView(self.simulation.model)
             def up(s):
-                self.updated_signal.emit(s.current_iter, time.perf_counter())
+                self.updated_signal.emit(s.current_iter - c_i, time.perf_counter())
             self.simulation.iter(self.ui.iterationsSpinBox.value(), up)
             self.simu_thr.exit()
 
         def end():
             self.ui.simuBtn.setEnabled(True)
             self.enable_process_tab(True)
+            self.ui.iterationsSpinBox.setEnabled(True)
+            self.ui.simulationTimeLineEdit.setEnabled(True)
             self.ui.statusbar.showMessage("Simulation complete.")
 
         self.simu_thr = QThread()
@@ -187,3 +199,22 @@ class MoldynMainWindow(QMainWindow):
 
     def goto_process(self):
         self.ui.tabWidget.setCurrentWidget(self.ui.tab_processing)
+
+    def set_waiting_status(self, s):
+        self.old_status = self.ui.statusbar.currentMessage()
+        self.ui.statusbar.showMessage(s)
+
+    def restore_status(self):
+        self.ui.statusbar.showMessage(self.old_status)
+
+    def PDF(self):
+        self.set_waiting_status("Computing PDF...")
+        visu.plt.ion()
+        visu.plt.plot(*PDF(self.simulation.model.pos, 1000, 1.5*max(self.model.rcut_a, self.model.rcut_b), 100))
+        visu.plt.show()
+        self.restore_status()
+
+    def density_map(self):
+        self.set_waiting_status("Computing density map...")
+        visu.plot_densityf(self.simulation.model)
+        self.restore_status()
