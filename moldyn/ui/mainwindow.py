@@ -97,6 +97,12 @@ class MoldynMainWindow(QMainWindow):
 
         self.ui.gotoProcessBtn.clicked.connect(self.goto_process)
 
+        self.ui.RTViewBtn.clicked.connect(self.show_model)
+
+        # Misc
+
+        self.ui.statusbar.showMessage("Please choose a model.")
+
         self.show()
 
     def update_iters(self):
@@ -126,7 +132,7 @@ class MoldynMainWindow(QMainWindow):
 
         self.update_simu_time()
 
-        self.ui.RTViewBtn.clicked.connect(self.show_model)
+        self.ui.statusbar.showMessage("Model loaded, simulation can begin.")
 
     def show_model(self):
         self.model_view.show() # bidon mais nécessaire pour que ça marche : on risque de redéfinir model donc model_view
@@ -151,9 +157,11 @@ class MoldynMainWindow(QMainWindow):
         self.last_t = time.perf_counter()
         self.t_deque.clear()
         self.t_deque.append(0)
+        self.ui.statusbar.showMessage("Simulation is running...")
+
         def run():
             # Pour continuer la simu précedente. On est obligés d'en créer une nouvelle pour des questions de scope.
-            # Dans l'idéal, il faudrait créer et conserver le thread une bonne fois pour toutes, pour que ce bricolage cesse.
+            # On pourrait créer et conserver le thread une bonne fois pour toutes, pour que ce bricolage cesse.
             c_i = self.simulation.current_iter
             self.simulation = Simulation(self.simulation.model)
             self.simulation.current_iter = c_i # pour savoir où on en est
@@ -161,11 +169,16 @@ class MoldynMainWindow(QMainWindow):
             def up(s):
                 self.updated_signal.emit(s.current_iter, time.perf_counter())
             self.simulation.iter(self.ui.iterationsSpinBox.value(), up)
+            self.simu_thr.exit()
+
+        def end():
             self.ui.simuBtn.setEnabled(True)
             self.enable_process_tab(True)
-            self.simu_thr.exit()
+            self.ui.statusbar.showMessage("Simulation complete.")
+
         self.simu_thr = QThread()
         self.simu_thr.run = run
+        self.simu_thr.finished.connect(end)
         self.simu_thr.start()
 
     def enable_process_tab(self, b):
