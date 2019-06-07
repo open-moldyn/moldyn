@@ -59,8 +59,8 @@ def plot_T(simulation):
 
 @_plot_base(axis='equal', grid=False)
 def plot_density(model, levels=None, refinement=0):
-    fig = plt.gcf()
     tri, density = dp.density(model, refinement)
+    fig = plt.gcf()
     if type(levels) == int:
         levels = np.linspace(min(density), max(density), levels)
     CS = plt.tricontour(tri, density, levels=levels)
@@ -71,8 +71,8 @@ def plot_density(model, levels=None, refinement=0):
 
 @_plot_base(axis='equal', grid=False)
 def plot_densityf(model, levels=None, refinement=0):
-    fig = plt.gcf()
     tri, density = dp.density(model, refinement)
+    fig = plt.gcf()
     if type(levels) == int:
         levels = np.linspace(min(density), max(density), levels)
     CS = plt.tricontourf(tri, density, levels=levels)

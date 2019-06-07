@@ -65,7 +65,7 @@ class CreateModelDialog(QWizard):
     def check_species(self):
         t = (self.species_a_params, self.species_b_params)
         a, b = (s.check_values() for s in t)
-        if a^b:
+        if a ^ b:
             t[a].set_values(t[b].get_values(), False)
         return a or b
 
