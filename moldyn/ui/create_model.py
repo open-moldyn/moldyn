@@ -111,9 +111,9 @@ class CreateModelDialog(QWizard):
         try:
             l = float(self.ui.boxWidthLineEdit.text())
         except:
-            l = float(self.ui.distanceBetweenAtoms.text()) * (self.ui.gridWidth.value()+1)
+            l = float(self.ui.distanceBetweenAtoms.text()) * (self.ui.gridWidth.value())
         self.ui.boxWidthLineEdit.setText(str(l))
-        self.ui.distanceBetweenAtoms.setText(str(l / (self.ui.gridWidth.value()+1)))
+        self.ui.distanceBetweenAtoms.setText(str(l / (self.ui.gridWidth.value())))
 
     def checked_distance(self):
         try:
@@ -122,7 +122,7 @@ class CreateModelDialog(QWizard):
             d = self.model.re_ab
         self.ui.distanceBetweenAtoms.setText(str(d))
 
-        self.ui.boxWidthLineEdit.setText(str(d * (self.ui.gridWidth.value()+1)))
+        self.ui.boxWidthLineEdit.setText(str(d * (self.ui.gridWidth.value())))
 
         return d
 
