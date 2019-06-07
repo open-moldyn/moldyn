@@ -39,6 +39,7 @@ class CreateModelDialog(QWizard):
         self.ui.gridHeight.valueChanged.connect(self.grid_h_changed)
 
         self.ui.distanceBetweenAtoms.editingFinished.connect(self.checked_distance)
+        self.ui.boxWidthLineEdit.editingFinished.connect(self.box_w_changed)
 
         self.ui.xPeriodicBoundariesCheckBox.stateChanged.connect(self.model.set_x_periodic)
         self.ui.yPeriodicBoudariesCheckBox.stateChanged.connect(self.model.set_y_periodic)
@@ -88,7 +89,8 @@ class CreateModelDialog(QWizard):
             self.species_a_params.get_values(),
             self.species_b_params.get_values()
         )
-        self.ui.distanceBetweenAtoms.setText(str(self.model.re_ab))
+        #self.ui.distanceBetweenAtoms.setText(str(self.model.re_ab))
+        self.checked_distance()
         return True
 
     def keep_ratio(self, b):
@@ -100,9 +102,18 @@ class CreateModelDialog(QWizard):
         if self.ui.gridHeight.isReadOnly():
             self.ui.gridHeight.setValue(v)
         self.ui.label_atom_number.setText(str(v * self.ui.gridHeight.value()))
+        self.checked_distance()
 
     def grid_h_changed(self, v):
         self.ui.label_atom_number.setText(str(v * self.ui.gridWidth.value()))
+
+    def box_w_changed(self):
+        try:
+            l = float(self.ui.boxWidthLineEdit.text())
+        except:
+            l = float(self.ui.distanceBetweenAtoms.text()) * (self.ui.gridWidth.value()+1)
+        self.ui.boxWidthLineEdit.setText(str(l))
+        self.ui.distanceBetweenAtoms.setText(str(l / (self.ui.gridWidth.value()+1)))
 
     def checked_distance(self):
         try:
@@ -110,6 +121,9 @@ class CreateModelDialog(QWizard):
         except:
             d = self.model.re_ab
         self.ui.distanceBetweenAtoms.setText(str(d))
+
+        self.ui.boxWidthLineEdit.setText(str(d * (self.ui.gridWidth.value()+1)))
+
         return d
 
     def preview(self, b):

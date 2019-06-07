@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>466</width>
-    <height>410</height>
+    <height>427</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -158,26 +158,36 @@
        <item row="3" column="1">
         <widget class="QLineEdit" name="distanceBetweenAtoms">
          <property name="text">
-          <string>1.0</string>
+          <string/>
          </property>
          <property name="clearButtonEnabled">
           <bool>false</bool>
          </property>
         </widget>
        </item>
-       <item row="4" column="0">
+       <item row="5" column="0">
         <widget class="QLabel" name="label">
          <property name="text">
           <string>Atom number</string>
          </property>
         </widget>
        </item>
-       <item row="4" column="1">
+       <item row="5" column="1">
         <widget class="QLabel" name="label_atom_number">
          <property name="text">
           <string>10000</string>
          </property>
         </widget>
+       </item>
+       <item row="4" column="0">
+        <widget class="QLabel" name="boxWidthLabel">
+         <property name="text">
+          <string>Box width (m)</string>
+         </property>
+        </widget>
+       </item>
+       <item row="4" column="1">
+        <widget class="QLineEdit" name="boxWidthLineEdit"/>
        </item>
       </layout>
      </widget>
@@ -387,6 +397,7 @@
   <tabstop>gridHeight</tabstop>
   <tabstop>keepRatioCheckBox</tabstop>
   <tabstop>distanceBetweenAtoms</tabstop>
+  <tabstop>boxWidthLineEdit</tabstop>
   <tabstop>xPeriodicBoundariesCheckBox</tabstop>
   <tabstop>yPeriodicBoudariesCheckBox</tabstop>
   <tabstop>firstSpeciesMoleFraction</tabstop>
