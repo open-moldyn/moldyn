@@ -59,18 +59,25 @@ def plot_T(simulation):
 
 @_plot_base(axis='equal', grid=False)
 def plot_density(model, levels=None, refinement=0):
+    fig = plt.gcf()
     tri, density = dp.density(model, refinement)
     if type(levels) == int:
         levels = np.linspace(min(density), max(density), levels)
-    plt.tricontour(tri, density, levels=levels)
+    CS = plt.tricontour(tri, density, levels=levels)
+    cbar = fig.colorbar()
+    cbar.add_lines(CS)
+    cbar.ax.set_ylabel('local density')
 
 
 @_plot_base(axis='equal', grid=False)
 def plot_densityf(model, levels=None, refinement=0):
+    fig = plt.gcf()
     tri, density = dp.density(model, refinement)
     if type(levels) == int:
         levels = np.linspace(min(density), max(density), levels)
-    plt.tricontourf(tri, density, levels=levels)
+    CS = plt.tricontourf(tri, density, levels=levels)
+    cbar = fig.colorbar(CS)
+    cbar.ax.set_ylabel('local density')
 
 @_plot_base(axis='equal', grid=False)
 def plot_density_surf(model,refinement=0):
