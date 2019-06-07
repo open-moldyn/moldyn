@@ -1,4 +1,5 @@
 from . import data_proc as dp
+from mpl_toolkits.mplot3d import Axes3D
 import matplotlib.pyplot as plt
 from functools import wraps
 import matplotlib
@@ -8,7 +9,7 @@ import scipy as sp
 from ..utils.data_mng import *
 
 
-def _plot_base(*, show=True, axis='', grid=True, figure=None):
+def _plot_base(*, show=False, axis='', grid=False, figure=None):
     """
     A wrapper designed to handle basic matplotlib configuration.
 
@@ -32,12 +33,17 @@ def _plot_base(*, show=True, axis='', grid=True, figure=None):
     def plot_dec(func):
         @wraps(func)
         def wrap(*args, **kwargs):
-            if figure is not None:
+            keys = kwargs.keys()
+            if 'figure' in keys:
+                plt.figure(kwargs['figure'])
+            elif figure is not None:
                 plt.figure(figure)
 
             func(*args, **kwargs)
 
-            if grid:
+            if 'grid' in keys and kwargs['grid']:
+                plt.grid()
+            elif grid:
                 plt.grid()
             plt.axis(axis)
             if show:
@@ -66,3 +72,13 @@ def plot_densityf(model, levels=None, refinement=0):
         levels = np.linspace(min(density), max(density), levels)
     plt.tricontourf(tri, density, levels=levels)
 
+@_plot_base(axis='equal', grid=False)
+def plot_density_surf(model,refinement=0):
+    fig = plt.figure()
+    ax = fig.gca(projection='3d')
+    tri, density = dp.density(model, refinement)
+    ax.plot_trisurf(tri, density)
+
+@_plot_base(show=False)
+def plot_temp(simulation):
+    pass
