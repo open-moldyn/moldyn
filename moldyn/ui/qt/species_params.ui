@@ -73,7 +73,11 @@
     </widget>
    </item>
    <item row="4" column="1">
-    <widget class="QLineEdit" name="sigmaMLineEdit"/>
+    <widget class="QLineEdit" name="sigmaMLineEdit">
+     <property name="text">
+      <string/>
+     </property>
+    </widget>
    </item>
    <item row="4" column="0">
     <widget class="QLabel" name="sigmaMLabel">
@@ -89,10 +93,18 @@
     <widget class="QLineEdit" name="nameLineEdit"/>
    </item>
    <item row="2" column="1">
-    <widget class="QLineEdit" name="massKgLineEdit"/>
+    <widget class="QLineEdit" name="massKgLineEdit">
+     <property name="text">
+      <string/>
+     </property>
+    </widget>
    </item>
    <item row="5" column="1">
-    <widget class="QLineEdit" name="epsilonJLineEdit"/>
+    <widget class="QLineEdit" name="epsilonJLineEdit">
+     <property name="text">
+      <string/>
+     </property>
+    </widget>
    </item>
   </layout>
  </widget>

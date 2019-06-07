@@ -1,4 +1,4 @@
-from PyQt5.QtWidgets import QDialog, QApplication, QWizard, QMessageBox
+from PyQt5.QtWidgets import QErrorMessage, QApplication, QWizard, QMessageBox
 from PyQt5.QtCore import pyqtSignal
 from .qt.create_model import Ui_CreateModel
 from .species_params import species_params
@@ -24,6 +24,9 @@ class CreateModelDialog(QWizard):
         self.species_b_params = species_params()
         self.ui.layout_a.addWidget(self.species_a_params)
         self.ui.layout_b.addWidget(self.species_b_params)
+
+        self.species_a_params.editingFinished.connect(self.check_species)
+        self.species_b_params.editingFinished.connect(self.check_species)
 
         self.model = Model()
 
@@ -57,9 +60,25 @@ class CreateModelDialog(QWizard):
 
         self.show()
 
+    # Premier panneau
+
+    def check_species(self):
+        t = (self.species_a_params, self.species_b_params)
+        a, b = (s.check_values() for s in t)
+        if a^b:
+            t[a].set_values(t[b].get_values(), False)
+        return a or b
+
     # Second panneau
 
     def to_spatial_conf(self):
+        if not self.check_species():
+            info_dialog = QErrorMessage(self)
+            info_dialog.setWindowTitle("Error")
+            info_dialog.setModal(True)
+            info_dialog.showMessage("Please define a species")
+            return False
+
         self.model.params["display_name"] = " ".join([
             self.species_a_params.ui.nameLineEdit.text(),
             "and",

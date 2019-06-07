@@ -209,11 +209,11 @@ class MoldynMainWindow(QMainWindow):
         self.ui.statusbar.showMessage(self.old_status)
 
     def PDF(self):
-        """Pair Distance Function"""
+        """Pair Distribution Function"""
         visu.plt.ion()
         visu.plt.plot(*PDF(self.simulation.model.pos, 1000, 1.5*max(self.model.rcut_a, self.model.rcut_b), 100))
         visu.plt.show()
 
     def density_map(self):
         """Density map"""
-        visu.plot_densityf(self.simulation.model)
+        visu.plot_densityf(self.simulation.model, 50)
