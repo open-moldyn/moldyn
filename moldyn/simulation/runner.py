@@ -45,7 +45,10 @@ class Simulation:
         Changing the values will affect behavior of the model.
     """
 
-    def __init__(self, model):
+    def __init__(self, model = None, simulation = None):
+
+        if simulation:
+            model = simulation.model
 
         self.model = model.copy()
 
@@ -91,11 +94,36 @@ class Simulation:
         self.BUFFER_PARAMS = self.context.buffer(reserve=4 * 5)
         self.BUFFER_PARAMS.bind_to_storage_buffer(4)
 
-        self.current_iter = 0
+        if simulation :
+            self.current_iter = simulation.current_iter
 
-        self.T_cntl = False
+            self.T = simulation.T
+            self.EC = simulation.EC
+            self.EP = simulation.EP
+            self.ET = simulation.ET
+            self.bonds = simulation.bonds
 
-        self.F = np.zeros(self.model.pos.shape) # Doit être initialisé et conservé d'une itération à l'autre
+            self.time = simulation.time
+            self.iters = simulation.iters
+
+            self.T_cntl = simulation.T_cntl
+
+            self.F = simulation.F
+        else:
+            self.current_iter = 0
+
+            self.T = []
+            self.EC = []
+            self.EP = []
+            self.ET = []
+            self.bonds = []
+
+            self.time = []
+            self.iters = []
+
+            self.T_cntl = False
+
+            self.F = np.zeros(self.model.pos.shape) # Doit être initialisé et conservé d'une itération à l'autre
 
     def iter(self, n=1, callback=None):
         """
@@ -144,6 +172,7 @@ class Simulation:
         length = self.model.length
 
         F = self.F
+        bondsGL = np.zeros(self.model.npart)
 
         periodic = self.model.x_periodic or self.model.y_periodic
 
@@ -165,17 +194,19 @@ class Simulation:
 
             self.compute_shader.run(group_x=self.groups_number)
 
-            # Énergie cinétique, à mettre au conditionnel
-            if betaC:
-                EC = 0.5 * ne.evaluate("sum(m*v*v)")
-                T = EC / knparts
+            # Énergie cinétique et température
+            EC = 0.5 * ne.evaluate("sum(m*v*v)")
+            T = EC / knparts
+            self.EC.append(EC)
+            self.T.append(T)
 
             F[:] = np.frombuffer(self.BUFFER_F.read(), dtype=np.float32).reshape(pos.shape)
 
-            # Énergie potentielle, à mettre au conditionnel, y compris dans le shader
-            if regEP:
-                EPgl = np.frombuffer(self.BUFFER_E.read(), dtype=np.float32)
-                EP = 0.5 * ne.evaluate("sum(EPgl)")
+            # Énergie potentielle
+            EPgl = np.frombuffer(self.BUFFER_E.read(), dtype=np.float32)
+            EP = 0.5 * ne.evaluate("sum(EPgl)")
+            self.EP.append(EP)
+            self.ET.append(EC + EP)
 
             # Thermostat
             if betaC:
@@ -186,6 +217,12 @@ class Simulation:
                 ne.evaluate("v + (F*dtm)", out=v)  # kick
 
             ne.evaluate("pos + v*dt2", out=pos)  # half drift
+
+            bondsGL[:] = np.frombuffer(self.BUFFER_COUNT.read(), dtype=np.float32)
+            self.bonds.append(ne.evaluate("sum(bondsGL)"))
+
+            self.iters.append(self.current_iter)
+            self.time.append(self.current_iter * dt)
 
             if callback:
                 callback(self)

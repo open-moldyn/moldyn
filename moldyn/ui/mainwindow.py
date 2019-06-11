@@ -1,5 +1,5 @@
-from PyQt5.QtWidgets import QMainWindow, QTreeWidgetItem, QHeaderView, QProgressBar
-from PyQt5.QtCore import QThread, pyqtSignal
+from PyQt5.QtWidgets import QMainWindow, QTreeWidgetItem, QHeaderView, QProgressBar, QListWidgetItem
+from PyQt5.QtCore import QThread, pyqtSignal, Qt
 from pyqtgraph import PlotWidget
 import time
 
@@ -107,6 +107,27 @@ class MoldynMainWindow(QMainWindow):
         self.ui.PDFButton.clicked.connect(lambda:self.process(self.PDF))
         self.ui.densityMapButton.clicked.connect(lambda:self.process(self.density_map))
 
+        self.temporal_variables = {
+            "Temperature":"T",
+            "Kinetic energy":"EC",
+            "Potential energy":"EP",
+            "Total energy":"ET",
+            "Number of bonds per atom":"bonds",
+            "Time":"time",
+            "Iteration":"iters",
+        }
+
+        self.temp_variables_w = []
+
+        for v in self.temporal_variables:
+            self.ui.lineComboW.addItem(v)
+            i = QListWidgetItem(v)
+            i.setCheckState(False)
+            self.temp_variables_w.append(i)
+            self.ui.lineListW.addItem(i)
+
+        self.ui.plotB.clicked.connect(self.line_graph)
+
         # Misc
 
         self.ui.statusbar.showMessage("Please choose a model.")
@@ -173,8 +194,7 @@ class MoldynMainWindow(QMainWindow):
             # Pour continuer la simu précedente. On est obligés d'en créer une nouvelle pour des questions de scope.
             # On pourrait créer et conserver le thread une bonne fois pour toutes, pour que ce bricolage cesse.
             c_i = self.simulation.current_iter
-            self.simulation = Simulation(self.simulation.model)
-            self.simulation.current_iter = c_i # pour savoir où on en est
+            self.simulation = Simulation(simulation=self.simulation)
             self.model_view = ModelView(self.simulation.model)
             def up(s):
                 self.updated_signal.emit(s.current_iter - c_i, time.perf_counter())
@@ -186,7 +206,7 @@ class MoldynMainWindow(QMainWindow):
             self.enable_process_tab(True)
             self.ui.iterationsSpinBox.setEnabled(True)
             self.ui.simulationTimeLineEdit.setEnabled(True)
-            self.ui.statusbar.showMessage("Simulation complete.")
+            self.ui.statusbar.showMessage("Simulation complete. (Iterations : " + str(self.simulation.current_iter) + ")")
 
         self.simu_thr = QThread()
         self.simu_thr.run = run
@@ -207,6 +227,21 @@ class MoldynMainWindow(QMainWindow):
         p()
 
         self.ui.statusbar.showMessage(self.old_status)
+
+    def line_graph(self):
+        ords = []
+        for i in self.temp_variables_w:
+            if i.checkState():
+                ords.append(self.temporal_variables[i.text()])
+        print(ords)
+        absc = self.temporal_variables[self.ui.lineComboW.currentText()]
+        print(absc)
+        visu.plt.ion()
+        for i in ords:
+            print(absc, ords)
+            visu.plt.plot(eval("self.simulation."+absc), eval("self.simulation."+i))
+        visu.plt.show()
+
 
     def PDF(self):
         """Pair Distribution Function"""
