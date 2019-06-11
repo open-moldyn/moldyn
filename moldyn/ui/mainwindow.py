@@ -109,12 +109,12 @@ class MoldynMainWindow(QMainWindow):
         self.ui.densityMapButton.clicked.connect(lambda:self.process(self.density_map))
 
         self.temporal_variables = {
+            "Time":["time","s"],
             "Temperature":["T","K"],
             "Kinetic energy":["EC","J"],
             "Potential energy":["EP","J"],
             "Total energy":["ET","J"],
             "Number of bonds per atom":["bonds"],
-            "Time":["time","s"],
             "Iteration":["iters"],
         }
 
@@ -254,17 +254,19 @@ class MoldynMainWindow(QMainWindow):
 
         visu.plt.ion()
         fig = visu.plt.figure()
-        host = HostAxes(fig, [0.15, 0.1, 0.65, 0.8])
+        host = HostAxes(fig, [0.15, 0.1, 0.75-(0.04*len(dimensions)), 0.8])
         host.set_xlabel(label(absc))
         host.set_ylabel(dimensions[0])
-        host.axis["right"].set_visible(False)
+
+        if len(dimensions)>1:
+            host.axis["right"].set_visible(False)
 
         axis[dimensions[0]] = host
 
         for i, dim in enumerate(dimensions[1:]):
             par = ParasiteAxes(host, sharex=host)
             host.parasites.append(par)
-            par.axis["right"] = par.get_grid_helper().new_fixed_axis(loc="right", axes=par, offset=(60*i, 0))
+            par.axis["right"] = par.get_grid_helper().new_fixed_axis(loc="right", axes=par, offset=(50*i, 0))
             par.axis["right"].set_visible(True)
             par.set_ylabel(dim)
             par.axis["right"].major_ticklabels.set_visible(True)
