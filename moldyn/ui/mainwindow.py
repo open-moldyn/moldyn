@@ -1,5 +1,6 @@
 from PyQt5.QtWidgets import QMainWindow, QTreeWidgetItem, QHeaderView, QProgressBar, QListWidgetItem
 from PyQt5.QtCore import QThread, pyqtSignal, Qt
+from mpl_toolkits.axisartist.parasite_axes import HostAxes, ParasiteAxes
 from pyqtgraph import PlotWidget
 import time
 
@@ -223,6 +224,7 @@ class MoldynMainWindow(QMainWindow):
     def process(self, p):
         self.old_status = self.ui.statusbar.currentMessage()
         self.ui.statusbar.showMessage("Computing " + p.__doc__ + "...")
+        visu.plt.figure()
 
         p()
 
@@ -230,6 +232,9 @@ class MoldynMainWindow(QMainWindow):
 
     def line_graph(self):
         ords = [i.text() for i in self.temp_variables_w if i.checkState()]
+        if not len(ords):
+            return
+
         absc = self.ui.lineComboW.currentText()
 
         def values(s):
@@ -238,11 +243,40 @@ class MoldynMainWindow(QMainWindow):
             if len(self.temporal_variables[s])>1:
                 return s + " (" + self.temporal_variables[s][1] + ")"
             return s
+        def dimension(s):
+            if "energy" in s:
+                return "Energy (J)"
+            else:
+                return label(s)
+
+        dimensions = list(set(dimension(s) for s in ords))
+        axis = dict()
 
         visu.plt.ion()
-        visu.plt.figure()
+        fig = visu.plt.figure()
+        host = HostAxes(fig, [0.15, 0.1, 0.65, 0.8])
+        host.set_xlabel(label(absc))
+        host.set_ylabel(dimensions[0])
+        host.axis["right"].set_visible(False)
+
+        axis[dimensions[0]] = host
+
+        for i, dim in enumerate(dimensions[1:]):
+            par = ParasiteAxes(host, sharex=host)
+            host.parasites.append(par)
+            par.axis["right"] = par.get_grid_helper().new_fixed_axis(loc="right", axes=par, offset=(60*i, 0))
+            par.axis["right"].set_visible(True)
+            par.set_ylabel(dim)
+            par.axis["right"].major_ticklabels.set_visible(True)
+            par.axis["right"].label.set_visible(True)
+            axis[dim] = par
+
         for i in ords:
-            visu.plt.plot(values(absc), values(i))
+            axis[dimension(i)].plot(values(absc), values(i), label=label(i))
+            #visu.plt.plot(values(absc), values(i), label=label(i))
+
+        fig.add_axes(host)
+        host.legend()
         visu.plt.show()
 
 
