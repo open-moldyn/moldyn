@@ -108,13 +108,13 @@ class MoldynMainWindow(QMainWindow):
         self.ui.densityMapButton.clicked.connect(lambda:self.process(self.density_map))
 
         self.temporal_variables = {
-            "Temperature":"T",
-            "Kinetic energy":"EC",
-            "Potential energy":"EP",
-            "Total energy":"ET",
-            "Number of bonds per atom":"bonds",
-            "Time":"time",
-            "Iteration":"iters",
+            "Temperature":["T","K"],
+            "Kinetic energy":["EC","J"],
+            "Potential energy":["EP","J"],
+            "Total energy":["ET","J"],
+            "Number of bonds per atom":["bonds"],
+            "Time":["time","s"],
+            "Iteration":["iters"],
         }
 
         self.temp_variables_w = []
@@ -229,17 +229,20 @@ class MoldynMainWindow(QMainWindow):
         self.ui.statusbar.showMessage(self.old_status)
 
     def line_graph(self):
-        ords = []
-        for i in self.temp_variables_w:
-            if i.checkState():
-                ords.append(self.temporal_variables[i.text()])
-        print(ords)
-        absc = self.temporal_variables[self.ui.lineComboW.currentText()]
-        print(absc)
+        ords = [i.text() for i in self.temp_variables_w if i.checkState()]
+        absc = self.ui.lineComboW.currentText()
+
+        def values(s):
+            return eval("self.simulation." + self.temporal_variables[s][0])
+        def label(s):
+            if len(self.temporal_variables[s])>1:
+                return s + " (" + self.temporal_variables[s][1] + ")"
+            return s
+
         visu.plt.ion()
+        visu.plt.figure()
         for i in ords:
-            print(absc, ords)
-            visu.plt.plot(eval("self.simulation."+absc), eval("self.simulation."+i))
+            visu.plt.plot(values(absc), values(i))
         visu.plt.show()
 
 
