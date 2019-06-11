@@ -166,6 +166,7 @@ class Simulation:
         m = self.model.m
         dtm = dt/m
         npart = self.model.npart
+        inv2npart = 0.5/npart
         knparts = self.model.kB * npart
 
         limInf = self.model.lim_inf
@@ -220,7 +221,7 @@ class Simulation:
             ne.evaluate("pos + v*dt2", out=pos)  # half drift
 
             bondsGL[:] = np.frombuffer(self.BUFFER_COUNT.read(), dtype=np.float32)
-            self.bonds.append(ne.evaluate("sum(bondsGL)")/npart)
+            self.bonds.append(inv2npart*ne.evaluate("sum(bondsGL)"))
 
             self.iters.append(self.current_iter)
             self.time.append(self.current_iter * dt)

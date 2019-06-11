@@ -224,7 +224,6 @@ class MoldynMainWindow(QMainWindow):
     def process(self, p):
         self.old_status = self.ui.statusbar.currentMessage()
         self.ui.statusbar.showMessage("Computing " + p.__doc__ + "...")
-        visu.plt.figure()
 
         p()
 
@@ -239,10 +238,12 @@ class MoldynMainWindow(QMainWindow):
 
         def values(s):
             return eval("self.simulation." + self.temporal_variables[s][0])
+
         def label(s):
             if len(self.temporal_variables[s])>1:
                 return s + " (" + self.temporal_variables[s][1] + ")"
             return s
+
         def dimension(s):
             if "energy" in s:
                 return "Energy (J)"
@@ -266,7 +267,7 @@ class MoldynMainWindow(QMainWindow):
         for i, dim in enumerate(dimensions[1:]):
             par = ParasiteAxes(host, sharex=host)
             host.parasites.append(par)
-            par.axis["right"] = par.get_grid_helper().new_fixed_axis(loc="right", axes=par, offset=(50*i, 0))
+            par.axis["right"] = par.get_grid_helper().new_fixed_axis(loc="right", axes=par, offset=(55*i, 0))
             par.axis["right"].set_visible(True)
             par.set_ylabel(dim)
             par.axis["right"].major_ticklabels.set_visible(True)
@@ -275,19 +276,21 @@ class MoldynMainWindow(QMainWindow):
 
         for i in ords:
             axis[dimension(i)].plot(values(absc), values(i), label=label(i))
-            #visu.plt.plot(values(absc), values(i), label=label(i))
 
         fig.add_axes(host)
         host.legend()
         visu.plt.show()
 
-
     def PDF(self):
         """Pair Distribution Function"""
         visu.plt.ion()
-        visu.plt.plot(*PDF(self.simulation.model.pos, 1000, 1.5*max(self.model.rcut_a, self.model.rcut_b), 100))
+        d = PDF(self.simulation.model.pos, self.ui.PDFNSpinBox.value(), self.ui.PDFDistSpinBox.value()*max(self.model.rcut_a, self.model.rcut_b), 100)
+        visu.plt.figure()
+        visu.plt.plot(*d)
+        visu.plt.xlabel("Distance (m)")
         visu.plt.show()
 
     def density_map(self):
         """Density map"""
+        visu.plt.figure()
         visu.plot_densityf(self.simulation.model, 50)
