@@ -94,6 +94,8 @@ class Simulation:
         self.BUFFER_PARAMS = self.context.buffer(reserve=4 * 5)
         self.BUFFER_PARAMS.bind_to_storage_buffer(4)
 
+        self.T_f = lambda t:model.T
+
         if simulation :
             self.current_iter = simulation.current_iter
 
@@ -107,6 +109,8 @@ class Simulation:
             self.iters = simulation.iters
 
             self.T_cntl = simulation.T_cntl
+            if self.T_cntl:
+                self.T_f = simulation.T_f
 
             self.F = simulation.F
         else:
@@ -156,7 +160,6 @@ class Simulation:
         """
 
         betaC = self.T_cntl # Contrôle de la température
-        regEP = False
 
         # on crée des alias aux valeurs du modèles pour numexpr
         v = self.model.v
@@ -186,6 +189,8 @@ class Simulation:
 
         for i in range(n):
 
+            t = self.current_iter * dt # l'heure, qui sert pour le calcul de température
+
             ne.evaluate("pos + v*dt2", out=pos)  # half drift
 
             # conditions périodiques de bord
@@ -212,7 +217,7 @@ class Simulation:
 
             # Thermostat
             if betaC:
-                beta = np.sqrt(1+self.model.gamma*(TVOULUE/T-1))
+                beta = np.sqrt(1+self.model.gamma*(self.T_f(t)/T-1))
                 ne.evaluate("(v + (F*dtm))*beta", out=v) # kick
 
             else:
@@ -224,7 +229,7 @@ class Simulation:
             self.bonds.append(inv2npart*ne.evaluate("sum(bondsGL)"))
 
             self.iters.append(self.current_iter)
-            self.time.append(self.current_iter * dt)
+            self.time.append(t)
 
             if callback:
                 callback(self)
@@ -265,6 +270,7 @@ class Simulation:
 
         """
         f2 = inter.interp1d(t, T)
+
         def f(x):
             if x<t[0]:
                 return np.array(T[0]) # pour la consistance des types

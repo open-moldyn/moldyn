@@ -168,6 +168,7 @@ class Model:
             "y_periodic":0,
             "x_lim_inf":0,
             "y_lim_inf":0,
+            "gamma":0.5,
         }
 
         self.x_lim_sup = 0

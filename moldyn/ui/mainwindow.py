@@ -3,6 +3,7 @@ from PyQt5.QtCore import QThread, pyqtSignal, Qt
 from mpl_toolkits.axisartist.parasite_axes import HostAxes, ParasiteAxes
 from pyqtgraph import PlotWidget
 import time
+import numpy as np
 
 from collections import deque
 
