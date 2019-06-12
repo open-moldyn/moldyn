@@ -100,6 +100,7 @@ class Simulation:
             self.current_iter = simulation.current_iter
 
             self.T = simulation.T
+            self.T_ctrl = simulation.T_ctrl
             self.EC = simulation.EC
             self.EP = simulation.EP
             self.ET = simulation.ET
@@ -117,6 +118,7 @@ class Simulation:
             self.current_iter = 0
 
             self.T = []
+            self.T_ctrl = []
             self.EC = []
             self.EP = []
             self.ET = []
@@ -216,6 +218,7 @@ class Simulation:
             self.ET.append(EC + EP)
 
             # Thermostat
+            self.T_ctrl.append(self.T_f(t))
             if betaC:
                 beta = np.sqrt(1+self.model.gamma*(self.T_f(t)/T-1))
                 ne.evaluate("(v + (F*dtm))*beta", out=v) # kick

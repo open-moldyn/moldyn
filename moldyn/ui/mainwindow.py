@@ -5,6 +5,9 @@ from pyqtgraph import PlotWidget
 import time
 import numpy as np
 
+from matplotlib.widgets import Button
+from multiprocessing import Process, Queue
+
 from collections import deque
 
 from .qt.mainwindow import Ui_MainWindow
@@ -17,6 +20,7 @@ from ..simulation.runner import Simulation
 
 from ..processing import visualisation as visu
 from ..processing.data_proc import PDF
+from . import draggableLine
 
 
 class MoldynMainWindow(QMainWindow):
@@ -90,6 +94,8 @@ class MoldynMainWindow(QMainWindow):
 
         self.updated_signal.connect(self.update_progress)
 
+        self.ui.designTemperatureBtn.clicked.connect(self.design_temperature_profile)
+
         self.progress_plt = PlotWidget(self.ui.progress_groupBox)
         self.ui.progress_groupBox.layout().addWidget(self.progress_plt, 2, 0, 1, 3)
         self.progress_plt.setXRange(0,1)
@@ -111,6 +117,7 @@ class MoldynMainWindow(QMainWindow):
         self.temporal_variables = {
             "Time":["time","s"],
             "Temperature":["T","K"],
+            "Temperature control":["T_ctrl","K"],
             "Kinetic energy":["EC","J"],
             "Potential energy":["EP","J"],
             "Total energy":["ET","J"],
@@ -135,18 +142,7 @@ class MoldynMainWindow(QMainWindow):
 
         self.show()
 
-    def update_iters(self):
-        try:
-            t = float(self.ui.simulationTimeLineEdit.text())
-        except:
-            self.update_simu_time()
-        else:
-            self.ui.iterationsSpinBox.setValue(int(t/self.simulation.model.dt))
-
-    def update_simu_time(self, v=None):
-        self.ui.simulationTimeLineEdit.setText(str(self.model.dt*self.ui.iterationsSpinBox.value()))
-        self.ui.simuProgressBar.setMaximum(self.ui.iterationsSpinBox.value())
-        self.progress_plt.setXRange(0, self.ui.iterationsSpinBox.value())
+    # Panneau modèle
 
     def set_model(self, model):
         self.model = model
@@ -171,8 +167,32 @@ class MoldynMainWindow(QMainWindow):
         self.cmd = CreateModelDialog(self)
         self.cmd.show()
 
+    # Panneau simu
+
+    def update_iters(self):
+        try:
+            t = float(self.ui.simulationTimeLineEdit.text())
+        except:
+            self.update_simu_time()
+        else:
+            self.ui.iterationsSpinBox.setValue(int(t/self.simulation.model.dt))
+
+    def update_simu_time(self, v=None):
+        self.ui.simulationTimeLineEdit.setText(str(self.model.dt*self.ui.iterationsSpinBox.value()))
+        self.ui.simuProgressBar.setMaximum(self.ui.iterationsSpinBox.value())
+        self.progress_plt.setXRange(0, self.ui.iterationsSpinBox.value())
+
     def goto_simu(self):
         self.ui.tabWidget.setCurrentWidget(self.ui.tab_simu)
+
+    def design_temperature_profile(self):
+        queue = Queue(1)
+        design_thread = Process(target=draggableLine.main, args=(queue,))
+        design_thread.start()
+        design_thread.join()
+        x_data, y_data = queue.get()
+        queue.close()
+        self.simulation.set_T_ramps(x_data, y_data)
 
     def update_progress(self, v, new_t):
         c_i = v+1 - self.c_i
@@ -227,6 +247,8 @@ class MoldynMainWindow(QMainWindow):
     def goto_process(self):
         self.ui.tabWidget.setCurrentWidget(self.ui.tab_processing)
 
+    # Panneau process
+
     def process(self, p):
         self.old_status = self.ui.statusbar.currentMessage()
         self.ui.statusbar.showMessage("Computing " + p.__doc__ + "...")
@@ -253,6 +275,8 @@ class MoldynMainWindow(QMainWindow):
         def dimension(s):
             if "energy" in s:
                 return "Energy (J)"
+            elif "Temperature" in s:
+                return "Temperature (K)"
             else:
                 return label(s)
 
