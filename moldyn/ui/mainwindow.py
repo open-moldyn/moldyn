@@ -3,6 +3,8 @@ from PyQt5.QtCore import QThread, pyqtSignal, Qt
 from mpl_toolkits.axisartist.parasite_axes import HostAxes, ParasiteAxes
 from pyqtgraph import PlotWidget
 import time
+import multiprocessing as mp
+mp.set_start_method('spawn')
 import numpy as np
 
 from matplotlib.widgets import Button
@@ -187,6 +189,7 @@ class MoldynMainWindow(QMainWindow):
 
     def design_temperature_profile(self):
         queue = Queue(1)
+        print('hi')
         design_thread = Process(target=draggableLine.main, args=(queue,))
         design_thread.start()
         design_thread.join()

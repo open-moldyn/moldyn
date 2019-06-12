@@ -35,16 +35,23 @@ def _plot_base(*, show=False, axis='', grid=False, figure=None):
         def wrap(*args, **kwargs):
             keys = kwargs.keys()
             if 'figure' in keys:
-                plt.figure(kwargs['figure'])
+                if isinstance(kwargs['figure'], plt.Figure):
+                    num = kwargs['figure'].number
+                else:
+                    num = kwargs['figure']
+                plt.figure(num)
+                del kwargs['figure']
             elif figure is not None:
                 plt.figure(figure)
 
-            func(*args, **kwargs)
-
             if 'grid' in keys and kwargs['grid']:
                 plt.grid()
+                del kwargs['grid']
             elif grid:
                 plt.grid()
+
+            func(*args, **kwargs)
+
             plt.axis(axis)
             if show:
                 plt.show()
