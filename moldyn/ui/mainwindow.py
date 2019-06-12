@@ -81,7 +81,6 @@ class MoldynMainWindow(QMainWindow):
 
         subItems(self.displayed_properties_list, self.ui.paramsTreeWidget)
 
-
         # Panneau simu
 
         self.ui.iterationsSpinBox.valueChanged.connect(self.update_simu_time)
@@ -92,7 +91,7 @@ class MoldynMainWindow(QMainWindow):
         self.updated_signal.connect(self.update_progress)
 
         self.progress_plt = PlotWidget(self.ui.progress_groupBox)
-        self.ui.progress_groupBox.layout().addWidget(self.progress_plt, 1, 0, 1, 2)
+        self.ui.progress_groupBox.layout().addWidget(self.progress_plt, 2, 0, 1, 3)
         self.progress_plt.setXRange(0,1)
         self.progress_plt.setLabel('bottom',text='Iteration')
         self.progress_plt.setLabel('left',text='Speed', units='Iteration/s')
@@ -176,10 +175,15 @@ class MoldynMainWindow(QMainWindow):
         self.ui.tabWidget.setCurrentWidget(self.ui.tab_simu)
 
     def update_progress(self, v, new_t):
-        self.ui.simuProgressBar.setValue(v+1)
+        c_i = v+1 - self.c_i
         self.t_deque.append(1/(new_t - self.last_t))
         self.last_t = new_t
-        self.progress_gr.setData(self.t_deque)
+        self.ui.simuProgressBar.setValue(c_i)
+        if c_i==self.ui.iterationsSpinBox.value() or not c_i%10:
+            self.progress_gr.setData(self.t_deque)
+            self.ui.currentIteration.setText(str(v+1))
+            self.ui.currentTime.setText(str((v+1)*self.model.dt))
+            self.ui.ETA.setText(str(int( (self.ui.iterationsSpinBox.value()/c_i - 1)*(new_t-self.simu_starttime) )) + "s")
 
     def simulate(self):
         self.ui.simuBtn.setEnabled(False)
@@ -195,11 +199,12 @@ class MoldynMainWindow(QMainWindow):
         def run():
             # Pour continuer la simu précedente. On est obligés d'en créer une nouvelle pour des questions de scope.
             # On pourrait créer et conserver le thread une bonne fois pour toutes, pour que ce bricolage cesse.
-            c_i = self.simulation.current_iter
+            self.c_i = self.simulation.current_iter
             self.simulation = Simulation(simulation=self.simulation)
             self.model_view = ModelView(self.simulation.model)
+            self.simu_starttime = time.perf_counter()
             def up(s):
-                self.updated_signal.emit(s.current_iter - c_i, time.perf_counter())
+                self.updated_signal.emit(s.current_iter, time.perf_counter())
             self.simulation.iter(self.ui.iterationsSpinBox.value(), up)
             self.simu_thr.exit()
 
