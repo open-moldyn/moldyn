@@ -1,4 +1,4 @@
-from PyQt5.QtWidgets import QMainWindow, QTreeWidgetItem, QHeaderView, QProgressBar, QListWidgetItem, QMessageBox
+from PyQt5.QtWidgets import QMainWindow, QTreeWidgetItem, QHeaderView, QProgressBar, QListWidgetItem, QMessageBox, QFileDialog
 from PyQt5.QtCore import QThread, pyqtSignal, Qt
 from mpl_toolkits.axisartist.parasite_axes import HostAxes, ParasiteAxes
 from pyqtgraph import PlotWidget
@@ -40,6 +40,8 @@ class MoldynMainWindow(QMainWindow):
 
         # Panneau modèle
         self.ui.newModelBtn.clicked.connect(self.create_model)
+        self.ui.loadModelBtn.clicked.connect(self.load_model)
+        self.ui.saveModelBtn.clicked.connect(self.save_model)
 
         self.ui.gotoSimuBtn.clicked.connect(self.goto_simu)
 
@@ -117,7 +119,7 @@ class MoldynMainWindow(QMainWindow):
         # Panneau processing
 
         self.ui.PDFButton.clicked.connect(lambda:self.process(self.PDF))
-        self.ui.densityMapButton.clicked.connect(lambda:self.process(self.density_map))
+        self.ui.drawSurfButton.clicked.connect(lambda:self.process(self.density_map))
 
         self.temporal_variables = {
             "Time":["time","s"],
@@ -152,6 +154,8 @@ class MoldynMainWindow(QMainWindow):
     def set_model(self, model):
         self.model = model
 
+        self.ui.saveModelBtn.setEnabled(True)
+
         self.ui.gotoSimuBtn.setEnabled(True)
         self.ui.tab_simu.setEnabled(True)
 
@@ -171,6 +175,12 @@ class MoldynMainWindow(QMainWindow):
     def create_model(self):
         self.cmd = CreateModelDialog(self)
         self.cmd.show()
+
+    def load_model(self):
+        pass
+
+    def save_model(self):
+        print(QFileDialog.getSaveFileName(caption="Save model", filter="Model file"))
 
     # Panneau simu
 
