@@ -335,3 +335,4 @@ class MoldynMainWindow(QMainWindow):
         """Density map"""
         visu.plt.figure()
         visu.plot_densityf(self.simulation.model, 50)
+        visu.plt.show()
