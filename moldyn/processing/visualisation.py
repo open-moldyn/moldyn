@@ -59,10 +59,6 @@ def _plot_base(*, show=False, axis='', grid=False, figure=None):
     return plot_dec
 
 
-@_plot_base(axis='equal')
-def plot_T(simulation):
-    plt.plot()
-
 
 @_plot_base(axis='equal', grid=False)
 def plot_density(model, levels=None, refinement=0):
@@ -93,6 +89,3 @@ def plot_density_surf(model,refinement=0):
     tri, density = dp.density(model, refinement)
     ax.plot_trisurf(tri, density)
 
-@_plot_base(show=False)
-def plot_temp(simulation):
-    pass

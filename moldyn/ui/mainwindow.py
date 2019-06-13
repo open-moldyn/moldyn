@@ -4,7 +4,10 @@ from mpl_toolkits.axisartist.parasite_axes import HostAxes, ParasiteAxes
 from pyqtgraph import PlotWidget
 import time
 import multiprocessing as mp
-mp.set_start_method('spawn')
+try:
+    mp.set_start_method('spawn')
+except RuntimeError:
+    pass
 import numpy as np
 
 from matplotlib.widgets import Button
@@ -286,7 +289,7 @@ class MoldynMainWindow(QMainWindow):
         dimensions = list(set(dimension(s) for s in ords))
         axis = dict()
 
-        visu.plt.ion()
+        visu.plt.ioff()
         fig = visu.plt.figure()
         host = HostAxes(fig, [0.15, 0.1, 0.75-(0.04*len(dimensions)), 0.8])
         host.set_xlabel(label(absc))
@@ -316,7 +319,7 @@ class MoldynMainWindow(QMainWindow):
 
     def PDF(self):
         """Pair Distribution Function"""
-        visu.plt.ion()
+        visu.plt.ioff()
         d = PDF(self.simulation.model.pos, self.ui.PDFNSpinBox.value(), self.ui.PDFDistSpinBox.value()*max(self.model.rcut_a, self.model.rcut_b), 100)
         visu.plt.figure()
         visu.plt.plot(*d)

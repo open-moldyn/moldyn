@@ -6,7 +6,7 @@ class ModelView():
     def __init__(self, model):
         self.model = model
 
-        plt.ion()
+        plt.ioff()
 
         plt.pause(1e-6)
 
@@ -22,4 +22,5 @@ class ModelView():
         plt.xlim(self.model.x_lim_inf, self.model.x_lim_sup)
         self.plot_a, = plt.plot(*self.model.pos[:self.model.n_a,:].T, "ro", markersize=1)
         self.plot_b, = plt.plot(*self.model.pos[self.model.n_a:,:].T, "bo", markersize=1)
-        plt.pause(1e-6)
+        plt.pause(1e-3)
+        #return self

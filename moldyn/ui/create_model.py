@@ -130,7 +130,7 @@ class CreateModelDialog(QWizard):
         self.model.atom_grid(self.ui.gridWidth.value(), self.ui.gridHeight.value(), self.checked_distance())
         self.model.shuffle_atoms()
 
-        self.mv=ModelView(self.model)
+        self.mv = ModelView(self.model)
         self.mv.show()
 
     # Troisième panneau
