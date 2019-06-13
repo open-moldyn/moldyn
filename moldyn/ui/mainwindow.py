@@ -192,7 +192,7 @@ class MoldynMainWindow(QMainWindow):
 
     def design_temperature_profile(self):
         queue = Queue(1)
-        print('hi')
+        queue.put((self.ui.iterationsSpinBox.value()*self.model.dt, 100))
         design_thread = Process(target=draggableLine.main, args=(queue,))
         design_thread.start()
         design_thread.join()
