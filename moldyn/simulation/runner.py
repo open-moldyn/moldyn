@@ -112,6 +112,7 @@ class Simulation:
             self.T_cntl = simulation.T_cntl
             if self.T_cntl:
                 self.T_f = simulation.T_f
+            self.T_ramps = simulation.T_ramps
 
             self.F = simulation.F
         else:
@@ -119,6 +120,8 @@ class Simulation:
 
             self.T = []
             self.T_ctrl = []
+            self.T_ramps = ([],[])
+
             self.EC = []
             self.EP = []
             self.ET = []
@@ -274,6 +277,7 @@ class Simulation:
 
         """
         f2 = inter.interp1d(t, T)
+        self.T_ramps = (t, T)
 
         def f(x):
             if x<t[0]:

@@ -192,7 +192,8 @@ class MoldynMainWindow(QMainWindow):
 
     def design_temperature_profile(self):
         queue = Queue(1)
-        queue.put((self.ui.iterationsSpinBox.value()*self.model.dt, 100))
+
+        queue.put((self.ui.iterationsSpinBox.value()*self.model.dt, 100, *self.simulation.T_ramps))
         design_thread = Process(target=draggableLine.main, args=(queue,))
         design_thread.start()
         design_thread.join()
@@ -220,6 +221,7 @@ class MoldynMainWindow(QMainWindow):
         self.ui.simuBtn.setEnabled(False)
         self.ui.iterationsSpinBox.setEnabled(False)
         self.ui.simulationTimeLineEdit.setEnabled(False)
+        self.ui.temperature_groupBox.setEnabled(False)
         self.enable_process_tab(False)
         self.ui.simuProgressBar.setValue(0)
         self.last_t = time.perf_counter()
@@ -244,6 +246,7 @@ class MoldynMainWindow(QMainWindow):
             self.enable_process_tab(True)
             self.ui.iterationsSpinBox.setEnabled(True)
             self.ui.simulationTimeLineEdit.setEnabled(True)
+            self.ui.temperature_groupBox.setEnabled(True)
             self.ui.statusbar.showMessage("Simulation complete. (Iterations : " + str(self.simulation.current_iter) + ")")
 
         self.simu_thr = QThread()
