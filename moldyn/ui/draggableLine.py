@@ -1,5 +1,4 @@
 import matplotlib
-matplotlib.use('Qt5Agg')
 import matplotlib.pyplot as plt
 from PyQt5.QtWidgets import (QDialog, QLineEdit, QApplication, QGridLayout,
                              QPushButton, QLabel)
@@ -36,6 +35,11 @@ class MultiInputDialog(QDialog):
         # Set dialog layout
 
         self.setLayout(layout)
+
+    def exec(self) -> int:
+        self.show()
+        self.edits[0].setFocus()
+        return super().exec()
 
     def result(self):
         print("result", super().result())
@@ -241,8 +245,9 @@ class DraggableLine:
         self.line.figure.canvas.mpl_disconnect(self.cidrelease)
         self.line.figure.canvas.mpl_disconnect(self.cidmotion)
 
-#app = QApplication(sys.argv)
+
 def main(queue):
+    #app = QApplication(sys.argv)
     fig = plt.figure()
     ax = fig.add_subplot(111)
     plt.subplots_adjust(bottom=0.2)
