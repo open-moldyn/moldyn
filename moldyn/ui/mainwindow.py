@@ -1,9 +1,14 @@
+import shutil
+
 from PyQt5.QtWidgets import QMainWindow, QTreeWidgetItem, QHeaderView, QProgressBar, QListWidgetItem, QMessageBox, QFileDialog
 from PyQt5.QtCore import QThread, pyqtSignal, Qt
 from mpl_toolkits.axisartist.parasite_axes import HostAxes, ParasiteAxes
 from pyqtgraph import PlotWidget
 import time
 import multiprocessing as mp
+
+from moldyn.utils.data_mng import DynState
+
 try:
     mp.set_start_method('spawn')
 except RuntimeError:
@@ -177,10 +182,30 @@ class MoldynMainWindow(QMainWindow):
         self.cmd.show()
 
     def load_model(self):
-        pass
+        path, filter = QFileDialog.getSaveFileName(caption="Save model", filter="Model file (*.zip)")
+        ds = DynState(path)
+        # position of particles
+        with ds.open(ds.POS, 'r') as IO:
+            self.model.pos = IO.load()
+        # parameters
+        with ds.open(ds.PAR) as IO:
+            for key, item in IO.items():
+                self.model.params[key] = item
+        # velocity
+        with ds.open(ds.VEL, 'r') as IO:
+            self.model.v = IO.load()
 
     def save_model(self):
-        print(QFileDialog.getSaveFileName(caption="Save model", filter="Model file"))
+        path, filter = QFileDialog.getSaveFileName(caption="Save model", filter="Model file (*.zip)")
+        print(QFileDialog.getSaveFileName(caption="Save model", filter="Model file (*.zip)"))
+        if path:
+            ds = DynState('./data/tmp1')
+            ds.save_model(self.model)
+            ds.to_zip(path)
+            shutil.rmtree('./data/tmp1')
+
+
+
 
     # Panneau simu
 

@@ -4,6 +4,8 @@ import datetime
 import datreant as dt
 from zipfile import *
 
+from moldyn.simulation.builder import Model
+
 CATEGORY_LIST = [
     "npart",
     "spc1",
@@ -226,6 +228,17 @@ class DynState(dt.Treant):
                 if leaf.exists:
                     archive.write(leaf.abspath)
 
+    def save_model(self, model:Model):
+
+        # position of particles
+        with self.open(self.POS, 'w') as IO:
+            IO.save(model.pos)
+        # parameters
+        with self.open(self.PAR, 'w') as IO:
+            IO.from_dict(model.params)
+        # velocity
+        with self.open(self.VEL, 'w') as IO:
+            IO.save(model.v)
 
 def discover(dirpath='./data', *args, **kwargs):
     return dt.discover(dirpath=dirpath, *args, **kwargs)
