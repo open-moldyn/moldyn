@@ -201,7 +201,7 @@ class MoldynMainWindow(QMainWindow):
             ds = DynState('./data/tmp1')
             ds.save_model(self.model)
             ds.to_zip(path)
-            shutil.rmtree('./data/tmp1')
+            #shutil.rmtree('./data/tmp1')
 
 
 

@@ -4,8 +4,6 @@ import datetime
 import datreant as dt
 from zipfile import *
 
-from moldyn.simulation.builder import Model
-
 CATEGORY_LIST = [
     "npart",
     "spc1",
@@ -115,8 +113,8 @@ class ParamIO(dict):
         if self != params:
             with open(self.file_name, mode='w') as file:
                 json.dump(self, file, ensure_ascii=False, indent=4)
-            self.dynState.categories['last modified'] = datetime.datetime.now().strftime('%d/%m/%Y-%X')
-        self._update_categories()
+            #self.dynState.categories['last modified'] = datetime.datetime.now().strftime('%d/%m/%Y-%X')
+        #self._update_categories()
 
     def from_dict(self, rdict : dict):
         """
@@ -175,8 +173,11 @@ class DynStateIO:
         return self
 
     def __exit__(self, exc_type, exc_val, exc_tb):
-        if self.file.readable():
+        """
+        if False and self.file.readable():
             self.dynState.categories['last modified'] = datetime.datetime.now().strftime('%d/%m/%Y-%X')
+        """
+        print("aa")
         self.file.close()
 
     def save(self, arr, **kwargs):
@@ -228,7 +229,7 @@ class DynState(dt.Treant):
                 if leaf.exists:
                     archive.write(leaf.abspath)
 
-    def save_model(self, model:Model):
+    def save_model(self, model):
 
         # position of particles
         with self.open(self.POS, 'w') as IO:
