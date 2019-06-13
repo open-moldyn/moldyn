@@ -101,16 +101,18 @@ class ParamIO(dict):
         exc_val
         exc_tb
         """
+        param_exists = False
         try:
             try:
                 with open(self.file_name, mode='r') as file:
                     params = json.load(self.file_name,
                                        parse_float=True, parse_int=True)
+                    param_exists = True
             except json.decoder.JSONDecodeError:
                 print("File corrupted")
         except FileNotFoundError:
             print("File does not YET exists")
-        if self != params:
+        if not param_exists or self != params:
             with open(self.file_name, mode='w') as file:
                 json.dump(self, file, ensure_ascii=False, indent=4)
             #self.dynState.categories['last modified'] = datetime.datetime.now().strftime('%d/%m/%Y-%X')
@@ -177,7 +179,6 @@ class DynStateIO:
         if False and self.file.readable():
             self.dynState.categories['last modified'] = datetime.datetime.now().strftime('%d/%m/%Y-%X')
         """
-        print("aa")
         self.file.close()
 
     def save(self, arr, **kwargs):
@@ -227,7 +228,12 @@ class DynState(dt.Treant):
         with ZipFile(path, "w") as archive:
             for leaf in self.leaves():
                 if leaf.exists:
-                    archive.write(leaf.abspath)
+                    print(leaf.relpath)
+                    if '/' in leaf.relpath:
+                        sep = '/'
+                    else:
+                        sep = '\\'
+                    archive.write(leaf.relpath, arcname=leaf.relpath.split(sep)[-1])
 
     def save_model(self, model):
 

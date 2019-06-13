@@ -182,26 +182,30 @@ class MoldynMainWindow(QMainWindow):
         self.cmd.show()
 
     def load_model(self):
-        path, filter = QFileDialog.getSaveFileName(caption="Save model", filter="Model file (*.zip)")
+        path, filter = QFileDialog.getOpenFileName(caption="Save model", filter="Model file (*.zip)")
         ds = DynState(path)
+        model = Model()
         # position of particles
         with ds.open(ds.POS, 'r') as IO:
-            self.model.pos = IO.load()
+            model.pos = IO.load()
         # parameters
         with ds.open(ds.PAR) as IO:
             for key, item in IO.items():
-                self.model.params[key] = item
+                model.params[key] = item
         # velocity
         with ds.open(ds.VEL, 'r') as IO:
-            self.model.v = IO.load()
+            model.v = IO.load()
+        self.set_model(model)
 
     def save_model(self):
         path, filter = QFileDialog.getSaveFileName(caption="Save model", filter="Model file (*.zip)")
+        if not path.endswith(".zip"):
+            path += ".zip"
         if path:
+            shutil.rmtree('./data/tmp1')
             ds = DynState('./data/tmp1')
             ds.save_model(self.model)
             ds.to_zip(path)
-            #shutil.rmtree('./data/tmp1')
 
 
 
