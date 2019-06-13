@@ -193,17 +193,18 @@ class DynState(dt.Treant):
     VEL = "velocities.npy" # final velocities
     PAR = "parameters.json" # parameters of model and simulation
 
-    def __init__(self, treant, *, extraction_path:str = './data/tmp'):
+    def __init__(self, treant, *, extraction_path : str = './data/tmp'):
         if isinstance(treant, dt.Treant):
             super().__init__(treant)
-        elif isinstance(treant, str):
+        elif isinstance(treant, str) and is_zipfile(treant) :
             try:
-                if is_zipfile(treant):
-                    with ZipFile(treant, 'r') as archive:
-                        archive.extractall('./data/tmp')
-                        super().__init__('./data/tmp')
+                with ZipFile(treant, 'r') as archive:
+                    archive.extractall(extraction_path)
+                    super().__init__(extraction_path)
             except BadZipFile:
                 pass
+        else:
+            super().__init__(treant)
 
 
     def open(self, file, mode='r'):
