@@ -1,4 +1,4 @@
-from PyQt5.QtWidgets import QMainWindow, QTreeWidgetItem, QHeaderView, QProgressBar, QListWidgetItem
+from PyQt5.QtWidgets import QMainWindow, QTreeWidgetItem, QHeaderView, QProgressBar, QListWidgetItem, QMessageBox
 from PyQt5.QtCore import QThread, pyqtSignal, Qt
 from mpl_toolkits.axisartist.parasite_axes import HostAxes, ParasiteAxes
 from pyqtgraph import PlotWidget
@@ -198,6 +198,11 @@ class MoldynMainWindow(QMainWindow):
         design_thread.join()
         x_data, y_data = queue.get()
         queue.close()
+        if len(x_data)<2:
+            qmb = QMessageBox()
+            qmb.setText("This only works with at least two points.")
+            qmb.exec()
+            return
         self.simulation.set_T_ramps(x_data, y_data)
 
     def update_progress(self, v, new_t):

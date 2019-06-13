@@ -254,6 +254,7 @@ class Simulation:
         """
         self.T_cntl = True
         self.T_f = f
+        self.model.T = f(self.current_iter*self.model.dt)
 
     def set_T_ramps(self, t, T):
         """
