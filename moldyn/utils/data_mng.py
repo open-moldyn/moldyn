@@ -2,6 +2,7 @@ import numpy as np
 import json
 import datetime
 import datreant as dt
+from zipfile import *
 
 CATEGORY_LIST = [
     "npart",
@@ -192,8 +193,18 @@ class DynState(dt.Treant):
     VEL = "velocities.npy" # final velocities
     PAR = "parameters.json" # parameters of model and simulation
 
-    def __init__(self, treant):
-        super().__init__(treant)
+    def __init__(self, treant, *, extraction_path:str = './data/tmp'):
+        if isinstance(treant, dt.Treant):
+            super().__init__(treant)
+        elif isinstance(treant, str):
+            try:
+                if is_zipfile(treant):
+                    with ZipFile(treant, 'r') as archive:
+                        archive.extractall('./data/tmp')
+                        super().__init__('./data/tmp')
+            except BadZipFile:
+                pass
+
 
     def open(self, file, mode='r'):
         if file.endswith(".npy"):
@@ -207,6 +218,12 @@ class DynState(dt.Treant):
 
     def add_tag(self,*tags):
         self.tags.add(*tags)
+
+    def to_zip(self, path):
+        with ZipFile(path, "w") as archive:
+            for leaf in self.leaves():
+                if leaf.exists:
+                    archive.write(leaf.abspath)
 
 
 def discover(dirpath='./data', *args, **kwargs):
