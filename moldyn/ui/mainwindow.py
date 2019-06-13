@@ -197,7 +197,6 @@ class MoldynMainWindow(QMainWindow):
 
     def save_model(self):
         path, filter = QFileDialog.getSaveFileName(caption="Save model", filter="Model file (*.zip)")
-        print(QFileDialog.getSaveFileName(caption="Save model", filter="Model file (*.zip)"))
         if path:
             ds = DynState('./data/tmp1')
             ds.save_model(self.model)
