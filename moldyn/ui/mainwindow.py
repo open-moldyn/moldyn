@@ -100,7 +100,7 @@ class MoldynMainWindow(QMainWindow):
 
         # Panneau simu
 
-        self.ui.tabWidget.currentChanged.connect(self.model_to_cache)
+        self.ui.tabWidget.currentChanged.connect(self._model_to_cache)
 
         self.ui.iterationsSpinBox.valueChanged.connect(self.update_simu_time)
         self.ui.simulationTimeLineEdit.editingFinished.connect(self.update_iters)
@@ -184,6 +184,8 @@ class MoldynMainWindow(QMainWindow):
 
         self.update_simu_time()
 
+        self.model_to_cache()
+
         self.ui.statusbar.showMessage("Model loaded, simulation can begin.")
 
     def show_model(self):
@@ -234,9 +236,12 @@ class MoldynMainWindow(QMainWindow):
 
     # Panneau simu
 
-    def model_to_cache(self, index):
-        if (self.ui.tabWidget.currentWidget() is self.ui.tab_simu
-                and self.model):
+    def _model_to_cache(self, index):
+        if (self.ui.tabWidget.currentWidget() is self.ui.tab_simu):
+            self.model_to_cache()
+
+    def model_to_cache(self):
+        if self.model:
             self.ds = DynState('./data/tmp')
             self.ds.save_model(self.model)
 
