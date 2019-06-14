@@ -99,6 +99,8 @@ class MoldynMainWindow(QMainWindow):
 
         # Panneau simu
 
+        self.ui.tabWidget.currentChanged.connect(self.model_to_cache)
+
         self.ui.iterationsSpinBox.valueChanged.connect(self.update_simu_time)
         self.ui.simulationTimeLineEdit.editingFinished.connect(self.update_iters)
 
@@ -153,8 +155,12 @@ class MoldynMainWindow(QMainWindow):
         self.ui.plotB.clicked.connect(self.line_graph)
 
         # Misc
-
-        self.ui.statusbar.showMessage("Please choose a model.")
+        try:
+            self._load_model('./data/tmp')
+        except:
+            self.ui.statusbar.showMessage("Please choose a model.")
+        else:
+            self.ui.statusbar.showMessage("Using cached model.")
 
         self.show()
 
@@ -187,6 +193,10 @@ class MoldynMainWindow(QMainWindow):
 
     def load_model(self):
         path, filter = QFileDialog.getOpenFileName(caption="Load model", filter="Model file (*.zip)")
+        if path:
+            self._load_model(path)
+
+    def _load_model(self, path):
         ds = DynState(path)
         model = Model()
         # position of particles
@@ -221,6 +231,11 @@ class MoldynMainWindow(QMainWindow):
         self._save_model(self.simulation.model)
 
     # Panneau simu
+
+    def model_to_cache(self, index):
+        if self.ui.tabWidget.currentWidget() is self.ui.tab_simu:
+            self.ds = DynState('./data/tmp')
+            self.ds.save_model(self.model)
 
     def update_iters(self):
         try:
