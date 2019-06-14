@@ -125,6 +125,8 @@ class MoldynMainWindow(QMainWindow):
 
         self.ui.saveRModelBtn.clicked.connect(self.save_final_model)
 
+        self.ui.reuseModelBtn.clicked.connect(self.reuse_model)
+
         self.ui.PDFButton.clicked.connect(lambda:self.process(self.PDF))
         self.ui.drawSurfButton.clicked.connect(lambda:self.process(self.density_map))
 
@@ -204,9 +206,9 @@ class MoldynMainWindow(QMainWindow):
 
     def _save_model(self, m):
         path, filter = QFileDialog.getSaveFileName(caption="Save model", filter="Model file (*.zip)")
-        if not path.endswith(".zip"):
-            path += ".zip"
         if path:
+            if not path.endswith(".zip"):
+                path += ".zip"
             shutil.rmtree('./data/tmp1')
             ds = DynState('./data/tmp1')
             ds.save_model(m)
@@ -217,9 +219,6 @@ class MoldynMainWindow(QMainWindow):
 
     def save_final_model(self):
         self._save_model(self.simulation.model)
-
-
-
 
     # Panneau simu
 
@@ -277,6 +276,13 @@ class MoldynMainWindow(QMainWindow):
         self.t_deque.append(0)
         self.ui.statusbar.showMessage("Simulation is running...")
 
+        if len(self.simulation.T_ramps[0]):
+            final_t = (self.simulation.current_iter + self.ui.iterationsSpinBox.value())*self.model.dt
+            t, T = map(list,self.simulation.T_ramps)
+            t.append(final_t)
+            T.append(self.simulation.T_f(final_t))
+            self.simulation.set_T_ramps(t, T)
+
         def run():
             # Pour continuer la simu précedente. On est obligés d'en créer une nouvelle pour des questions de scope.
             # On pourrait créer et conserver le thread une bonne fois pour toutes, pour que ce bricolage cesse.
@@ -310,6 +316,10 @@ class MoldynMainWindow(QMainWindow):
         self.ui.tabWidget.setCurrentWidget(self.ui.tab_processing)
 
     # Panneau process
+
+    def reuse_model(self):
+        self.set_model(self.simulation.model)
+        self.ui.tabWidget.setCurrentWidget(self.ui.tab_model)
 
     def process(self, p):
         self.old_status = self.ui.statusbar.currentMessage()
