@@ -209,15 +209,15 @@ class MoldynMainWindow(QMainWindow):
             ds.save_model(self.model)
             ds.to_zip(path)
 
-     def save_final_model(self):
-            path, filter = QFileDialog.getSaveFileName(caption="Save model", filter="Model file (*.zip)")
-            if not path.endswith(".zip"):
-                path += ".zip"
-            if path:
-                shutil.rmtree('./data/tmp1')
-                ds = DynState('./data/tmp1')
-                ds.save_model(self.simulation.model)
-                ds.to_zip(path)
+    def save_final_model(self):
+        path, filter = QFileDialog.getSaveFileName(caption="Save model", filter="Model file (*.zip)")
+        if not path.endswith(".zip"):
+            path += ".zip"
+        if path:
+            shutil.rmtree('./data/tmp1')
+            ds = DynState('./data/tmp1')
+            ds.save_model(self.simulation.model)
+            ds.to_zip(path)
 
 
 
