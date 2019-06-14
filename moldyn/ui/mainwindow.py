@@ -91,6 +91,7 @@ class MoldynMainWindow(QMainWindow):
                     currentItem = QTreeWidgetItem([k])
                     subItems(item[k], currentItem)
                 parent.addChild(currentItem)
+                currentItem.setExpanded(True)
 
         self.ui.paramsTreeWidget.addChild = self.ui.paramsTreeWidget.addTopLevelItem
         self.ui.paramsTreeWidget.header().setResizeMode(QHeaderView.ResizeToContents)
@@ -169,6 +170,7 @@ class MoldynMainWindow(QMainWindow):
     def set_model(self, model):
         self.model = model
 
+        self.ui.saveAllAtomsPositionCheckBox.setEnabled(True)
         self.ui.saveModelBtn.setEnabled(True)
 
         self.ui.gotoSimuBtn.setEnabled(True)
@@ -285,6 +287,7 @@ class MoldynMainWindow(QMainWindow):
         self.ui.iterationsSpinBox.setEnabled(False)
         self.ui.simulationTimeLineEdit.setEnabled(False)
         self.ui.temperature_groupBox.setEnabled(False)
+        self.ui.saveAllAtomsPositionCheckBox.setEnabled(False)
         self.enable_process_tab(False)
         self.ui.simuProgressBar.setValue(0)
         self.last_t = time.perf_counter()
