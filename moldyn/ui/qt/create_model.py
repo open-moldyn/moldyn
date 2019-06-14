@@ -11,7 +11,7 @@ from PyQt5 import QtCore, QtGui, QtWidgets
 class Ui_CreateModel(object):
     def setupUi(self, CreateModel):
         CreateModel.setObjectName("CreateModel")
-        CreateModel.resize(466, 427)
+        CreateModel.resize(508, 537)
         sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Expanding)
         sizePolicy.setHorizontalStretch(0)
         sizePolicy.setVerticalStretch(0)
