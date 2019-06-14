@@ -76,8 +76,7 @@ class ParamIO(dict):
         try:
             try:
                 with open(self.file_name, mode='r') as file:
-                    params = json.load(self.file_name,
-                                       parse_float=True, parse_int=True)
+                    params = json.load(self.file_name)
                 for key, value in params.items():
                     self[key] = value
             except json.decoder.JSONDecodeError:
@@ -105,8 +104,7 @@ class ParamIO(dict):
         try:
             try:
                 with open(self.file_name, mode='r') as file:
-                    params = json.load(self.file_name,
-                                       parse_float=True, parse_int=True)
+                    params = json.load(self.file_name)
                     param_exists = True
             except json.decoder.JSONDecodeError:
                 print("File corrupted")
