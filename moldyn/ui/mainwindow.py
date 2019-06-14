@@ -197,6 +197,9 @@ class MoldynMainWindow(QMainWindow):
         # velocity
         with ds.open(ds.VEL, 'r') as IO:
             model.v = IO.load()
+
+        model._m()
+
         self.set_model(model)
 
     def _save_model(self, m):
