@@ -189,9 +189,7 @@ class DynStateIO:
 
 
 class DynState(dt.Treant):
-    POS = "pos.npy" # position at each timestep
-    POS0 = "pos0.npy" # initial position
-    POSF = "posF.npy" # final position
+    POS = "pos.npy" # position of particles
     VEL = "velocities.npy" # final velocities
     PAR = "parameters.json" # parameters of model and simulation
 

@@ -123,6 +123,8 @@ class MoldynMainWindow(QMainWindow):
 
         # Panneau processing
 
+        self.ui.saveRModelBtn.clicked.connect(self.save_final_model)
+
         self.ui.PDFButton.clicked.connect(lambda:self.process(self.PDF))
         self.ui.drawSurfButton.clicked.connect(lambda:self.process(self.density_map))
 
@@ -206,6 +208,16 @@ class MoldynMainWindow(QMainWindow):
             ds = DynState('./data/tmp1')
             ds.save_model(self.model)
             ds.to_zip(path)
+
+     def save_final_model(self):
+            path, filter = QFileDialog.getSaveFileName(caption="Save model", filter="Model file (*.zip)")
+            if not path.endswith(".zip"):
+                path += ".zip"
+            if path:
+                shutil.rmtree('./data/tmp1')
+                ds = DynState('./data/tmp1')
+                ds.save_model(self.simulation.model)
+                ds.to_zip(path)
 
 
 
