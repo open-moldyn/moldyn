@@ -184,7 +184,7 @@ class MoldynMainWindow(QMainWindow):
         self.cmd.show()
 
     def load_model(self):
-        path, filter = QFileDialog.getOpenFileName(caption="Save model", filter="Model file (*.zip)")
+        path, filter = QFileDialog.getOpenFileName(caption="Load model", filter="Model file (*.zip)")
         ds = DynState(path)
         model = Model()
         # position of particles
