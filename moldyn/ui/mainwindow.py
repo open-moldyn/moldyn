@@ -233,7 +233,8 @@ class MoldynMainWindow(QMainWindow):
     # Panneau simu
 
     def model_to_cache(self, index):
-        if self.ui.tabWidget.currentWidget() is self.ui.tab_simu:
+        if (self.ui.tabWidget.currentWidget() is self.ui.tab_simu
+                and self.model):
             self.ds = DynState('./data/tmp')
             self.ds.save_model(self.model)
 
