@@ -1,6 +1,13 @@
 import numpy as np
 import json
 import datetime
+
+try:
+    import fcntl
+except ImportError:
+    import os, sys
+    sys.path.append(os.path.dirname(__file__))
+
 import datreant as dt
 from zipfile import *
 
