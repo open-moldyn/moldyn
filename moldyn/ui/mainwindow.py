@@ -154,6 +154,17 @@ class MoldynMainWindow(QMainWindow):
             self.temp_variables_w.append(i)
             self.ui.lineListW.addItem(i)
 
+        self._1d_options = {
+            "log x":None,
+            "log y":None,
+            "grid":None,
+        }
+        for i_n in self._1d_options:
+            i = QListWidgetItem(i_n)
+            i.setCheckState(False)
+            self.ui.list1DOptions.addItem(i)
+            self._1d_options[i_n] = i
+
         self.ui.plotB.clicked.connect(self.line_graph)
 
         # Misc
@@ -441,9 +452,21 @@ class MoldynMainWindow(QMainWindow):
 
         visu.plt.ioff()
         fig = visu.plt.figure()
+
+        gr_opts = dict()
+        for o in self._1d_options:
+            gr_opts[o] = self._1d_options[o].checkState()
+
         host = HostAxes(fig, [0.15, 0.1, 0.75-(0.04*len(dimensions)), 0.8])
         host.set_xlabel(label(absc))
         host.set_ylabel(dimensions[0])
+        if gr_opts["log x"]:
+            host.semilogx()
+        if gr_opts["log y"]:
+            host.semilogy()
+        if gr_opts["grid"]:
+            host.grid(True, which="minor", linestyle="--")
+            host.grid(True, which="major")
 
         if len(dimensions)>1:
             host.axis["right"].set_visible(False)
@@ -459,6 +482,10 @@ class MoldynMainWindow(QMainWindow):
             par.axis["right"].major_ticklabels.set_visible(True)
             par.axis["right"].label.set_visible(True)
             axis[dim] = par
+            if gr_opts["log x"]:
+                par.semilogx()
+            if gr_opts["log y"]:
+                par.semilogy()
 
         for i in ords:
             axis[dimension(i)].plot(values(absc), values(i), label=label(i))

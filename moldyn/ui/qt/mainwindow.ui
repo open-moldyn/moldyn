@@ -327,7 +327,7 @@
           </property>
           <layout class="QHBoxLayout" name="horizontalLayout_4">
            <item>
-            <widget class="QListWidget" name="listWidget"/>
+            <widget class="QListWidget" name="list1DOptions"/>
            </item>
           </layout>
          </widget>
