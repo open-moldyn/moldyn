@@ -210,6 +210,7 @@ class MoldynMainWindow(QMainWindow):
                 self.simulation.set_T_ramps(t, T)
             self.ui.saveAllAtomsPositionCheckBox.setCheckState(self.simulation.model.params["save_pos_history"])
             self.ui.saveAllAtomsPositionCheckBox.setEnabled(False)
+            self.ui.statusbar.showMessage("Simulation history loaded.")
 
     def show_model(self):
         self.model_view.show() # bidon mais nécessaire pour que ça marche : on risque de redéfinir model donc model_view
