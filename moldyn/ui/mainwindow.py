@@ -8,7 +8,7 @@ from pyqtgraph import PlotWidget
 import time
 import multiprocessing as mp
 
-from moldyn.utils.data_mng import DynState
+from moldyn.utils.data_mng import DynState, tmp1_path, tmp_path
 
 try:
     mp.set_start_method('spawn')
@@ -158,7 +158,7 @@ class MoldynMainWindow(QMainWindow):
 
         # Misc
         try:
-            self._load_model('./data/tmp')
+            self._load_model(tmp_path)
         except:
             self.ui.statusbar.showMessage("Please choose a model.")
         else:
@@ -248,8 +248,8 @@ class MoldynMainWindow(QMainWindow):
         if path:
             if not path.endswith(".zip"):
                 path += ".zip"
-            shutil.rmtree('./data/tmp1')
-            ds = DynState('./data/tmp1')
+            shutil.rmtree(tmp1_path)
+            ds = DynState(tmp1_path)
             ds.save_model(m)
             ds.to_zip(path)
 
@@ -267,7 +267,7 @@ class MoldynMainWindow(QMainWindow):
 
     def model_to_cache(self):
         if self.model:
-            self.ds = DynState('./data/tmp')
+            self.ds = DynState(tmp_path)
             self.ds.save_model(self.model)
 
     def update_iters(self):
@@ -333,7 +333,7 @@ class MoldynMainWindow(QMainWindow):
         if self.save_pos:
             mode = "a" if self.simulation.current_iter else "w"
 
-            self.pos_IO = DynState("./data/tmp").open(DynState.POS_H, mode=mode)
+            self.pos_IO = DynState(tmp_path).open(DynState.POS_H, mode=mode)
             self.pos_IO.__enter__()
 
         if len(self.simulation.T_ramps[0]):
@@ -359,7 +359,7 @@ class MoldynMainWindow(QMainWindow):
             if self.save_pos:
                 self.pos_IO.file.close()
 
-            with DynState("./data/tmp").open(DynState.STATE_FCT, mode="w") as ds:
+            with DynState(tmp_path).open(DynState.STATE_FCT, mode="w") as ds:
                 ds.from_dict(self.simulation.state_fct)
 
             self.ui.simuBtn.setEnabled(True)
@@ -393,10 +393,10 @@ class MoldynMainWindow(QMainWindow):
             if not path.endswith(".zip"):
                 path += ".zip"
             #shutil.rmtree('./data/tmp1')
-            ds = DynState('./data/tmp')
+            ds = DynState(tmp_path)
             if not self.ui.saveAllAtomsPositionCheckBox.checkState():
                 try:
-                    os.remove('./data/tmp/'+DynState.POS_H)
+                    os.remove(tmp_path+'/'+DynState.POS_H)
                 except:
                     pass
             ds.save_model(self.simulation.model)

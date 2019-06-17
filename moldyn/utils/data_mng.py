@@ -9,8 +9,12 @@ except ImportError:
 
 import datreant as dt
 from zipfile import *
-if os.
-data_path = ""
+
+from . import appdirs
+
+data_path = appdirs.user_data_dir("open-moldyn")
+tmp_path = data_path + "/tmp"
+tmp1_path = data_path + "/tmp1"
 
 CATEGORY_LIST = [
     "npart",
@@ -201,7 +205,7 @@ class DynState(dt.Treant):
     STATE_FCT = "state_fct.json" # state functions (energy, temperature...)
     PAR = "parameters.json" # parameters of model and simulation
 
-    def __init__(self, treant, *, extraction_path : str = './data/tmp'):
+    def __init__(self, treant, *, extraction_path : str = data_path+'/tmp'):
         if isinstance(treant, dt.Treant):
             super().__init__(treant)
         elif isinstance(treant, str) and is_zipfile(treant) :
@@ -251,7 +255,7 @@ class DynState(dt.Treant):
         with self.open(self.VEL, 'w') as IO:
             IO.save(model.v)
 
-def discover(dirpath='./data', *args, **kwargs):
+def discover(dirpath=data_path, *args, **kwargs):
     return dt.discover(dirpath=dirpath, *args, **kwargs)
 
 
