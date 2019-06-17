@@ -248,7 +248,10 @@ class MoldynMainWindow(QMainWindow):
         if path:
             if not path.endswith(".zip"):
                 path += ".zip"
-            shutil.rmtree(tmp1_path)
+            try:
+                shutil.rmtree(tmp1_path)
+            except FileNotFoundError:
+                pass
             ds = DynState(tmp1_path)
             ds.save_model(m)
             ds.to_zip(path)
