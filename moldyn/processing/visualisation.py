@@ -91,7 +91,7 @@ def plot_density_surf(model,refinement=0):
     tri, density = dp.density(model, refinement)
     ax.plot_trisurf(tri, density)
 
-def make_avi(simulation, ds, name:str, pfilm=5, fps=24, callback=None):
+def make_movie(simulation, ds, name:str, pfilm=5, fps=24, callback=None):
     # ouverture pour la lecture
     imgs = []
     npas = simulation.current_iter

@@ -167,6 +167,8 @@ class MoldynMainWindow(QMainWindow):
 
         self.ui.plotB.clicked.connect(self.line_graph)
 
+        self.ui.makeMovieBtn.clicked.connect(self.make_movie)
+
         # Misc
         try:
             self._load_model(tmp_path)
@@ -219,7 +221,10 @@ class MoldynMainWindow(QMainWindow):
             t, T = self.simulation.state_fct["T_ramps"]
             if len(t)>1:
                 self.simulation.set_T_ramps(t, T)
-            self.ui.saveAllAtomsPositionCheckBox.setCheckState(self.simulation.model.params["save_pos_history"])
+            sp = self.simulation.model.params["save_pos_history"]
+            if sp:
+                self.ui.groupBoxMovie.setEnabled(False)
+            self.ui.saveAllAtomsPositionCheckBox.setCheckState(sp)
             self.ui.saveAllAtomsPositionCheckBox.setEnabled(False)
             self.ui.statusbar.showMessage("Simulation history loaded.")
 
@@ -381,6 +386,7 @@ class MoldynMainWindow(QMainWindow):
             self.ui.iterationsSpinBox.setEnabled(True)
             self.ui.simulationTimeLineEdit.setEnabled(True)
             self.ui.temperature_groupBox.setEnabled(True)
+            self.ui.groupBoxMovie.setEnabled(self.save_pos)
             self.ui.statusbar.showMessage("Simulation complete. (Iterations : " + str(self.simulation.current_iter) + ")")
 
         self.simu_thr = QThread()
@@ -508,3 +514,10 @@ class MoldynMainWindow(QMainWindow):
         visu.plt.figure()
         visu.plot_densityf(self.simulation.model, 50)
         visu.plt.show()
+
+    def make_movie(self):
+        path, filter = QFileDialog.getSaveFileName(caption="Make movie", filter="Video file (*.mp4)")
+        if path:
+            def up(k):
+                print(k)
+            visu.make_movie(self.simulation, DynState(tmp_path), path, self.ui.stepsByFrameSpinBox.value(), self.ui.FPSSpinBox.value(), up)
