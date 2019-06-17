@@ -81,13 +81,12 @@ class ParamIO(dict):
         self : ParamIO
         """
         try:
-            try:
-                with open(self.file_name, mode='r') as file:
-                    params = json.load(self.file_name)
-                for key, value in params.items():
-                    self[key] = value
-            except json.decoder.JSONDecodeError:
-                print("File corrupted")
+            with open(self.file_name, mode='r') as file:
+                params = json.load(self.file_name)
+            for key, value in params.items():
+                self[key] = value
+        except json.decoder.JSONDecodeError:
+            print("File corrupted")
         except FileNotFoundError:
             print("File does not YET exists")
 
@@ -109,12 +108,11 @@ class ParamIO(dict):
         """
         param_exists = False
         try:
-            try:
-                with open(self.file_name, mode='r') as file:
-                    params = json.load(self.file_name)
-                    param_exists = True
-            except json.decoder.JSONDecodeError:
-                print("File corrupted")
+            with open(self.file_name, mode='r') as file:
+                params = json.load(self.file_name)
+                param_exists = True
+        except json.decoder.JSONDecodeError:
+            print("File corrupted")
         except FileNotFoundError:
             print("File does not YET exists")
         if not param_exists or self != params:

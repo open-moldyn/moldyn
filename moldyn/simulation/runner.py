@@ -113,7 +113,7 @@ class Simulation:
 
             self.state_fct["T"] = []
             self.state_fct["T_ctrl"] = []
-            self.state_fct["T_ramps"] = ([],[])
+            self.state_fct["T_ramps"] = [[],[]]
 
             self.state_fct["EC"] = []
             self.state_fct["EP"] = []
@@ -276,13 +276,14 @@ class Simulation:
 
         """
         f2 = inter.interp1d(t, T)
-        self.T_ramps = (t, T)
+        self.state_fct["T_ramps"] = [list(t), list(T)]
+        self.T_ramps = self.state_fct["T_ramps"]
 
         def f(x):
             if x<t[0]:
-                return np.array(T[0]) # pour la consistance des types
+                return T[0] # pour la consistance des types
             elif x>t[-1]:
-                return np.array(T[-1])
+                return T[-1]
             else:
-                return f2(x)
+                return float(f2(x))
         self.set_T_f(f)

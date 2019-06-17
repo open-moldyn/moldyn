@@ -187,6 +187,10 @@ class MoldynMainWindow(QMainWindow):
 
         self.model_to_cache()
 
+        self.ui.tab_processing.setEnabled(False)
+        self.ui.currentTime.setText("0")
+        self.ui.currentIteration.setText("0")
+
         self.ui.statusbar.showMessage("Model loaded, simulation can begin.")
 
     def load_simulation(self):
@@ -201,6 +205,9 @@ class MoldynMainWindow(QMainWindow):
             self.ui.currentIteration.setText(str(c_i))
             self.ui.currentTime.setText(str((c_i)*self.model.dt))
             self.enable_process_tab(True)
+            t, T = self.simulation.state_fct["T_ramps"]
+            if len(t)>1:
+                self.simulation.set_T_ramps(t, T)
             self.ui.saveAllAtomsPositionCheckBox.setCheckState(self.simulation.model.params["save_pos_history"])
             self.ui.saveAllAtomsPositionCheckBox.setEnabled(False)
 
@@ -387,7 +394,10 @@ class MoldynMainWindow(QMainWindow):
             #shutil.rmtree('./data/tmp1')
             ds = DynState('./data/tmp')
             if not self.ui.saveAllAtomsPositionCheckBox.checkState():
-                os.remove('./data/tmp/'+DynState.POS_H)
+                try:
+                    os.remove('./data/tmp/'+DynState.POS_H)
+                except:
+                    pass
             ds.save_model(self.simulation.model)
             ds.to_zip(path)
 
