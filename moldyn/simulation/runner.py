@@ -160,6 +160,9 @@ class Simulation:
 
         """
 
+        for s in self.state_fct:
+            self.__setattr__(s, self.state_fct[s])
+
         betaC = self.T_cntl # Contrôle de la température
 
         # on crée des alias aux valeurs du modèles pour numexpr

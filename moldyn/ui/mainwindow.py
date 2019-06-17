@@ -1,3 +1,4 @@
+import os
 import shutil
 
 from PyQt5.QtWidgets import QMainWindow, QTreeWidgetItem, QHeaderView, QProgressBar, QListWidgetItem, QMessageBox, QFileDialog
@@ -47,7 +48,7 @@ class MoldynMainWindow(QMainWindow):
         self.ui.newModelBtn.clicked.connect(self.create_model)
         self.ui.loadModelBtn.clicked.connect(self.load_model)
         self.ui.saveModelBtn.clicked.connect(self.save_model)
-
+        self.ui.loadSimuBtn.clicked.connect()
         self.ui.gotoSimuBtn.clicked.connect(self.goto_simu)
 
         self.displayed_properties_list = {
@@ -100,7 +101,7 @@ class MoldynMainWindow(QMainWindow):
 
         # Panneau simu
 
-        self.ui.tabWidget.currentChanged.connect(self._model_to_cache)
+        #self.ui.tabWidget.currentChanged.connect(self._model_to_cache)
 
         self.ui.iterationsSpinBox.valueChanged.connect(self.update_simu_time)
         self.ui.simulationTimeLineEdit.editingFinished.connect(self.update_iters)
@@ -127,7 +128,7 @@ class MoldynMainWindow(QMainWindow):
         # Panneau processing
 
         self.ui.saveRModelBtn.clicked.connect(self.save_final_model)
-
+        self.ui.saveSimuBtn.clicked.connect(self.save_simu_history)
         self.ui.reuseModelBtn.clicked.connect(self.reuse_model)
 
         self.ui.PDFButton.clicked.connect(lambda:self.process(self.PDF))
@@ -188,6 +189,21 @@ class MoldynMainWindow(QMainWindow):
 
         self.ui.statusbar.showMessage("Model loaded, simulation can begin.")
 
+    def load_simulation(self):
+        path, filter = QFileDialog.getOpenFileName(caption="Load model", filter="Model file (*.zip)")
+        if path:
+            ds = self._load_model(path)
+            with ds.open(ds.STATE_FCT, 'r') as IO:
+                for key, item in IO.items():
+                    self.simulation.state_fct[key] = item
+            c_i = len(self.simulation.state_fct["T"])
+            self.simulation.current_iter = c_i
+            self.ui.currentIteration.setText(str(c_i))
+            self.ui.currentTime.setText(str((c_i)*self.model.dt))
+            self.enable_process_tab(True)
+            self.ui.saveAllAtomsPositionCheckBox.setCheckState(self.simulation.model.params["save_pos_history"])
+            self.ui.saveAllAtomsPositionCheckBox.setEnabled(False)
+
     def show_model(self):
         self.model_view.show() # bidon mais nécessaire pour que ça marche : on risque de redéfinir model donc model_view
 
@@ -217,6 +233,7 @@ class MoldynMainWindow(QMainWindow):
         model._m()
 
         self.set_model(model)
+        return ds
 
     def _save_model(self, m):
         path, filter = QFileDialog.getSaveFileName(caption="Save model", filter="Model file (*.zip)")
@@ -304,6 +321,7 @@ class MoldynMainWindow(QMainWindow):
         self.ui.statusbar.showMessage("Simulation is running...")
 
         self.save_pos = self.ui.saveAllAtomsPositionCheckBox.checkState()
+        self.simulation.model.params["save_pos_history"] = self.save_pos
         if self.save_pos:
             mode = "a" if self.simulation.current_iter else "w"
 
@@ -333,6 +351,9 @@ class MoldynMainWindow(QMainWindow):
             if self.save_pos:
                 self.pos_IO.file.close()
 
+            with DynState("./data/tmp").open(DynState.STATE_FCT, mode="w") as ds:
+                ds.from_dict(self.simulation.state_fct)
+
             self.ui.simuBtn.setEnabled(True)
             self.enable_process_tab(True)
             self.ui.iterationsSpinBox.setEnabled(True)
@@ -357,6 +378,18 @@ class MoldynMainWindow(QMainWindow):
     def reuse_model(self):
         self.set_model(self.simulation.model)
         self.ui.tabWidget.setCurrentWidget(self.ui.tab_model)
+
+    def save_simu_history(self):
+        path, filter = QFileDialog.getSaveFileName(caption="Save simulation history", filter="Simulation file (*.zip)")
+        if path:
+            if not path.endswith(".zip"):
+                path += ".zip"
+            #shutil.rmtree('./data/tmp1')
+            ds = DynState('./data/tmp')
+            if not self.ui.saveAllAtomsPositionCheckBox.checkState():
+                os.remove('./data/tmp/'+DynState.POS_H)
+            ds.save_model(self.simulation.model)
+            ds.to_zip(path)
 
     def process(self, p):
         self.old_status = self.ui.statusbar.currentMessage()
