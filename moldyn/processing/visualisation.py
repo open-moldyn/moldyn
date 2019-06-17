@@ -1,3 +1,6 @@
+import io
+from PIL import Image
+from imageio_ffmpeg import write_frames
 from . import data_proc as dp
 from mpl_toolkits.mplot3d import Axes3D
 import matplotlib.pyplot as plt
@@ -89,3 +92,41 @@ def plot_density_surf(model,refinement=0):
     tri, density = dp.density(model, refinement)
     ax.plot_trisurf(tri, density)
 
+def make_avi(simulation, ds, name:str, pfilm=5, fps=24):
+    # ouverture pour la lecture
+    imgs = []
+    npas = simulation.current_iter
+    YlimB = simulation.model.y_lim_inf
+    YlimH = simulation.model.y_lim_sup
+    XlimG = simulation.model.x_lim_inf
+    XlimD = simulation.model.x_lim_sup
+    if not name.endswith(".mp4"):
+        name += "+mp4"
+    with ds.open(DynState.POS_H, 'r') as fix:
+        # liste de k ou tracer le graph
+        klist = range(0, npas, pfilm)
+        # boucle pour creer le film
+        figure_size = (1920, 1088)
+        gen = write_frames(name, figure_size, fps=fps, quality=9)
+        gen.send(None)
+        for k in range(npas):
+            pos = np.load(fix) # on charge a chaque pas de temps
+            # dessin a chaque pas (ne s'ouvre pas: est sauvegarde de maniere incrementale)
+            if k in klist:
+                plt.figure(0, figsize=(figure_size[0] / (72 * 2), figure_size[1] / (72 * 2)))
+                # definition du domaine de dessin
+                plt.ioff()  # pour ne pas afficher les graphs)
+                plt.ylim(YlimB, YlimH)
+                plt.xlim(XlimG, XlimD)
+                plt.xlabel(k)
+                plt.plot(*pos[:simulation.model.n_a,:].T, 'ro', markersize=0.5)
+                plt.plot(*pos[simulation.model.n_a:,:].T, 'bo', markersize=0.5)
+                temp = io.BytesIO()
+                plt.savefig(temp, format='raw', dpi=72 * 2)  # sauvegarde incrementale
+                plt.clf()
+                temp.seek(0)
+                # imgs.append(Image.frombytes('RGBA', figure_size, temp.read()).convert('RGB'))
+                print(k)
+                gen.send(Image.frombytes('RGBA', figure_size, temp.read()).convert('RGB').tobytes())
+        # imageio.mimwrite(f"./debug.gif", imgs, "GIF", duration=0.05,subrectangles=True)
+        gen.close()
