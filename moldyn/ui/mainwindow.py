@@ -36,6 +36,7 @@ from . import draggableLine
 
 class MoldynMainWindow(QMainWindow):
     updated_signal = pyqtSignal(int, float)
+    movie_progress_signal = pyqtSignal(int)
     displayed_properties = dict()
 
     def __init__(self):
@@ -168,6 +169,7 @@ class MoldynMainWindow(QMainWindow):
         self.ui.plotB.clicked.connect(self.line_graph)
 
         self.ui.makeMovieBtn.clicked.connect(self.make_movie)
+        self.movie_progress_signal.connect(self.ui.movieProgressBar.setValue)
 
         # Misc
         try:
@@ -222,8 +224,7 @@ class MoldynMainWindow(QMainWindow):
             if len(t)>1:
                 self.simulation.set_T_ramps(t, T)
             sp = self.simulation.model.params["save_pos_history"]
-            if sp:
-                self.ui.groupBoxMovie.setEnabled(False)
+            self.ui.groupBoxMovie.setEnabled(sp)
             self.ui.saveAllAtomsPositionCheckBox.setCheckState(sp)
             self.ui.saveAllAtomsPositionCheckBox.setEnabled(False)
             self.ui.statusbar.showMessage("Simulation history loaded.")
@@ -518,6 +519,23 @@ class MoldynMainWindow(QMainWindow):
     def make_movie(self):
         path, filter = QFileDialog.getSaveFileName(caption="Make movie", filter="Video file (*.mp4)")
         if path:
-            def up(k):
-                print(k)
-            visu.make_movie(self.simulation, DynState(tmp_path), path, self.ui.stepsByFrameSpinBox.value(), self.ui.FPSSpinBox.value(), up)
+            self.ui.tab_model.setEnabled(False)
+            self.ui.tab_simu.setEnabled(False)
+            self.ui.groupBoxMovie.setEnabled(False)
+            self.ui.movieProgressBar.setMaximum(self.simulation.current_iter)
+
+            def run():
+                def up(k):
+                    self.movie_progress_signal.emit(k)
+                visu.make_movie(self.simulation, DynState(tmp_path), path, self.ui.stepsByFrameSpinBox.value(), self.ui.FPSSpinBox.value(), up)
+
+            def end():
+                self.ui.tab_model.setEnabled(True)
+                self.ui.tab_simu.setEnabled(True)
+                self.ui.groupBoxMovie.setEnabled(True)
+                self.ui.movieProgressBar.setValue(self.simulation.current_iter)
+
+            self.render_thr = QThread()
+            self.render_thr.run = run
+            self.render_thr.finished.connect(end)
+            self.render_thr.start()

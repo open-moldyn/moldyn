@@ -1,4 +1,6 @@
 import io
+import os
+
 from PIL import Image
 from imageio_ffmpeg import write_frames
 from . import data_proc as dp
@@ -93,7 +95,6 @@ def plot_density_surf(model,refinement=0):
 
 def make_movie(simulation, ds, name:str, pfilm=5, fps=24, callback=None):
     # ouverture pour la lecture
-    imgs = []
     npas = simulation.current_iter
     YlimB = simulation.model.y_lim_inf
     YlimH = simulation.model.y_lim_sup
@@ -106,26 +107,34 @@ def make_movie(simulation, ds, name:str, pfilm=5, fps=24, callback=None):
         klist = range(0, npas, pfilm)
         # boucle pour creer le film
         figure_size = (1920, 1088)
+        try:
+            os.remove(name)
+        except FileNotFoundError:
+            pass
         gen = write_frames(name, figure_size, fps=fps, quality=9)
         gen.send(None)
-        for k in range(npas):
-            pos = np.load(fix) # on charge a chaque pas de temps
+        fig = plt.figure(0, figsize=(figure_size[0] / (72 * 2), figure_size[1] / (72 * 2)))
+        plt.clf()
+        # definition du domaine de dessin
+        plt.ioff()  # pour ne pas afficher les graphs)
+        plt.axis('scaled')
+        plt.ylim(YlimB, YlimH)
+        plt.xlim(XlimG, XlimD)
+        pos = fix.load()
+        line1, = plt.plot(*pos[:simulation.model.n_a,:].T, 'ro', markersize=0.5)
+        line2, = plt.plot(*pos[simulation.model.n_a:,:].T, 'bo', markersize=0.5)
+        plt.xlabel("0")
+        temp = io.BytesIO()
+        for k in range(1, npas):
             # dessin a chaque pas (ne s'ouvre pas: est sauvegarde de maniere incrementale)
             if k in klist:
-                plt.figure(0, figsize=(figure_size[0] / (72 * 2), figure_size[1] / (72 * 2)))
-                # definition du domaine de dessin
-                plt.ioff()  # pour ne pas afficher les graphs)
-                plt.ylim(YlimB, YlimH)
-                plt.xlim(XlimG, XlimD)
-                plt.xlabel(k)
-                plt.plot(*pos[:simulation.model.n_a,:].T, 'ro', markersize=0.5)
-                plt.plot(*pos[simulation.model.n_a:,:].T, 'bo', markersize=0.5)
-                temp = io.BytesIO()
-                plt.savefig(temp, format='raw', dpi=72 * 2)  # sauvegarde incrementale
-                plt.clf()
                 temp.seek(0)
-                # imgs.append(Image.frombytes('RGBA', figure_size, temp.read()).convert('RGB'))
+                plt.xlabel(k)
+                line1.set_data(*pos[:simulation.model.n_a,:].T)
+                line2.set_data(*pos[simulation.model.n_a:,:].T)
+                fig.savefig(temp, format='raw', dpi=72 * 2)  # sauvegarde incrementale
+                temp.seek(0)
                 if callback: callback(k)
                 gen.send(Image.frombytes('RGBA', figure_size, temp.read()).convert('RGB').tobytes())
-        # imageio.mimwrite(f"./debug.gif", imgs, "GIF", duration=0.05,subrectangles=True)
+            pos = fix.load() # on charge a chaque pas de temps
         gen.close()

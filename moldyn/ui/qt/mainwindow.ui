@@ -502,6 +502,13 @@
            <string>Movie</string>
           </property>
           <layout class="QGridLayout" name="gridLayout_8">
+           <item row="0" column="2">
+            <widget class="QToolButton" name="makeMovieBtn">
+             <property name="text">
+              <string>Make movie</string>
+             </property>
+            </widget>
+           </item>
            <item row="0" column="0">
             <layout class="QFormLayout" name="formLayout_4">
              <item row="0" column="0">
@@ -535,22 +542,9 @@
             </layout>
            </item>
            <item row="0" column="1">
-            <spacer name="horizontalSpacer_6">
-             <property name="orientation">
-              <enum>Qt::Horizontal</enum>
-             </property>
-             <property name="sizeHint" stdset="0">
-              <size>
-               <width>40</width>
-               <height>20</height>
-              </size>
-             </property>
-            </spacer>
-           </item>
-           <item row="0" column="2">
-            <widget class="QToolButton" name="makeMovieBtn">
-             <property name="text">
-              <string>Make movie</string>
+            <widget class="QProgressBar" name="movieProgressBar">
+             <property name="value">
+              <number>0</number>
              </property>
             </widget>
            </item>
