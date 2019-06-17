@@ -197,7 +197,9 @@ class DynStateIO:
 
 class DynState(dt.Treant):
     POS = "pos.npy" # position of particles
+    POS_H = "pos_history.npy" # history of position
     VEL = "velocities.npy" # final velocities
+    STATE_FCT = "state_fct.json" # state functions (energy, temperature...)
     PAR = "parameters.json" # parameters of model and simulation
 
     def __init__(self, treant, *, extraction_path : str = './data/tmp'):

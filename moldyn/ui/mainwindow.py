@@ -287,6 +287,9 @@ class MoldynMainWindow(QMainWindow):
             self.ui.currentTime.setText(str((v+1)*self.model.dt))
             self.ui.ETA.setText(str(int( (self.ui.iterationsSpinBox.value()/c_i - 1)*(new_t-self.simu_starttime) )) + "s")
 
+        if self.save_pos:
+            self.pos_IO.save(self.simulation.model.pos)
+
     def simulate(self):
         self.ui.simuBtn.setEnabled(False)
         self.ui.iterationsSpinBox.setEnabled(False)
@@ -299,6 +302,13 @@ class MoldynMainWindow(QMainWindow):
         self.t_deque.clear()
         self.t_deque.append(0)
         self.ui.statusbar.showMessage("Simulation is running...")
+
+        self.save_pos = self.ui.saveAllAtomsPositionCheckBox.checkState()
+        if self.save_pos:
+            mode = "a" if self.simulation.current_iter else "w"
+
+            self.pos_IO = DynState("./data/tmp").open(DynState.POS_H, mode=mode)
+            self.pos_IO.__enter__()
 
         if len(self.simulation.T_ramps[0]):
             final_t = (self.simulation.current_iter + self.ui.iterationsSpinBox.value())*self.model.dt
@@ -320,6 +330,9 @@ class MoldynMainWindow(QMainWindow):
             self.simu_thr.exit()
 
         def end():
+            if self.save_pos:
+                self.pos_IO.file.close()
+
             self.ui.simuBtn.setEnabled(True)
             self.enable_process_tab(True)
             self.ui.iterationsSpinBox.setEnabled(True)
@@ -361,7 +374,7 @@ class MoldynMainWindow(QMainWindow):
         absc = self.ui.lineComboW.currentText()
 
         def values(s):
-            return eval("self.simulation." + self.temporal_variables[s][0])
+            return self.simulation.state_fct[self.temporal_variables[s][0]]
 
         def label(s):
             if len(self.temporal_variables[s])>1:

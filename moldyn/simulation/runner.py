@@ -99,40 +99,36 @@ class Simulation:
         if simulation :
             self.current_iter = simulation.current_iter
 
-            self.T = simulation.T
-            self.T_ctrl = simulation.T_ctrl
-            self.EC = simulation.EC
-            self.EP = simulation.EP
-            self.ET = simulation.ET
-            self.bonds = simulation.bonds
-
-            self.time = simulation.time
-            self.iters = simulation.iters
+            self.state_fct = simulation.state_fct
 
             self.T_cntl = simulation.T_cntl
             if self.T_cntl:
                 self.T_f = simulation.T_f
-            self.T_ramps = simulation.T_ramps
 
             self.F = simulation.F
         else:
             self.current_iter = 0
 
-            self.T = []
-            self.T_ctrl = []
-            self.T_ramps = ([],[])
+            self.state_fct = dict()
 
-            self.EC = []
-            self.EP = []
-            self.ET = []
-            self.bonds = []
+            self.state_fct["T"] = []
+            self.state_fct["T_ctrl"] = []
+            self.state_fct["T_ramps"] = ([],[])
 
-            self.time = []
-            self.iters = []
+            self.state_fct["EC"] = []
+            self.state_fct["EP"] = []
+            self.state_fct["ET"] = []
+            self.state_fct["bonds"] = []
+
+            self.state_fct["time"] = []
+            self.state_fct["iters"] = []
 
             self.T_cntl = False
 
             self.F = np.zeros(self.model.pos.shape) # Doit être initialisé et conservé d'une itération à l'autre
+
+        for s in self.state_fct:
+            self.__setattr__(s, self.state_fct[s])
 
     def iter(self, n=1, callback=None):
         """
