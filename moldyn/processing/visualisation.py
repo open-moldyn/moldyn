@@ -9,7 +9,6 @@ import matplotlib
 matplotlib.use('Qt5Agg')
 import numpy as np
 import scipy as sp
-from ..utils.data_mng import *
 
 
 def _plot_base(*, show=False, axis='', grid=False, figure=None):
@@ -102,7 +101,7 @@ def make_avi(simulation, ds, name:str, pfilm=5, fps=24):
     XlimD = simulation.model.x_lim_sup
     if not name.endswith(".mp4"):
         name += "+mp4"
-    with ds.open(DynState.POS_H, 'r') as fix:
+    with ds.open(ds.POS_H, 'r') as fix:
         # liste de k ou tracer le graph
         klist = range(0, npas, pfilm)
         # boucle pour creer le film
