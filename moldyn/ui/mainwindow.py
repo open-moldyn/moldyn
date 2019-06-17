@@ -48,7 +48,7 @@ class MoldynMainWindow(QMainWindow):
         self.ui.newModelBtn.clicked.connect(self.create_model)
         self.ui.loadModelBtn.clicked.connect(self.load_model)
         self.ui.saveModelBtn.clicked.connect(self.save_model)
-        self.ui.loadSimuBtn.clicked.connect()
+        self.ui.loadSimuBtn.clicked.connect(self.load_simulation)
         self.ui.gotoSimuBtn.clicked.connect(self.goto_simu)
 
         self.displayed_properties_list = {
