@@ -84,7 +84,12 @@ def plot_densityf(model, levels=None, refinement=0):
         levels = np.linspace(min(density), max(density), levels)
     CS = plt.tricontourf(tri, density, levels=levels)
     cbar = fig.colorbar(CS)
-    cbar.ax.set_ylabel('local density')
+    cbar.ax.set_ylabel('local density')\
+
+@_plot_base(axis='scaled', grid=False)
+def plot_particles(model, levels=None, refinement=0):
+    line1, = plt.plot(*model.pos[:model.n_a, :].T, 'ro', markersize=0.5)
+    line2, = plt.plot(*model.pos[model.n_a:, :].T, 'bo', markersize=0.5)
 
 @_plot_base(axis='scaled', grid=False)
 def plot_density_surf(model,refinement=0):
@@ -92,6 +97,8 @@ def plot_density_surf(model,refinement=0):
     ax = fig.gca(projection='3d')
     tri, density = dp.density(model, refinement)
     ax.plot_trisurf(tri, density)
+
+
 
 def make_movie(simulation, ds, name:str, pfilm=5, fps=24, callback=None):
     # ouverture pour la lecture
