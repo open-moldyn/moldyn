@@ -7,7 +7,6 @@ The first species values are stored in the first part of arrays (lower indices),
 (higher indices). This is meant to facilitate computation of inter-atomic forces and potential energy.
 """
 
-import numpy as np
 import numexpr as ne
 from ..utils.data_mng import *
 

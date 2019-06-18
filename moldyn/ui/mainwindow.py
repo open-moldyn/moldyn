@@ -1,8 +1,8 @@
 import os
 import shutil
 
-from PyQt5.QtWidgets import QMainWindow, QTreeWidgetItem, QHeaderView, QProgressBar, QListWidgetItem, QMessageBox, QFileDialog
-from PyQt5.QtCore import QThread, pyqtSignal, Qt
+from PyQt5.QtWidgets import QMainWindow, QTreeWidgetItem, QHeaderView, QListWidgetItem, QMessageBox, QFileDialog
+from PyQt5.QtCore import QThread, pyqtSignal
 from mpl_toolkits.axisartist.parasite_axes import HostAxes, ParasiteAxes
 from pyqtgraph import PlotWidget
 import time
@@ -14,9 +14,7 @@ try:
     mp.set_start_method('spawn')
 except RuntimeError:
     pass
-import numpy as np
 
-from matplotlib.widgets import Button
 from multiprocessing import Process, Queue
 
 from collections import deque
