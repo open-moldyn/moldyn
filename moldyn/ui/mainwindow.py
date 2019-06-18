@@ -102,8 +102,6 @@ class MoldynMainWindow(QMainWindow):
 
         # Panneau simu
 
-        #self.ui.tabWidget.currentChanged.connect(self._model_to_cache)
-
         self.ui.iterationsSpinBox.valueChanged.connect(self.update_simu_time)
         self.ui.simulationTimeLineEdit.editingFinished.connect(self.update_iters)
 
@@ -132,8 +130,8 @@ class MoldynMainWindow(QMainWindow):
         self.ui.saveSimuBtn.clicked.connect(self.save_simu_history)
         self.ui.reuseModelBtn.clicked.connect(self.reuse_model)
 
-        self.ui.PDFButton.clicked.connect(lambda:self.process(self.PDF))
-        self.ui.drawSurfButton.clicked.connect(lambda:self.process(self.density_map))
+        self.ui.PDFButton.clicked.connect(self.PDF)
+        self.ui.drawSurfButton.clicked.connect(self.density_map)
 
         self.temporal_variables = {
             "Time":["time","s"],
@@ -423,14 +421,6 @@ class MoldynMainWindow(QMainWindow):
             ds.save_model(self.simulation.model)
             ds.to_zip(path)
 
-    def process(self, p):
-        self.old_status = self.ui.statusbar.currentMessage()
-        self.ui.statusbar.showMessage("Computing " + p.__doc__ + "...")
-
-        p()
-
-        self.ui.statusbar.showMessage(self.old_status)
-
     def line_graph(self):
         ords = [i.text() for i in self.temp_variables_w if i.checkState()]
         if not len(ords):
@@ -503,6 +493,9 @@ class MoldynMainWindow(QMainWindow):
 
     def PDF(self):
         """Pair Distribution Function"""
+        self.old_status = self.ui.statusbar.currentMessage()
+        self.ui.statusbar.showMessage("Computing Pair Distribution Function...")
+
         visu.plt.ioff()
         d = PDF(self.simulation.model.pos, self.ui.PDFNSpinBox.value(), self.ui.PDFDistSpinBox.value()*max(self.model.rcut_a, self.model.rcut_b), 100)
         visu.plt.figure()
@@ -510,11 +503,18 @@ class MoldynMainWindow(QMainWindow):
         visu.plt.xlabel("Distance (m)")
         visu.plt.show()
 
+        self.ui.statusbar.showMessage(self.old_status)
+
     def density_map(self):
         """Density map"""
+        self.old_status = self.ui.statusbar.currentMessage()
+        self.ui.statusbar.showMessage("Computing density map...")
+
         visu.plt.figure()
         visu.plot_densityf(self.simulation.model, 50)
         visu.plt.show()
+
+        self.ui.statusbar.showMessage(self.old_status)
 
     def make_movie(self):
         path, filter = QFileDialog.getSaveFileName(caption="Make movie", filter="Video file (*.mp4)")
