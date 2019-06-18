@@ -108,7 +108,7 @@ def make_movie(simulation, ds, name:str, pfilm=5, fps=24, callback=None):
     XlimG = simulation.model.x_lim_inf
     XlimD = simulation.model.x_lim_sup
     if not name.endswith(".mp4"):
-        name += "+mp4"
+        name += ".mp4"
     with ds.open(ds.POS_H, 'r') as fix:
         # liste de k ou tracer le graph
         klist = set(range(0, npas, pfilm))
