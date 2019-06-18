@@ -131,7 +131,6 @@ class MoldynMainWindow(QMainWindow):
         self.ui.reuseModelBtn.clicked.connect(self.reuse_model)
 
         self.ui.PDFButton.clicked.connect(self.PDF)
-        self.ui.drawSurfButton.clicked.connect(self.density_map)
 
         self.temporal_variables = {
             "Time":["time","s"],
@@ -165,6 +164,18 @@ class MoldynMainWindow(QMainWindow):
             self._1d_options[i_n] = i
 
         self.ui.plotB.clicked.connect(self.line_graph)
+
+        self._2d_options = {
+            "density map": None,
+            "particles": None,
+        }
+        for i_n in self._2d_options:
+            i = QListWidgetItem(i_n)
+            i.setCheckState(False)
+            self.ui.surfListW.addItem(i)
+            self._2d_options[i_n] = i
+
+        self.ui.drawSurfButton.clicked.connect(self.draw_surf)
 
         self.ui.makeMovieBtn.clicked.connect(self.make_movie)
         self.movie_progress_signal.connect(self.ui.movieProgressBar.setValue)
@@ -505,13 +516,25 @@ class MoldynMainWindow(QMainWindow):
 
         self.ui.statusbar.showMessage(self.old_status)
 
-    def density_map(self):
-        """Density map"""
+    def draw_surf(self):
         self.old_status = self.ui.statusbar.currentMessage()
-        self.ui.statusbar.showMessage("Computing density map...")
+
+        gr_opts = dict()
+        for o in self._2d_options:
+            gr_opts[o] = self._2d_options[o].checkState()
 
         visu.plt.figure()
-        visu.plot_densityf(self.simulation.model, 50)
+
+        if gr_opts["density map"]:
+            self.ui.statusbar.showMessage("Computing density map...")
+            visu.plot_densityf(self.simulation.model, 50)
+
+        if gr_opts["particles"]:
+            visu.plot_particles(self.simulation.model)
+
+        visu.plt.ylim(self.model.y_lim_inf, self.model.y_lim_sup)
+        visu.plt.xlim(self.model.x_lim_inf, self.model.x_lim_sup)
+
         visu.plt.show()
 
         self.ui.statusbar.showMessage(self.old_status)
