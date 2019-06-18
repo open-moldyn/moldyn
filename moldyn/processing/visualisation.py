@@ -80,9 +80,10 @@ def plot_density(model, levels=None, refinement=0):
 def plot_densityf(model, levels=None, refinement=0):
     tri, density = dp.density(model, refinement)
     fig = plt.gcf()
+    cmap = plt.get_cmap("viridis")
     if type(levels) == int:
         levels = np.linspace(min(density), max(density), levels)
-    CS = plt.tricontourf(tri, density, levels=levels)
+    CS = plt.tricontourf(tri, density, levels=levels, cmap=cmap)
     cbar = fig.colorbar(CS)
     cbar.ax.set_ylabel('local density')\
 
