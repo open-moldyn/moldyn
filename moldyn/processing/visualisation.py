@@ -104,7 +104,7 @@ def make_movie(simulation, ds, name:str, pfilm=5, fps=24, callback=None):
         name += "+mp4"
     with ds.open(ds.POS_H, 'r') as fix:
         # liste de k ou tracer le graph
-        klist = range(0, npas, pfilm)
+        klist = set(range(0, npas, pfilm))
         # boucle pour creer le film
         figure_size = (1920, 1088)
         try:
@@ -129,7 +129,8 @@ def make_movie(simulation, ds, name:str, pfilm=5, fps=24, callback=None):
             # dessin a chaque pas (ne s'ouvre pas: est sauvegarde de maniere incrementale)
             if k in klist:
                 temp.seek(0)
-                plt.xlabel(k)
+                plt.xlabel("Iteration : {}".format(k))
+                plt.title(f"T = {simulation.state_fct['T'][k]:.2f} K")
                 line1.set_data(*pos[:simulation.model.n_a,:].T)
                 line2.set_data(*pos[simulation.model.n_a:,:].T)
                 fig.savefig(temp, format='raw', dpi=72 * 2)  # sauvegarde incrementale
