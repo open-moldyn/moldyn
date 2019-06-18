@@ -64,7 +64,7 @@ def _plot_base(*, show=False, axis='', grid=False, figure=None):
 
 
 
-@_plot_base(axis='equal', grid=False)
+@_plot_base(axis='scaled', grid=False)
 def plot_density(model, levels=None, refinement=0):
     tri, density = dp.density(model, refinement)
     fig = plt.gcf()
@@ -76,7 +76,7 @@ def plot_density(model, levels=None, refinement=0):
     cbar.ax.set_ylabel('local density')
 
 
-@_plot_base(axis='equal', grid=False)
+@_plot_base(axis='scaled', grid=False)
 def plot_densityf(model, levels=None, refinement=0):
     tri, density = dp.density(model, refinement)
     fig = plt.gcf()
@@ -86,7 +86,7 @@ def plot_densityf(model, levels=None, refinement=0):
     cbar = fig.colorbar(CS)
     cbar.ax.set_ylabel('local density')
 
-@_plot_base(axis='equal', grid=False)
+@_plot_base(axis='scaled', grid=False)
 def plot_density_surf(model,refinement=0):
     fig = plt.figure()
     ax = fig.gca(projection='3d')

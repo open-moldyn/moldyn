@@ -17,7 +17,7 @@ class ModelView():
 
     def show(self):
         plt.clf()
-        plt.axis("equal")
+        plt.axis("scaled")
         plt.ylim(self.model.y_lim_inf, self.model.y_lim_sup)
         plt.xlim(self.model.x_lim_inf, self.model.x_lim_sup)
         self.plot_a, = plt.plot(*self.model.pos[:self.model.n_a,:].T, "ro", markersize=1)
