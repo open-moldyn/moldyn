@@ -1,6 +1,6 @@
 import sys
 from PyQt5.QtWidgets import QApplication
-from .mainwindow import MoldynMainWindow
+from moldyn.ui.mainwindow import MoldynMainWindow
 
 
 def main():
