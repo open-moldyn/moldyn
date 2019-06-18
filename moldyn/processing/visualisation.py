@@ -113,7 +113,7 @@ def make_movie(simulation, ds, name:str, pfilm=5, fps=24, callback=None):
             pass
         gen = write_frames(name, figure_size, fps=fps, quality=9)
         gen.send(None)
-        fig = plt.figure(0, figsize=(figure_size[0] / (72 * 2), figure_size[1] / (72 * 2)))
+        fig = plt.figure(figsize=(figure_size[0] / (72 * 2), figure_size[1] / (72 * 2)))
         plt.clf()
         # definition du domaine de dessin
         plt.ioff()  # pour ne pas afficher les graphs)
@@ -138,3 +138,4 @@ def make_movie(simulation, ds, name:str, pfilm=5, fps=24, callback=None):
                 gen.send(Image.frombytes('RGBA', figure_size, temp.read()).convert('RGB').tobytes())
             pos = fix.load() # on charge a chaque pas de temps
         gen.close()
+        plt.close(fig)
