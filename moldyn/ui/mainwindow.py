@@ -58,15 +58,18 @@ class MoldynMainWindow(QMainWindow):
                     "sigma_a" : ["Sigma", "m"],
                     "epsilon_a" : ["Epsilon", "J"],
                     "m_a" : ["Atomic mass", "kg"],
+                    "rcut_a" : ["rcut_a", "m"],
                 },
                 "Second species" : {
                     "sigma_b" : ["Sigma", "m"],
                     "epsilon_b" : ["Epsilon", "J"],
                     "m_b" : ["Atomic mass", "kg"],
+                    "rcut_b" : ["rcut_b", "m"],
                 },
                 "Inter-species" : {
                     "sigma_ab" : ["Sigma", "m"],
                     "epsilon_ab" : ["Epsilon", "J"],
+                    "rcut_ab" : ["rcut_ab", "m"],
                 },
             },
             "npart" : ["Atom number"],

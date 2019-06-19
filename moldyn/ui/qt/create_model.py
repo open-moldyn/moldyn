@@ -230,6 +230,9 @@ class Ui_CreateModel(object):
         self.r_cut_abLineEdit = QtWidgets.QLineEdit(self.groupBox_8)
         self.r_cut_abLineEdit.setObjectName("r_cut_abLineEdit")
         self.formLayout_7.setWidget(2, QtWidgets.QFormLayout.FieldRole, self.r_cut_abLineEdit)
+        self.resetRcut = QtWidgets.QToolButton(self.groupBox_8)
+        self.resetRcut.setObjectName("resetRcut")
+        self.formLayout_7.setWidget(3, QtWidgets.QFormLayout.LabelRole, self.resetRcut)
         self.verticalLayout_4.addWidget(self.groupBox_8)
         CreateModel.addPage(self.wizardPage3)
         self.gridWidthNumberOfAtomsLabel.setBuddy(self.gridWidth)
@@ -294,4 +297,5 @@ class Ui_CreateModel(object):
         self.r_cut_aLabel.setText(_translate("CreateModel", "r_cut_a (m)"))
         self.r_cut_bLabel.setText(_translate("CreateModel", "r_cut_b (m)"))
         self.r_cut_abLabel.setText(_translate("CreateModel", "r_cut_ab (m)"))
+        self.resetRcut.setText(_translate("CreateModel", "Reset"))
 

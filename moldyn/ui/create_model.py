@@ -61,6 +61,12 @@ class CreateModelDialog(QWizard):
         self.ui.epsilonJLineEdit.editingFinished.connect(self.check_es_ab)
         self.ui.sigmaMLineEdit.editingFinished.connect(self.check_es_ab)
 
+        self.ui.r_cut_aLineEdit.editingFinished.connect(self.check_rcut)
+        self.ui.r_cut_bLineEdit.editingFinished.connect(self.check_rcut)
+        self.ui.r_cut_abLineEdit.editingFinished.connect(self.check_rcut)
+
+        self.ui.resetRcut.clicked.connect(self.reset_rcut)
+
         self.show()
 
     # Premier panneau
@@ -158,11 +164,11 @@ class CreateModelDialog(QWizard):
         self.checked_timestep()
 
     def reset_rcut(self):
-        rcut_a = self.model.rcut_a * self.model.rcut_fact
+        rcut_a = self.model.re_a * self.model.rcut_fact
         self.ui.r_cut_aLineEdit.setText(str(rcut_a))
-        rcut_b = self.model.rcut_b * self.model.rcut_fact
+        rcut_b = self.model.re_b * self.model.rcut_fact
         self.ui.r_cut_bLineEdit.setText(str(rcut_b))
-        rcut_ab = self.model.rcut_ab * self.model.rcut_fact
+        rcut_ab = self.model.re_ab * self.model.rcut_fact
         self.ui.r_cut_abLineEdit.setText(str(rcut_ab))
 
     def check_rcut(self):
@@ -170,18 +176,21 @@ class CreateModelDialog(QWizard):
             rcut_a = float(self.ui.r_cut_aLineEdit.text())
         except:
             rcut_a = self.model.rcut_a
-        self.ui.r_cut_abLineEdit.setText(str(rcut_a))
+        self.model.params["rcut_a"] = rcut_a
+        self.ui.r_cut_aLineEdit.setText(str(rcut_a))
 
         try:
             rcut_b = float(self.ui.r_cut_bLineEdit.text())
         except:
             rcut_b = self.model.rcut_ab
+        self.model.params["rcut_b"] = rcut_b
         self.ui.r_cut_bLineEdit.setText(str(rcut_b))
 
         try:
             rcut_ab = float(self.ui.r_cut_abLineEdit.text())
         except:
             rcut_ab = self.model.rcut_ab
+        self.model.params["rcut_ab"] = rcut_ab
         self.ui.r_cut_abLineEdit.setText(str(rcut_ab))
 
     def set_parameters(self):
