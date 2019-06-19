@@ -157,6 +157,33 @@ class CreateModelDialog(QWizard):
         self.model.params["sigma_ab"] = sigma_ab
         self.checked_timestep()
 
+    def reset_rcut(self):
+        rcut_a = self.model.rcut_a * self.model.rcut_fact
+        self.ui.r_cut_aLineEdit.setText(str(rcut_a))
+        rcut_b = self.model.rcut_b * self.model.rcut_fact
+        self.ui.r_cut_bLineEdit.setText(str(rcut_b))
+        rcut_ab = self.model.rcut_ab * self.model.rcut_fact
+        self.ui.r_cut_abLineEdit.setText(str(rcut_ab))
+
+    def check_rcut(self):
+        try:
+            rcut_a = float(self.ui.r_cut_aLineEdit.text())
+        except:
+            rcut_a = self.model.rcut_a
+        self.ui.r_cut_abLineEdit.setText(str(rcut_a))
+
+        try:
+            rcut_b = float(self.ui.r_cut_bLineEdit.text())
+        except:
+            rcut_b = self.model.rcut_ab
+        self.ui.r_cut_bLineEdit.setText(str(rcut_b))
+
+        try:
+            rcut_ab = float(self.ui.r_cut_abLineEdit.text())
+        except:
+            rcut_ab = self.model.rcut_ab
+        self.ui.r_cut_abLineEdit.setText(str(rcut_ab))
+
     def set_parameters(self):
         self.model.atom_grid(self.ui.gridWidth.value(), self.ui.gridHeight.value(), self.checked_distance())
         self.model.shuffle_atoms()
@@ -168,6 +195,8 @@ class CreateModelDialog(QWizard):
         self.reset_es_ab()
 
         self.ui.timestepLineEdit.setText(str(self.model.dt))
+
+        self.reset_rcut()
 
         return True
 
