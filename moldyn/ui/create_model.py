@@ -53,6 +53,8 @@ class CreateModelDialog(QWizard):
 
         self.ui.reset_ia_LJ.clicked.connect(self.reset_es_ab)
 
+        self.ui.resetTimestep.clicked.connect(self.set_decent_timestep)
+
         self.ui.temperatureKDoubleSpinBox.valueChanged.connect(self.model.set_T)
 
         self.ui.timestepLineEdit.editingFinished.connect(self.checked_timestep)
@@ -74,10 +76,9 @@ class CreateModelDialog(QWizard):
 
     def to_spatial_conf(self):
         if not self.check_species():
-            info_dialog = QErrorMessage(self)
-            info_dialog.setWindowTitle("Error")
-            info_dialog.setModal(True)
-            info_dialog.showMessage("Please define a species")
+            qmb = QMessageBox()
+            qmb.setText("Please define a species.")
+            qmb.exec()
             return False
 
         self.model.params["display_name"] = " ".join([
@@ -136,8 +137,10 @@ class CreateModelDialog(QWizard):
     # Troisième panneau
 
     def reset_es_ab(self):
+        self.model.calc_ab()
         self.ui.epsilonJLineEdit.setText(str(self.model.epsilon_ab))
         self.ui.sigmaMLineEdit.setText(str(self.model.sigma_ab))
+        self.checked_timestep()
 
     def check_es_ab(self):
         try:
@@ -150,6 +153,9 @@ class CreateModelDialog(QWizard):
             sigma_ab = self.model.sigma_ab
         self.ui.epsilonJLineEdit.setText(str(epsilon_ab))
         self.ui.sigmaMLineEdit.setText(str(sigma_ab))
+        self.model.params["epsilon_ab"] = epsilon_ab
+        self.model.params["sigma_ab"] = sigma_ab
+        self.checked_timestep()
 
     def set_parameters(self):
         self.model.atom_grid(self.ui.gridWidth.value(), self.ui.gridHeight.value(), self.checked_distance())
@@ -165,6 +171,10 @@ class CreateModelDialog(QWizard):
 
         return True
 
+    def set_decent_timestep(self):
+        self.ui.timestepLineEdit.setText(str(self.model.decent_dt()))
+        self.checked_timestep()
+
     def checked_timestep(self):
         try:
             dt = float(self.ui.timestepLineEdit.text())
@@ -172,6 +182,13 @@ class CreateModelDialog(QWizard):
             dt = self.model.dt
         self.ui.timestepLineEdit.setText(str(dt))
         self.model.dt = dt
+
+        decent = self.model.decent_dt()
+        if dt > decent:
+            qmb = QMessageBox()
+            qmb.setText("The time-step may be too high. Simulation may then not be accurate enough.")
+            qmb.exec()
+
         return dt
 
     def accept(self):

@@ -338,6 +338,13 @@
        <item row="0" column="1">
         <widget class="QLineEdit" name="timestepLineEdit"/>
        </item>
+       <item row="1" column="0">
+        <widget class="QToolButton" name="resetTimestep">
+         <property name="text">
+          <string>Reset</string>
+         </property>
+        </widget>
+       </item>
       </layout>
      </widget>
     </item>
@@ -380,11 +387,50 @@
         <widget class="QLineEdit" name="epsilonJLineEdit"/>
        </item>
        <item row="2" column="0">
-        <widget class="QPushButton" name="reset_ia_LJ">
+        <widget class="QToolButton" name="reset_ia_LJ">
          <property name="text">
           <string>Reset</string>
          </property>
         </widget>
+       </item>
+      </layout>
+     </widget>
+    </item>
+    <item>
+     <widget class="QGroupBox" name="groupBox_8">
+      <property name="title">
+       <string>Performance</string>
+      </property>
+      <layout class="QFormLayout" name="formLayout_7">
+       <item row="0" column="0">
+        <widget class="QLabel" name="r_cut_aLabel">
+         <property name="text">
+          <string>r_cut_a (m)</string>
+         </property>
+        </widget>
+       </item>
+       <item row="0" column="1">
+        <widget class="QLineEdit" name="r_cut_aLineEdit"/>
+       </item>
+       <item row="1" column="0">
+        <widget class="QLabel" name="r_cut_bLabel">
+         <property name="text">
+          <string>r_cut_b (m)</string>
+         </property>
+        </widget>
+       </item>
+       <item row="1" column="1">
+        <widget class="QLineEdit" name="r_cut_bLineEdit"/>
+       </item>
+       <item row="2" column="0">
+        <widget class="QLabel" name="r_cut_abLabel">
+         <property name="text">
+          <string>r_cut_ab (m)</string>
+         </property>
+        </widget>
+       </item>
+       <item row="2" column="1">
+        <widget class="QLineEdit" name="r_cut_abLineEdit"/>
        </item>
       </layout>
      </widget>

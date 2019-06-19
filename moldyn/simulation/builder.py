@@ -483,6 +483,15 @@ class Model:
         self.x_periodic = x
         self.y_periodic = y
 
+    def decent_dt(self):
+        epsilon = max(self.epsilon_a, self.epsilon_b, self.epsilon_ab)
+        sigma = min(self.sigma_a, self.sigma_b, self.sigma_ab)
+        m = min(self.m_a, self.m_b)
+        freq = np.sqrt((57.1464 * epsilon / (sigma**2)) / m) / (2*np.pi)
+        period = 1 / freq
+        dt = period / 50
+        return dt
+
     def set_dt(self, dt : int = None):
         """
         Defines the timestep used for simulation.
@@ -496,9 +505,7 @@ class Model:
 
         """
         if not dt: # période d'oscillation pour pouvoir calibrer le pas de temps
-            freq0 = np.sqrt((57.1464 * self.epsilon_a / (self.sigma_a**2)) / self.m_a) / (2*np.pi)
-            peri0 = 1 / freq0
-            dt = peri0 / 75
+            dt = self.decent_dt()
 
         self.params["dt"] = abs(dt)
 
