@@ -144,7 +144,16 @@ class Model:
 
     kB = 1.38064852e-23 # en unités SI
 
+    _special_values_f = {}
+    _derived_values_f = {}
+
     def __init__(self, pos=None, v=None, npart=0, x_a=1.0):
+
+        for f in self._special_values:
+            self._special_values_f[f] = eval("self.set_" + f)
+
+        for f in self._derived_values:
+            self._derived_values_f[f] = eval("self.get_" + f)
 
         if pos:
             self.pos = pos
@@ -177,10 +186,6 @@ class Model:
         self.set_dt()
         self.set_periodic_boundary()
 
-        self._derived_values_f = {}
-        for f in self._derived_values:
-            self._derived_values_f[f] = eval("self.get_" + f)
-
     def copy(self):
         """
 
@@ -208,12 +213,13 @@ class Model:
     ]
 
     def __getattr__(self, item):
-        if item in self._derived_values:
+        try:
             return self._derived_values_f[item]()
-        elif item in self.params:
-            return self.params[item]
-        else:
-            raise AttributeError(item)
+        except KeyError:
+            try:
+                return self.params[item]
+            except KeyError:
+                raise AttributeError(item)
 
     _special_values=[ # Les valeurs à vérifier ou  à transformer avant enregistrement
         "T",
@@ -231,10 +237,9 @@ class Model:
     ]
 
     def __setattr__(self, key, value):
-        if key in self._special_values:
-            f = eval("self.set_"+key)
-            f(value)
-        else:
+        try:
+            self._special_values_f[key](value)
+        except KeyError:
             super(Model, self).__setattr__(key, value)
 
     def _set_species(self, epsilon : float, sigma : float, m : float, sp : str):
