@@ -7,9 +7,8 @@ try:
 except ImportError:
     sys.path.append(os.path.dirname(__file__))
 
-import datreant as dt
+from . import datreant as dt
 from zipfile import *
-
 from . import appdirs
 
 data_path = appdirs.user_data_dir("open-moldyn")
