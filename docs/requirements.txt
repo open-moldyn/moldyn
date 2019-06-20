@@ -1,3 +1,11 @@
 numpy
 scipy
 matplotlib
+pillow
+imageio_ffmpeg
+asciitree
+pathlib2
+scandir
+six
+fuzzywuzzy
+pyparsing
