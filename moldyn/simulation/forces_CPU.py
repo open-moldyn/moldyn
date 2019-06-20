@@ -29,7 +29,6 @@ def _iterate(current_pos, i, pos, F, PE, counts, a, b, epsilon, sigma, rcut, X_P
         if i==j:
             continue
         distxy = current_pos - pos[j, :]
-        dist = np.sqrt(np.sum(distxy ** 2))
 
         if X_PERIODIC:
             if distxy[0] < (-SHIFT_X):
@@ -42,6 +41,8 @@ def _iterate(current_pos, i, pos, F, PE, counts, a, b, epsilon, sigma, rcut, X_P
                 distxy[1] += LENGTH_Y
             if distxy[1] > SHIFT_Y:
                 distxy[1] -= LENGTH_Y
+
+        dist = np.sqrt(np.sum(distxy ** 2))
 
         if dist < rcut:
             p = (sigma / dist) ** 6
