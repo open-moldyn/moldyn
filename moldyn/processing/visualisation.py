@@ -132,6 +132,19 @@ def plot_particles(model):
 
 @_plot_base(axis='scaled', grid=False)
 def plot_density_surf(model,refinement=0):
+    """
+    Compute and plot the 3D surface of the local density of model.
+
+    Parameters
+    ----------
+    model : Model
+        The model to plot.
+    refinement : int
+        the level of refinement
+    Returns
+    -------
+
+    """
     fig = plt.figure()
     ax = fig.gca(projection='3d')
     tri, density = dp.density(model, refinement)
