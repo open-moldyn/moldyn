@@ -25,6 +25,9 @@ def energy(dist, epsilon, p):
 
 @numba.njit(nogil=True, cache=True)
 def _iterate(current_pos, i, pos, F, PE, counts, a, b, epsilon, sigma, rcut, X_PERIODIC, Y_PERIODIC, SHIFT_X, SHIFT_Y, LENGTH_X, LENGTH_Y):
+    f = np.zeros((2,))
+    e = 0.0
+    m = 0.0
     for j in range(a, b):
         if i==j:
             continue
@@ -46,9 +49,12 @@ def _iterate(current_pos, i, pos, F, PE, counts, a, b, epsilon, sigma, rcut, X_P
 
         if dist < rcut:
             p = (sigma / dist) ** 6
-            F[i, :] += force(dist, epsilon, p)*distxy
-            PE[i] += energy(dist, epsilon, p)
-            counts[i] += 1.0
+            f += force(dist, epsilon, p)*distxy
+            e += energy(dist, epsilon, p)
+            m += 1.0
+    F[i, :] += f
+    PE[i] += e
+    counts[i] += m
 
 
 @numba.njit(parallel=False, nogil=True, cache=True)
@@ -77,11 +83,11 @@ def _p_compute_forces(
         offset,
         end):
 
+    F[:, :] = 0.0
+    PE[:] = 0.0
+    counts[:] = 0.0
     for i in numba.prange(offset, end):
         current_pos = pos[i,:]
-        F[i, :] = 0.0
-        PE[i] = 0.0
-        counts[i] = 0.0
         if i < N_A:
             _iterate(current_pos, i, pos, F, PE, counts, 0, N_A, EPSILON_A, SIGMA_A, RCUT_A, X_PERIODIC, Y_PERIODIC, SHIFT_X, SHIFT_Y, LENGTH_X, LENGTH_Y)
             _iterate(current_pos, i, pos, F, PE, counts, N_A, NPART, EPSILON_AB, SIGMA_AB, RCUT_AB, X_PERIODIC, Y_PERIODIC, SHIFT_X, SHIFT_Y, LENGTH_X, LENGTH_Y)

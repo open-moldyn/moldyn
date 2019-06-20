@@ -71,6 +71,7 @@ class Simulation:
             consts[k.upper()] = model.params[k]
 
         self.compute_GPU = ForcesComputeCPU(consts)
+        #self.compute_CPU = ForcesComputeCPU(consts)
 
         self.T_f = lambda t:model.T
 
