@@ -70,7 +70,7 @@ class Simulation:
         for k in model.params:
             consts[k.upper()] = model.params[k]
 
-        self.compute_GPU = ForcesComputeGPU(consts)
+        self.compute_GPU = ForcesComputeCPU(consts)
 
         self.T_f = lambda t:model.T
 
