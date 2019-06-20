@@ -1,6 +1,6 @@
 """
 Simulator.
-Simulates the dynamics of a model on the GPU.
+Simulates the dynamics of a model (on the CPU or GPU).
 """
 
 import os
@@ -10,6 +10,9 @@ import moderngl
 import numpy as np
 import numexpr as ne
 import scipy.interpolate as inter
+
+from .forces_CPU import ForcesComputeCPU
+from .forces_GPU import ForcesComputeGPU
 
 class Simulation:
     """
@@ -67,28 +70,7 @@ class Simulation:
         for k in model.params:
             consts[k.upper()] = model.params[k]
 
-        self.context = moderngl.create_standalone_context(require=430)
-        self.compute_shader = self.context.compute_shader(gl_util.source(os.path.dirname(__file__)+'/templates/moldyn.glsl', consts))
-
-        # Buffer de positions 1
-        self.BUFFER_P = self.context.buffer(reserve=2*4 * self.model.npart)
-        self.BUFFER_P.bind_to_storage_buffer(0)
-
-        # Buffer de forces
-        self.BUFFER_F = self.context.buffer(reserve=2*4 * self.model.npart)
-        self.BUFFER_F.bind_to_storage_buffer(1)
-
-        # Buffer d'énergies potentielles
-        self.BUFFER_E = self.context.buffer(reserve=4 * self.model.npart)
-        self.BUFFER_E.bind_to_storage_buffer(2)
-
-        # Buffer de compteurs de liaisons
-        self.BUFFER_COUNT = self.context.buffer(reserve=4 * self.model.npart)
-        self.BUFFER_COUNT.bind_to_storage_buffer(3)
-
-        # Buffer de paramètres
-        self.BUFFER_PARAMS = self.context.buffer(reserve=4 * 5)
-        self.BUFFER_PARAMS.bind_to_storage_buffer(4)
+        self.compute_GPU = ForcesComputeGPU(consts)
 
         self.T_f = lambda t:model.T
 
@@ -197,9 +179,7 @@ class Simulation:
             if periodic:
                 ne.evaluate("pos + (pos<limInf)*length - (pos>limSup)*length", out=pos)
 
-            self.BUFFER_P.write(pos.astype('f4').tobytes())
-
-            self.compute_shader.run(group_x=self.groups_number)
+            self.compute_GPU.set_pos(pos)
 
             # Énergie cinétique et température
             EC = 0.5 * ne.evaluate("sum(m*v*v)")
@@ -207,10 +187,10 @@ class Simulation:
             self.EC.append(EC)
             self.T.append(T)
 
-            F[:] = np.frombuffer(self.BUFFER_F.read(), dtype=np.float32).reshape(pos.shape)
+            F[:] = self.compute_GPU.get_F()
 
             # Énergie potentielle
-            EPgl = np.frombuffer(self.BUFFER_E.read(), dtype=np.float32)
+            EPgl = self.compute_GPU.get_PE()
             EP = 0.5 * ne.evaluate("sum(EPgl)")
             self.EP.append(EP)
             self.ET.append(EC + EP)
@@ -226,7 +206,7 @@ class Simulation:
 
             ne.evaluate("pos + v*dt2", out=pos)  # half drift
 
-            bondsGL[:] = np.frombuffer(self.BUFFER_COUNT.read(), dtype=np.float32)
+            bondsGL[:] = self.compute_GPU.get_COUNT()
             self.bonds.append(inv2npart*ne.evaluate("sum(bondsGL)"))
 
             self.iters.append(self.current_iter)

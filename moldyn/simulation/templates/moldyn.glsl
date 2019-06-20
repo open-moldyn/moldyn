@@ -55,11 +55,11 @@ layout (std430, binding=4) buffer in_params
     uint inparams[];
 };
 
-float force(float dist,float p, float epsilon) {
+float force(float dist, float p, float epsilon) {
 	return (-4.0*epsilon*(6.0*p-12.0*p*p))/(dist*dist);
 }
 
-float energy(float dist,float p, float epsilon) {
+float energy(float dist, float p, float epsilon) {
 	return epsilon*(4.0*(p*p-p)+127.0/4096.0);
 }
 
