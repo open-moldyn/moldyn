@@ -58,10 +58,6 @@ class Simulation:
         self.groups_number = int(np.ceil(self.model.npart / max_layout_size))
         self.layout_size = int(np.ceil(self.model.npart / self.groups_number))
 
-        self.elements_number = np.array([self.layout_size] * self.groups_number)
-        if self.model.npart % self.layout_size:
-            self.elements_number[-1] = self.model.npart % self.layout_size
-
         # Chargement et paramétrage du compute shader
         consts = {
             "LAYOUT_SIZE": self.layout_size,
@@ -281,9 +277,9 @@ class Simulation:
 
         def f(x):
             if x<t[0]:
-                return T[0] # pour la consistance des types
+                return T[0]
             elif x>t[-1]:
                 return T[-1]
             else:
-                return float(f2(x))
+                return float(f2(x)) # pour la consistance des types
         self.set_T_f(f)
