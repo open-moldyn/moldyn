@@ -66,6 +66,21 @@ def _plot_base(*, show=False, axis='', grid=False, figure=None):
 
 @_plot_base(axis='scaled', grid=False)
 def plot_density(model, levels=None, refinement=0):
+    """
+    Compute and plot the contours of the local density of model.
+
+    Parameters
+    ----------
+    model : Model
+        The model to plot
+    levels : int or array-like
+        the number of levels or a sorted array-like object of levels
+    refinement : int
+        the level of refinement
+    Returns
+    -------
+
+    """
     tri, density = dp.density(model, refinement)
     fig = plt.gcf()
     if type(levels) == int:
@@ -78,6 +93,21 @@ def plot_density(model, levels=None, refinement=0):
 
 @_plot_base(axis='scaled', grid=False)
 def plot_densityf(model, levels=None, refinement=0):
+    """
+    Compute and plot the filled contours of the local density of model.
+
+    Parameters
+    ----------
+    model : Model
+        The model to plot
+    levels : int or array-like
+        the number of levels or a sorted array-like object of levels
+    refinement : int
+        the level of refinement
+    Returns
+    -------
+
+    """
     tri, density = dp.density(model, refinement)
     fig = plt.gcf()
     cmap = plt.get_cmap("viridis")
@@ -88,12 +118,33 @@ def plot_densityf(model, levels=None, refinement=0):
     cbar.ax.set_ylabel('local density')\
 
 @_plot_base(axis='scaled', grid=False)
-def plot_particles(model, levels=None, refinement=0):
+def plot_particles(model):
+    """
+    Plot the position stored in model
+
+    Parameters
+    ----------
+    model : Model
+        The model to plot
+    """
     line1, = plt.plot(*model.pos[:model.n_a, :].T, 'ro', markersize=0.5)
     line2, = plt.plot(*model.pos[model.n_a:, :].T, 'bo', markersize=0.5)
 
 @_plot_base(axis='scaled', grid=False)
 def plot_density_surf(model,refinement=0):
+    """
+    Compute and plot the 3D surface of the local density of model.
+
+    Parameters
+    ----------
+    model : Model
+        The model to plot.
+    refinement : int
+        the level of refinement
+    Returns
+    -------
+
+    """
     fig = plt.figure()
     ax = fig.gca(projection='3d')
     tri, density = dp.density(model, refinement)
@@ -101,7 +152,30 @@ def plot_density_surf(model,refinement=0):
 
 
 
-def make_movie(simulation, ds, name:str, pfilm=5, fps=24, callback=None):
+def make_movie(simulation, dynstate, name: str, pfilm=5, fps=24, callback=None):
+    """
+    Makes a .mp4 movie of simulation from the history saved in dynstate.
+
+    Parameters
+    ----------
+    simulation : Simulation
+        The simulation object
+    dynstate : DynState
+        The dynState object containing the position history file.
+    name : str
+        The path (and name) of the file to be writen.
+    pfilm : int
+        To make the movie, takes every pfilm position.
+    fps : int
+        The number of frame per seconds of the film.
+    callback : function
+        An optional callback function that is called every time a
+        frame is made and is passed the current iteration number.
+
+    Returns
+    -------
+
+    """
     # ouverture pour la lecture
     npas = simulation.current_iter
     YlimB = simulation.model.y_lim_inf
@@ -110,7 +184,7 @@ def make_movie(simulation, ds, name:str, pfilm=5, fps=24, callback=None):
     XlimD = simulation.model.x_lim_sup
     if not name.endswith(".mp4"):
         name += ".mp4"
-    with ds.open(ds.POS_H, 'r') as fix:
+    with dynstate.open(dynstate.POS_H, 'r') as fix:
         # liste de k ou tracer le graph
         klist = set(range(0, npas, pfilm))
         # boucle pour creer le film

@@ -141,6 +141,21 @@ class ParamIO(dict):
         for key, value in rdict.items():
             self[key] = value
 
+    def to_dict(self, rdict : dict):
+        """
+        Copy itself into the remote dictionary
+        Parameters
+        ----------
+        rdict : dict
+            The remot dictionary to which to copy
+
+        Returns
+        -------
+
+        """
+        for key, value in self.items():
+            rdict[key] = value
+
     def to_attr(self, obj):
         """
         Dump the parameter dictionary in the object (obj) as attributes of said object.
@@ -166,16 +181,36 @@ class ParamIO(dict):
             if key in CATEGORY_LIST:
                 self.dynState.categories[key] = value
 
-class DynStateIO:
+class NumpyIO:
     """
     An interface to interact with numpy save files with a context manager.
 
+    Attributes
+    ----------
+    dynState : datreant.Treant
+        The treant that support the leaf (file) associated with it.
+    mode : str
+        The access mode of the file (usually 'r' or 'w' or 'a')
+    file_name : datreant.Leaf
+        The file name of the .npy file associated with it.
+    file : file object
+        the file that is opened (contains None until entering a context manager)
+    Example
+    -------
+    .. code-block:: python
 
+        t = DynState(dirpath)
+        # here t.open returns a NumpyIO object as the file is .npy
+        with t.open("pos.npy", 'r') as IO:
+            arr = IO.load() #load an array
+        with t.open("pos.npy", 'w') as IO:
+            IO.save(arr) #save an array
     """
     def __init__(self, dynState, file : dt.Leaf, mode):
         self.dynState = dynState
         self.mode = mode
         self.file_name = file
+        self.file = None
 
     def __enter__(self):
         self.file = open(self.file_name, mode=self.mode)
@@ -188,16 +223,37 @@ class DynStateIO:
         """
         self.file.close()
 
-    def save(self, arr, **kwargs):
-        assert self.mode != 'r'
+    def save(self, arr):
+        """
+        Save an array to the opened file.
+
+        Parameters
+        ----------
+        arr : ndarray (numpy)
+            The array to be stored
+        Returns
+        -------
+
+        """
         np.save(self.file, arr)
 
     def load(self):
-        assert 'r' in self.mode
+        """
+        Load an array stored in the file.
+        Returns
+        -------
+        arr : ndarray
+            the array loaded
+        """
         return np.load(self.file, allow_pickle=True)
 
 
 class DynState(dt.Treant):
+    """
+    A Treant specialized for handling .npy and .json files for moldyn
+
+
+    """
     POS = "pos.npy" # position of particles
     POS_H = "pos_history.npy" # history of position
     VEL = "velocities.npy" # final velocities
@@ -217,12 +273,11 @@ class DynState(dt.Treant):
         else:
             super().__init__(treant)
 
-
     def open(self, file, mode='r'):
         if file.endswith(".npy"):
             if not(mode.endswith("+b")):
                 mode += "+b"
-            return DynStateIO(self, self.leafloc[file], mode)
+            return NumpyIO(self, self.leafloc[file], mode)
         elif file.endswith(".json"):
             return ParamIO(self, self.leafloc[file])
         else:
@@ -235,7 +290,7 @@ class DynState(dt.Treant):
         with ZipFile(path, "w") as archive:
             for leaf in self.leaves():
                 if leaf.exists:
-                    print(leaf.relpath)
+                    #print(leaf.relpath)
                     if '/' in leaf.relpath:
                         sep = '/'
                     else:
@@ -254,22 +309,9 @@ class DynState(dt.Treant):
         with self.open(self.VEL, 'w') as IO:
             IO.save(model.v)
 
+
 def discover(dirpath=data_path, *args, **kwargs):
     return dt.discover(dirpath=dirpath, *args, **kwargs)
 
 
-t = 0
-def test(dirpath):
-    global t
-    t = DynState(dirpath)
-    with t.open(t.POS, 'w') as IO:
-        IO.save(np.ones(5))
-
-    with t.open(t.POS, 'r') as IO:
-        print(IO.load())
-
-    IO = t.open(t.POS, 'w')
-    IO.__enter__()
-
-    IO.__exit__()
 
