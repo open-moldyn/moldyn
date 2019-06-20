@@ -12,12 +12,12 @@ import numba
 import threading
 
 
-@numba.njit(nogil=True)
+@numba.jit(nogil=True)
 def force(dist, epsilon, p):
     return (-4.0 * epsilon * (6.0 * p - 12.0 * p * p)) / (dist * dist)
 
 
-@numba.njit(nogil=True)
+@numba.jit(nogil=True)
 def energy(dist, epsilon, p):
     # p = (dist/sigma)**6
     return epsilon * (4.0 * (p * p - p) + 127.0 / 4096.0)
