@@ -38,7 +38,6 @@ scandir = "^1.10"
 six = "^1.12"
 fuzzywuzzy = "^0.17.0"
 pyparsing = "^2.4"
-icc-rt = "^2019.0"
 numba = "^0.44.1"
 
 [tool.poetry.dev-dependencies]

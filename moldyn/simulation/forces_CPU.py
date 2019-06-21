@@ -59,18 +59,18 @@ def _iterate(current_pos, i, pos, a, b, epsilon, sigma, rcut, X_PERIODIC, Y_PERI
 
 def _par_iterate(current_pos, i, pos, EPSILON_A, EPSILON_B, EPSILON_AB, SIGMA_A, SIGMA_B, SIGMA_AB, RCUT_A, RCUT_B,
                  RCUT_AB, N_A, NPART, LENGTH_X, LENGTH_Y, X_PERIODIC, Y_PERIODIC, SHIFT_X, SHIFT_Y):
-    blabla = np.zeros((4,))
+    ret = np.zeros((4,))
     if i < N_A:
-        blabla += _iterate(current_pos, i, pos, 0, N_A, EPSILON_A, SIGMA_A, RCUT_A, X_PERIODIC,
+        ret += _iterate(current_pos, i, pos, 0, N_A, EPSILON_A, SIGMA_A, RCUT_A, X_PERIODIC,
                            Y_PERIODIC, SHIFT_X, SHIFT_Y, LENGTH_X, LENGTH_Y)
-        blabla += _iterate(current_pos, i, pos, N_A, NPART, EPSILON_AB, SIGMA_AB, RCUT_AB,
+        ret += _iterate(current_pos, i, pos, N_A, NPART, EPSILON_AB, SIGMA_AB, RCUT_AB,
                            X_PERIODIC, Y_PERIODIC, SHIFT_X, SHIFT_Y, LENGTH_X, LENGTH_Y)
     else:
-        blabla += _iterate(current_pos, i, pos, 0, N_A, EPSILON_AB, SIGMA_AB, RCUT_AB, X_PERIODIC,
+        ret += _iterate(current_pos, i, pos, 0, N_A, EPSILON_AB, SIGMA_AB, RCUT_AB, X_PERIODIC,
                            Y_PERIODIC, SHIFT_X, SHIFT_Y, LENGTH_X, LENGTH_Y)
-        blabla += _iterate(current_pos, i, pos, N_A, NPART, EPSILON_B, SIGMA_B, RCUT_B, X_PERIODIC,
+        ret += _iterate(current_pos, i, pos, N_A, NPART, EPSILON_B, SIGMA_B, RCUT_B, X_PERIODIC,
                            Y_PERIODIC, SHIFT_X, SHIFT_Y, LENGTH_X, LENGTH_Y)
-    return blabla
+    return ret
 
 
 def _p_compute_forces(

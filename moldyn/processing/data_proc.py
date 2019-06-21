@@ -36,11 +36,11 @@ def PDF(pos, nb_samples, rcut, bin_count):
 
 def density(model, refinement=0):
     """
-    Create a Voronoi mesh and calculate the local density on its vertices.
+    Create a Voronoi mesh and calculate the local particle density on its vertices.
 
     The local density is calculated as follows:
     for each vertex, compute the density of each neighbour region as
-    the mass of the particle over the area and assign the average of
+    one over the area and assign the average of
     the neighbouring density to the vertex.
 
     Parameters
@@ -79,7 +79,7 @@ def density(model, refinement=0):
         if vertices:
             if -1 not in vertices:
                 area = ConvexHull(vor.vertices[vertices]).area # gets the area
-                vert_density[vertices] += model.m[point_index, 0] / area # makes it a density (sort-of)
+                vert_density[vertices] += 1 / area # makes it a density (sort-of)
                 reg_num[vertices] += 1
     vert_density /= reg_num # averaging
 
