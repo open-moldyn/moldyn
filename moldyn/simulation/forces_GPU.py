@@ -8,6 +8,10 @@ import os
 import moderngl
 import numpy as np
 
+if not gl_util.testGL():
+    os.environ["MESA_GL_VERSION_OVERRIDE"] = "4.3"
+    os.environ["MESA_GLSL_VERSION_OVERRIDE"] = "430"
+
 
 class ForcesComputeGPU:
 
