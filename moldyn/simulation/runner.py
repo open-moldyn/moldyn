@@ -70,7 +70,8 @@ class Simulation:
         for k in model.params:
             consts[k.upper()] = model.params[k]
 
-        self.compute_GPU = ForcesComputeCPU(consts)
+        self.compute_ = ForcesComputeCPU(consts)
+        #self.compute_GPU = ForcesComputeGPU(consts)
         #self.compute_CPU = ForcesComputeCPU(consts)
 
         self.T_f = lambda t:model.T
@@ -180,7 +181,7 @@ class Simulation:
             if periodic:
                 ne.evaluate("pos + (pos<limInf)*length - (pos>limSup)*length", out=pos)
 
-            self.compute_GPU.set_pos(pos)
+            self.compute_.set_pos(pos)
 
             # Énergie cinétique et température
             EC = 0.5 * ne.evaluate("sum(m*v*v)")
@@ -188,10 +189,10 @@ class Simulation:
             self.EC.append(EC)
             self.T.append(T)
 
-            F[:] = self.compute_GPU.get_F()
+            F[:] = self.compute_.get_F()
 
             # Énergie potentielle
-            EPgl = self.compute_GPU.get_PE()
+            EPgl = self.compute_.get_PE()
             EP = 0.5 * ne.evaluate("sum(EPgl)")
             self.EP.append(EP)
             self.ET.append(EC + EP)
@@ -207,7 +208,7 @@ class Simulation:
 
             ne.evaluate("pos + v*dt2", out=pos)  # half drift
 
-            bondsGL[:] = self.compute_GPU.get_COUNT()
+            bondsGL[:] = self.compute_.get_COUNT()
             self.bonds.append(inv2npart*ne.evaluate("sum(bondsGL)"))
 
             self.iters.append(self.current_iter)
