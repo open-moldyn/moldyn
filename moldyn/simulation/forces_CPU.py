@@ -10,21 +10,22 @@ installer icc-rt et tbb sur les machines à processeur intel
 import numpy as np
 import numba
 import threading
+import multiprocessing as mp
+import ctypes
 
 
-@numba.jit(nogil=True)
+@numba.njit(nogil=True)
 def force(dist, epsilon, p):
     return (-4.0 * epsilon * (6.0 * p - 12.0 * p * p)) / (dist * dist)
 
 
-@numba.jit(nogil=True)
+@numba.njit(nogil=True)
 def energy(dist, epsilon, p):
-    # p = (dist/sigma)**6
     return epsilon * (4.0 * (p * p - p) + 127.0 / 4096.0)
 
 
 @numba.njit(nogil=True, cache=True)
-def _iterate(current_pos, i, pos, F, PE, counts, a, b, epsilon, sigma, rcut, X_PERIODIC, Y_PERIODIC, SHIFT_X, SHIFT_Y, LENGTH_X, LENGTH_Y):
+def _iterate(current_pos, i, pos, a, b, epsilon, sigma, rcut, X_PERIODIC, Y_PERIODIC, SHIFT_X, SHIFT_Y, LENGTH_X, LENGTH_Y):
     f = np.zeros((2,))
     e = 0.0
     m = 0.0
@@ -45,21 +46,36 @@ def _iterate(current_pos, i, pos, F, PE, counts, a, b, epsilon, sigma, rcut, X_P
             if distxy[1] > SHIFT_Y:
                 distxy[1] -= LENGTH_Y
 
-        dist = np.sqrt(np.sum(distxy ** 2))
+        if np.abs(distxy[0])<rcut and np.abs(distxy[1])<rcut:
+            dist = np.sqrt(np.sum(distxy ** 2))
 
-        if dist < rcut:
-            p = (sigma / dist) ** 6
-            f += force(dist, epsilon, p)*distxy
-            e += energy(dist, epsilon, p)
-            m += 1.0
-    F[i, :] += f
-    PE[i] += e
-    counts[i] += m
+            if dist < rcut:
+                p = (sigma / dist) ** 6
+                f += force(dist, epsilon, p)*distxy
+                e += energy(dist, epsilon, p)
+                m += 1.0
+    return np.array((f[0], f[1], e, m))
 
 
-@numba.njit(parallel=False, nogil=True, cache=True)
+def _par_iterate(current_pos, i, pos, EPSILON_A, EPSILON_B, EPSILON_AB, SIGMA_A, SIGMA_B, SIGMA_AB, RCUT_A, RCUT_B,
+                 RCUT_AB, N_A, NPART, LENGTH_X, LENGTH_Y, X_PERIODIC, Y_PERIODIC, SHIFT_X, SHIFT_Y):
+    blabla = np.zeros((4,))
+    if i < N_A:
+        blabla += _iterate(current_pos, i, pos, 0, N_A, EPSILON_A, SIGMA_A, RCUT_A, X_PERIODIC,
+                           Y_PERIODIC, SHIFT_X, SHIFT_Y, LENGTH_X, LENGTH_Y)
+        blabla += _iterate(current_pos, i, pos, N_A, NPART, EPSILON_AB, SIGMA_AB, RCUT_AB,
+                           X_PERIODIC, Y_PERIODIC, SHIFT_X, SHIFT_Y, LENGTH_X, LENGTH_Y)
+    else:
+        blabla += _iterate(current_pos, i, pos, 0, N_A, EPSILON_AB, SIGMA_AB, RCUT_AB, X_PERIODIC,
+                           Y_PERIODIC, SHIFT_X, SHIFT_Y, LENGTH_X, LENGTH_Y)
+        blabla += _iterate(current_pos, i, pos, N_A, NPART, EPSILON_B, SIGMA_B, RCUT_B, X_PERIODIC,
+                           Y_PERIODIC, SHIFT_X, SHIFT_Y, LENGTH_X, LENGTH_Y)
+    return blabla
+
+
 def _p_compute_forces(
-        pos,
+        pool,
+        _array,
         F,
         PE,
         counts,
@@ -82,64 +98,16 @@ def _p_compute_forces(
         SHIFT_Y,
         offset,
         end):
+    pos = np.array(_array).reshape(NPART,2)
 
-    F[:, :] = 0.0
-    PE[:] = 0.0
-    counts[:] = 0.0
-    for i in numba.prange(offset, end):
-        current_pos = pos[i,:]
-        if i < N_A:
-            _iterate(current_pos, i, pos, F, PE, counts, 0, N_A, EPSILON_A, SIGMA_A, RCUT_A, X_PERIODIC, Y_PERIODIC, SHIFT_X, SHIFT_Y, LENGTH_X, LENGTH_Y)
-            _iterate(current_pos, i, pos, F, PE, counts, N_A, NPART, EPSILON_AB, SIGMA_AB, RCUT_AB, X_PERIODIC, Y_PERIODIC, SHIFT_X, SHIFT_Y, LENGTH_X, LENGTH_Y)
-        else:
-            _iterate(current_pos, i, pos, F, PE, counts, 0, N_A, EPSILON_AB, SIGMA_AB, RCUT_AB, X_PERIODIC, Y_PERIODIC, SHIFT_X, SHIFT_Y, LENGTH_X, LENGTH_Y)
-            _iterate(current_pos, i, pos, F, PE, counts, N_A, NPART, EPSILON_B, SIGMA_B, RCUT_B, X_PERIODIC, Y_PERIODIC, SHIFT_X, SHIFT_Y, LENGTH_X, LENGTH_Y)
+    gen = ((pos[i,:], i, pos, EPSILON_A,EPSILON_B,EPSILON_AB,SIGMA_A,SIGMA_B,SIGMA_AB,RCUT_A,RCUT_B,
+            RCUT_AB,N_A,NPART,LENGTH_X,LENGTH_Y,X_PERIODIC,Y_PERIODIC, SHIFT_X, SHIFT_Y) for i in range(offset, end))
 
+    sortie = np.array(pool.starmap(_par_iterate, gen))
 
-def _compute_forces(pos, F, PE, counts, consts, offset=0, end=None, cache=True):
-    EPSILON_A = consts["EPSILON_A"]
-    EPSILON_B = consts["EPSILON_B"]
-    EPSILON_AB = consts["EPSILON_AB"]
-    SIGMA_A = consts["SIGMA_A"]
-    SIGMA_B = consts["SIGMA_B"]
-    SIGMA_AB = consts["SIGMA_AB"]
-    RCUT_A = consts["RCUT_A"]
-    RCUT_B = consts["RCUT_B"]
-    RCUT_AB = consts["RCUT_AB"]
-    N_A = consts["N_A"]
-    NPART = consts["NPART"]
-    LENGTH_X = consts["LENGTH_X"]
-    LENGTH_Y = consts["LENGTH_Y"]
-    X_PERIODIC = consts["X_PERIODIC"]
-    Y_PERIODIC = consts["Y_PERIODIC"]
-
-    SHIFT_X = LENGTH_X / 2
-    SHIFT_Y = LENGTH_Y / 2
-    end = end or NPART
-    _p_compute_forces(
-        pos,
-        F,
-        PE,
-        counts,
-        EPSILON_A,
-        EPSILON_B,
-        EPSILON_AB,
-        SIGMA_A,
-        SIGMA_B,
-        SIGMA_AB,
-        RCUT_A,
-        RCUT_B,
-        RCUT_AB,
-        N_A,
-        NPART,
-        LENGTH_X,
-        LENGTH_Y,
-        X_PERIODIC,
-        Y_PERIODIC,
-        SHIFT_X,
-        SHIFT_Y,
-        offset,
-        end)
+    F[:,:] = sortie[:,:2]
+    PE[:] = sortie[:,2]
+    counts[:] = sortie[:,3]
 
 
 class ForcesComputeCPU:
@@ -156,26 +124,71 @@ class ForcesComputeCPU:
         self.compute_npart = min(self.compute_npart, self.npart)
 
         self.array_shape = (self.npart, 2)
-        self._POS = np.zeros(self.array_shape, dtype=np.float32)
         self._F = np.zeros(self.array_shape, dtype=np.float32)
         self._PE = np.zeros((self.npart,), dtype=np.float32)
         self._COUNT = np.zeros((self.npart,), dtype=np.float32)
 
-        self.thr_run = False
+        self._thr_run = False
+
+        self._pool = mp.Pool(mp.cpu_count())
+        self._POS = mp.Array(ctypes.c_float, self.npart * 2, lock=False)
 
     def _compute_forces(self):
-        _compute_forces(self._POS, self._F, self._PE, self._COUNT, self.consts, offset=self.compute_offset)
+        EPSILON_A = self.consts["EPSILON_A"]
+        EPSILON_B = self.consts["EPSILON_B"]
+        EPSILON_AB = self.consts["EPSILON_AB"]
+        SIGMA_A = self.consts["SIGMA_A"]
+        SIGMA_B = self.consts["SIGMA_B"]
+        SIGMA_AB = self.consts["SIGMA_AB"]
+        RCUT_A = self.consts["RCUT_A"]
+        RCUT_B = self.consts["RCUT_B"]
+        RCUT_AB = self.consts["RCUT_AB"]
+        N_A = self.consts["N_A"]
+        NPART = self.consts["NPART"]
+        LENGTH_X = self.consts["LENGTH_X"]
+        LENGTH_Y = self.consts["LENGTH_Y"]
+        X_PERIODIC = self.consts["X_PERIODIC"]
+        Y_PERIODIC = self.consts["Y_PERIODIC"]
+
+        SHIFT_X = LENGTH_X / 2
+        SHIFT_Y = LENGTH_Y / 2
+        end = NPART
+        _p_compute_forces(
+            self._pool,
+            self._POS,
+            self._F,
+            self._PE,
+            self._COUNT,
+            EPSILON_A,
+            EPSILON_B,
+            EPSILON_AB,
+            SIGMA_A,
+            SIGMA_B,
+            SIGMA_AB,
+            RCUT_A,
+            RCUT_B,
+            RCUT_AB,
+            N_A,
+            NPART,
+            LENGTH_X,
+            LENGTH_Y,
+            X_PERIODIC,
+            Y_PERIODIC,
+            SHIFT_X,
+            SHIFT_Y,
+            self.compute_offset,
+            end)
 
     def _join_thr(self):
-        if self.thr_run:
-            self.thread.join()
-            self.thr_run = False
+        if self._thr_run:
+            self._thread.join()
+            self._thr_run = False
 
     def set_pos(self, pos):
-        self._POS[:,:] = pos
-        self.thr_run = True
-        self.thread = threading.Thread(target=self._compute_forces)
-        self.thread.start()
+        self._POS[:] = pos.reshape((self.npart * 2,))
+        self._thr_run = True
+        self._thread = threading.Thread(target=self._compute_forces)
+        self._thread.start()
 
     def get_F(self):
         self._join_thr()
