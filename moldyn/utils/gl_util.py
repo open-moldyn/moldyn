@@ -26,28 +26,22 @@ def source(uri, consts={}):
         content = content.replace(f"%%{key}%%", str(value))
     return content
 
-def testMaxSizes():
+def testGL():
     """
-    Finds the maximum layout size for openGL compute shaders.
+    Tries to initialize a compute shader.
 
     Returns
     -------
 
-    int
-        Maximum layout size
+    bool
+        initialisation success
 
     """
-    context = moderngl.create_standalone_context(require=430)
-
-    buffer_size = 1024 # garanti par la spec
+    f = source('./dummy.glsl', {"X":50})
     try:
-        while True:
-            context.compute_shader(source('./dummy.glsl', {"X":buffer_size}))
-            buffer_size*=2
+        context = moderngl.create_standalone_context(require=430)
+        context.compute_shader(f)
     except:
-        pass
-
-    return buffer_size//2
-
-if __name__=="__main__":
-    print("Taille maximale :",testMaxSizes())
+        return False
+    else:
+        return  True
