@@ -10,6 +10,7 @@ import moderngl
 import numpy as np
 import numexpr as ne
 import scipy.interpolate as inter
+import warnings
 
 from .forces_CPU import ForcesComputeCPU
 from .forces_GPU import ForcesComputeGPU
@@ -70,9 +71,11 @@ class Simulation:
         for k in model.params:
             consts[k.upper()] = model.params[k]
 
-        self.compute_ = ForcesComputeCPU(consts)
-        #self.compute_GPU = ForcesComputeGPU(consts)
-        #self.compute_CPU = ForcesComputeCPU(consts)
+        try:
+            self.compute_ = ForcesComputeGPU(consts)
+        except:
+            warnings.warn("GPU not available, falling back on CPU. GPU compute needs OpenGL >=4.3.")
+            self.compute_ = ForcesComputeCPU(consts)
 
         self.T_f = lambda t:model.T
 
