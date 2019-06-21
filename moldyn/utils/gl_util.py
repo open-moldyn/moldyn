@@ -1,4 +1,5 @@
 import moderngl
+import os
 
 def source(uri, consts={}):
     """
@@ -37,7 +38,7 @@ def testGL():
         initialisation success
 
     """
-    f = source('./dummy.glsl', {"X":50})
+    f = source(os.path.dirname(__file__)+'/dummy.glsl', {"X":50})
     try:
         context = moderngl.create_standalone_context(require=430)
         context.compute_shader(f)
