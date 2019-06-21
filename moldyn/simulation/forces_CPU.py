@@ -57,9 +57,10 @@ def _iterate(current_pos, i, pos, a, b, epsilon, sigma, rcut, X_PERIODIC, Y_PERI
     return np.array((f[0], f[1], e, m))
 
 
-def _par_iterate(current_pos, i, pos, EPSILON_A, EPSILON_B, EPSILON_AB, SIGMA_A, SIGMA_B, SIGMA_AB, RCUT_A, RCUT_B,
+def _par_iterate(current_pos, i, EPSILON_A, EPSILON_B, EPSILON_AB, SIGMA_A, SIGMA_B, SIGMA_AB, RCUT_A, RCUT_B,
                  RCUT_AB, N_A, NPART, LENGTH_X, LENGTH_Y, X_PERIODIC, Y_PERIODIC, SHIFT_X, SHIFT_Y):
     ret = np.zeros((4,))
+    pos = np.array(_pos_array).reshape(NPART,2)
     if i < N_A:
         ret += _iterate(current_pos, i, pos, 0, N_A, EPSILON_A, SIGMA_A, RCUT_A, X_PERIODIC,
                            Y_PERIODIC, SHIFT_X, SHIFT_Y, LENGTH_X, LENGTH_Y)
@@ -100,7 +101,7 @@ def _p_compute_forces(
         end):
     pos = np.array(_array).reshape(NPART,2)
 
-    gen = ((pos[i,:], i, pos, EPSILON_A,EPSILON_B,EPSILON_AB,SIGMA_A,SIGMA_B,SIGMA_AB,RCUT_A,RCUT_B,
+    gen = ((pos[i,:], i, EPSILON_A,EPSILON_B,EPSILON_AB,SIGMA_A,SIGMA_B,SIGMA_AB,RCUT_A,RCUT_B,
             RCUT_AB,N_A,NPART,LENGTH_X,LENGTH_Y,X_PERIODIC,Y_PERIODIC, SHIFT_X, SHIFT_Y) for i in range(offset, end))
 
     sortie = np.array(pool.starmap(_par_iterate, gen))
@@ -109,6 +110,11 @@ def _p_compute_forces(
     PE[:] = sortie[:,2]
     counts[:] = sortie[:,3]
 
+_pos_array = None
+
+def initProcess(array):
+    global _pos_array
+    _pos_array = array
 
 class ForcesComputeCPU:
 
@@ -130,8 +136,8 @@ class ForcesComputeCPU:
 
         self._thr_run = False
 
-        self._pool = mp.Pool(mp.cpu_count())
         self._POS = mp.Array(ctypes.c_float, self.npart * 2, lock=False)
+        self._pool = mp.Pool(mp.cpu_count(), initializer=initProcess, initargs=(self._POS,))
 
     def _compute_forces(self):
         EPSILON_A = self.consts["EPSILON_A"]
