@@ -139,6 +139,9 @@ class ForcesComputeCPU:
         self._POS = mp.Array(ctypes.c_float, self.npart * 2, lock=False)
         self._pool = mp.Pool(mp.cpu_count(), initializer=initProcess, initargs=(self._POS,))
 
+    def __del__(self):
+        self._pool.close() # pour ne pas garder des processus ouverts pour rien
+
     def _compute_forces(self):
         EPSILON_A = self.consts["EPSILON_A"]
         EPSILON_B = self.consts["EPSILON_B"]
