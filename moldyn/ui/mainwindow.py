@@ -343,7 +343,7 @@ class MoldynMainWindow(QMainWindow):
             self.progress_gr.setData(self.t_deque)
             self.ui.currentIteration.setText(str(v+1))
             self.ui.currentTime.setText(str((v+1)*self.model.dt))
-            self.ui.ETA.setText(str(timedelta(seconds=int( (self.ui.iterationsSpinBox.value()/c_i - 1)*(new_t-self.simu_starttime) ))))
+            self.ui.ETA.setText(str(timedelta(seconds=int( (self.ui.iterationsSpinBox.value()/c_i - 1)*(new_t-self.simu_starttime)))))
 
         if self.save_pos:
             self.pos_IO.save(self.simulation.model.pos)
