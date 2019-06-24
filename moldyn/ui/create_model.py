@@ -1,5 +1,4 @@
-from PyQt5.QtWidgets import QErrorMessage, QApplication, QWizard, QMessageBox
-from PyQt5.QtCore import pyqtSignal
+from PyQt5.QtWidgets import QWizard, QMessageBox
 from .qt.create_model import Ui_CreateModel
 from .species_params import species_params
 
@@ -10,8 +9,6 @@ from ._conv import _float
 
 import matplotlib
 matplotlib.use('Qt5Agg')
-import matplotlib.pyplot as plt
-
 
 class CreateModelDialog(QWizard):
 
