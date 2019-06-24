@@ -23,6 +23,7 @@ from collections import deque
 from .qt.mainwindow import Ui_MainWindow
 
 from .create_model import CreateModelDialog
+from .edit_model import EditModelDialog
 from .model_viewer import ModelView
 
 from ._conv import _float
@@ -52,6 +53,8 @@ class MoldynMainWindow(QMainWindow):
         self.ui.saveModelBtn.clicked.connect(self.save_model)
         self.ui.loadSimuBtn.clicked.connect(self.load_simulation)
         self.ui.gotoSimuBtn.clicked.connect(self.goto_simu)
+        self.ui.newSimuBtn.clicked.connect(self.reset_model)
+        self.ui.editModelBtn.clicked.connect(self.edit_model)
 
         self.displayed_properties_list = {
             "display_name" : ["Name"],
@@ -218,8 +221,17 @@ class MoldynMainWindow(QMainWindow):
         self.ui.tab_processing.setEnabled(False)
         self.ui.currentTime.setText("0")
         self.ui.currentIteration.setText("0")
+        self.ui.editModelBtn.setEnabled(True)
+        self.ui.newSimuBtn.setEnabled(True)
 
         self.ui.statusbar.showMessage("Model loaded, simulation can begin.")
+
+    def reset_model(self):
+        self.set_model(self.model)
+
+    def edit_model(self):
+        self.emd = EditModelDialog(self)
+        self.emd.show()
 
     def load_simulation(self):
         path, filter = QFileDialog.getOpenFileName(caption="Load model", filter="Model file (*.zip)")
