@@ -49,7 +49,7 @@ class Simulation:
         Changing the values will affect behavior of the model.
     """
 
-    def __init__(self, model = None, simulation = None):
+    def __init__(self, model = None, simulation = None, prefer_gpu = True):
 
         if simulation:
             model = simulation.model
@@ -71,10 +71,13 @@ class Simulation:
         for k in model.params:
             consts[k.upper()] = model.params[k]
 
-        try:
-            self._compute = ForcesComputeGPU(consts)
-        except:
-            warnings.warn("GPU not available, falling back on CPU. GPU compute needs OpenGL >=4.3.")
+        if prefer_gpu:
+            try:
+                self._compute = ForcesComputeGPU(consts)
+            except:
+                warnings.warn("GPU not available, falling back on CPU. GPU compute needs OpenGL >=4.3.")
+                self._compute = ForcesComputeCPU(consts)
+        else:
             self._compute = ForcesComputeCPU(consts)
 
         self.T_f = lambda t:model.T

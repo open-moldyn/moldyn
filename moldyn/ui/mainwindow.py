@@ -202,7 +202,7 @@ class MoldynMainWindow(QMainWindow):
         self.ui.gotoSimuBtn.setEnabled(True)
         self.ui.tab_simu.setEnabled(True)
 
-        self.simulation = Simulation(self.model)
+        self.simulation = Simulation(self.model, prefer_gpu=self.ui.tryToUseGPUCheckBox.checkState())
         self.model_view = ModelView(self.simulation.model)
 
         for dp in self.displayed_properties:
@@ -349,6 +349,7 @@ class MoldynMainWindow(QMainWindow):
         self.ui.simuBtn.setEnabled(False)
         self.ui.iterationsSpinBox.setEnabled(False)
         self.ui.simulationTimeLineEdit.setEnabled(False)
+        self.ui.tryToUseGPUCheckBox.setEnabled(False)
         self.ui.temperature_groupBox.setEnabled(False)
         self.ui.saveAllAtomsPositionCheckBox.setEnabled(False)
         self.enable_process_tab(False)
@@ -377,7 +378,7 @@ class MoldynMainWindow(QMainWindow):
             # Pour continuer la simu précedente. On est obligés d'en créer une nouvelle pour des questions de scope.
             # On pourrait créer et conserver le thread une bonne fois pour toutes, pour que ce bricolage cesse.
             self.c_i = self.simulation.current_iter
-            self.simulation = Simulation(simulation=self.simulation)
+            self.simulation = Simulation(simulation=self.simulation, prefer_gpu=self.ui.tryToUseGPUCheckBox.checkState())
             self.model_view = ModelView(self.simulation.model)
             self.simu_starttime = time.perf_counter()
             def up(s):
@@ -392,9 +393,10 @@ class MoldynMainWindow(QMainWindow):
             with DynState(tmp_path).open(DynState.STATE_FCT, mode="w") as ds:
                 ds.from_dict(self.simulation.state_fct)
 
-            self.ui.simuBtn.setEnabled(True)
             self.enable_process_tab(True)
+            self.ui.simuBtn.setEnabled(True)
             self.ui.iterationsSpinBox.setEnabled(True)
+            self.ui.tryToUseGPUCheckBox.setEnabled(True)
             self.ui.simulationTimeLineEdit.setEnabled(True)
             self.ui.temperature_groupBox.setEnabled(True)
             self.ui.groupBoxMovie.setEnabled(self.save_pos)
