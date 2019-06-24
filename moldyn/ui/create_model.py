@@ -6,9 +6,12 @@ from .species_params import species_params
 from ..simulation.builder import Model
 from .model_viewer import ModelView
 
+from ._conv import _float
+
 import matplotlib
 matplotlib.use('Qt5Agg')
 import matplotlib.pyplot as plt
+
 
 class CreateModelDialog(QWizard):
 
@@ -96,7 +99,6 @@ class CreateModelDialog(QWizard):
             self.species_a_params.get_values(),
             self.species_b_params.get_values()
         )
-        #self.ui.distanceBetweenAtoms.setText(str(self.model.re_ab))
         self.checked_distance()
         return True
 
@@ -118,13 +120,13 @@ class CreateModelDialog(QWizard):
         try:
             l = float(self.ui.boxWidthLineEdit.text())
         except:
-            l = float(self.ui.distanceBetweenAtoms.text()) * (self.ui.gridWidth.value())
+            l = _float(self.ui.distanceBetweenAtoms) * (self.ui.gridWidth.value())
         self.ui.boxWidthLineEdit.setText(str(l))
         self.ui.distanceBetweenAtoms.setText(str(l / (self.ui.gridWidth.value())))
 
     def checked_distance(self):
         try:
-            d = float(self.ui.distanceBetweenAtoms.text())
+            d = _float(self.ui.distanceBetweenAtoms)
         except:
             d = self.model.re_ab
         self.ui.distanceBetweenAtoms.setText(str(d))
@@ -150,11 +152,11 @@ class CreateModelDialog(QWizard):
 
     def check_es_ab(self):
         try:
-            epsilon_ab = float(self.ui.epsilonJLineEdit.text())
+            epsilon_ab = _float(self.ui.epsilonJLineEdit)
         except:
             epsilon_ab = self.model.epsilon_ab
         try:
-            sigma_ab = float(self.ui.sigmaMLineEdit.text())
+            sigma_ab = _float(self.ui.sigmaMLineEdit)
         except:
             sigma_ab = self.model.sigma_ab
         self.ui.epsilonJLineEdit.setText(str(epsilon_ab))
@@ -173,21 +175,21 @@ class CreateModelDialog(QWizard):
 
     def check_rcut(self):
         try:
-            rcut_a = float(self.ui.r_cut_aLineEdit.text())
+            rcut_a = _float(self.ui.r_cut_aLineEdit)
         except:
             rcut_a = self.model.rcut_a
         self.model.params["rcut_a"] = rcut_a
         self.ui.r_cut_aLineEdit.setText(str(rcut_a))
 
         try:
-            rcut_b = float(self.ui.r_cut_bLineEdit.text())
+            rcut_b = _float(self.ui.r_cut_bLineEdit)
         except:
             rcut_b = self.model.rcut_ab
         self.model.params["rcut_b"] = rcut_b
         self.ui.r_cut_bLineEdit.setText(str(rcut_b))
 
         try:
-            rcut_ab = float(self.ui.r_cut_abLineEdit.text())
+            rcut_ab = _float(self.ui.r_cut_abLineEdit)
         except:
             rcut_ab = self.model.rcut_ab
         self.model.params["rcut_ab"] = rcut_ab
@@ -215,7 +217,7 @@ class CreateModelDialog(QWizard):
 
     def checked_timestep(self):
         try:
-            dt = float(self.ui.timestepLineEdit.text())
+            dt = _float(self.ui.timestepLineEdit)
         except:
             dt = self.model.dt
         self.ui.timestepLineEdit.setText(str(dt))
@@ -230,8 +232,8 @@ class CreateModelDialog(QWizard):
         return dt
 
     def accept(self):
-        self.model.params["epsilon_ab"] = float(self.ui.epsilonJLineEdit.text())
-        self.model.params["sigma_ab"] = float(self.ui.sigmaMLineEdit.text())
+        self.model.params["epsilon_ab"] = _float(self.ui.epsilonJLineEdit)
+        self.model.params["sigma_ab"] = _float(self.ui.sigmaMLineEdit)
         if self.parent_window:
             self.parent_window.set_model(self.model)
         super().accept()

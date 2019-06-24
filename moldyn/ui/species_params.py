@@ -4,6 +4,8 @@ from PyQt5.QtCore import pyqtSignal
 from .qt.species_params import Ui_species_params
 from ..data.atom_preset import atoms
 
+from ._conv import _float
+
 class species_params(QWidget):
     editingFinished = pyqtSignal()
 
@@ -31,9 +33,7 @@ class species_params(QWidget):
 
     def check_values(self):
         try:
-            float(self.ui.epsilonJLineEdit.text())
-            float(self.ui.sigmaMLineEdit.text())
-            float(self.ui.massKgLineEdit.text())
+            self.get_values()
         except:
             return False
         return True
@@ -50,12 +50,12 @@ class species_params(QWidget):
                 w.setText(str(av))
 
     def get_values(self):
-        vals = (
-            self.ui.epsilonJLineEdit.text(),
-            self.ui.sigmaMLineEdit.text(),
-            self.ui.massKgLineEdit.text(),
+        wid = (
+            self.ui.epsilonJLineEdit,
+            self.ui.sigmaMLineEdit,
+            self.ui.massKgLineEdit,
         )
-        return tuple(float(val) for val in vals)
+        return tuple(map(_float,wid))
 
     def _editing_finished(self):
         self.editingFinished.emit()
