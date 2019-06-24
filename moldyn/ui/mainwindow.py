@@ -24,6 +24,8 @@ from .qt.mainwindow import Ui_MainWindow
 from .create_model import CreateModelDialog
 from .model_viewer import ModelView
 
+from ._conv import _float
+
 from ..simulation.builder import Model
 from ..simulation.runner import Simulation
 
@@ -302,7 +304,7 @@ class MoldynMainWindow(QMainWindow):
 
     def update_iters(self):
         try:
-            t = float(self.ui.simulationTimeLineEdit.text())
+            t = _float(self.ui.simulationTimeLineEdit)
         except:
             self.update_simu_time()
         else:
