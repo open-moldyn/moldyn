@@ -7,6 +7,7 @@ from mpl_toolkits.axisartist.parasite_axes import HostAxes, ParasiteAxes
 from pyqtgraph import PlotWidget
 import time
 import multiprocessing as mp
+from datetime import timedelta
 
 from moldyn.utils.data_mng import DynState, tmp1_path, tmp_path
 
@@ -342,7 +343,7 @@ class MoldynMainWindow(QMainWindow):
             self.progress_gr.setData(self.t_deque)
             self.ui.currentIteration.setText(str(v+1))
             self.ui.currentTime.setText(str((v+1)*self.model.dt))
-            self.ui.ETA.setText(str(int( (self.ui.iterationsSpinBox.value()/c_i - 1)*(new_t-self.simu_starttime) )) + "s")
+            self.ui.ETA.setText(str(timedelta(seconds=int( (self.ui.iterationsSpinBox.value()/c_i - 1)*(new_t-self.simu_starttime) ))))
 
         if self.save_pos:
             self.pos_IO.save(self.simulation.model.pos)
