@@ -86,23 +86,23 @@ class MoldynMainWindow(QMainWindow):
             }
         }
 
-        def subItems(item, parent):
+        def sub_items(item, parent):
             for k in item:
                 if type(item[k]) == list:
                     if len(item[k])>1:
-                        item[k][1:] = ["", item[k][-1]]
-                    currentItem = QTreeWidgetItem(item[k])
-                    self.displayed_properties[k] = currentItem
+                        item[k][1:] = ["", item[k][1]]
+                    current_item = QTreeWidgetItem(item[k])
+                    self.displayed_properties[k] = current_item
                 else:
-                    currentItem = QTreeWidgetItem([k])
-                    subItems(item[k], currentItem)
-                parent.addChild(currentItem)
-                currentItem.setExpanded(True)
+                    current_item = QTreeWidgetItem([k])
+                    sub_items(item[k], current_item)
+                parent.addChild(current_item)
+                current_item.setExpanded(True)
 
         self.ui.paramsTreeWidget.addChild = self.ui.paramsTreeWidget.addTopLevelItem
         self.ui.paramsTreeWidget.header().setResizeMode(QHeaderView.ResizeToContents)
 
-        subItems(self.displayed_properties_list, self.ui.paramsTreeWidget)
+        sub_items(self.displayed_properties_list, self.ui.paramsTreeWidget)
 
         # Panneau simu
 
