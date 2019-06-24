@@ -3,10 +3,6 @@ Simulator.
 Simulates the dynamics of a model (on the CPU or GPU).
 """
 
-import os
-
-from ..utils import gl_util
-import moderngl
 import numpy as np
 import numexpr as ne
 import scipy.interpolate as inter
@@ -24,6 +20,12 @@ class Simulation:
     model : builder.Model
         Model to simulate.
         The original model object is copied, and thus preserved, which allows it to serve as a reference.
+    simulation : Simulation
+        Simulation to copy.
+        The simulation is copied, and the computing module reinitialized.
+    prefer_gpu : bool
+        Specifies if GPU should be used to compute inter-atomic forces.
+        Defaults to `True`, as it often results in a significant speed gain.
 
     Attributes
     ----------
@@ -56,18 +58,8 @@ class Simulation:
 
         self.model = model.copy()
 
-        # Découpage de la liste en segments de taille acceptable par le GPU
-        #max_layout_size = gl_util.testMaxSizes()
-        max_layout_size = 256 # Probablement optimal (en tout cas d'après essais et guides de bonnes pratiques)
-        self.groups_number = int(np.ceil(self.model.npart / max_layout_size))
-        self.layout_size = int(np.ceil(self.model.npart / self.groups_number))
-
-        # Chargement et paramétrage du compute shader
-        consts = {
-            "LAYOUT_SIZE": self.layout_size,
-            "X_PERIODIC": 1,
-            "Y_PERIODIC": 1,
-        }
+        # paramétrage du module de calcul
+        consts = dict()
         for k in model.params:
             consts[k.upper()] = model.params[k]
 

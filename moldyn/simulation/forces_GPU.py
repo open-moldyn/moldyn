@@ -16,8 +16,14 @@ if not gl_util.testGL():
 class ForcesComputeGPU:
 
     def __init__(self, consts, compute_npart=None):
+        """
 
-        self.consts = consts
+        Parameters
+        ----------
+        consts : dict
+            Dictionary containing constants used for calculations.
+
+        """
 
         self.npart = consts["NPART"]
         self.compute_npart = compute_npart or consts["NPART"]
@@ -26,11 +32,16 @@ class ForcesComputeGPU:
         self.groups_number = int(np.ceil(self.compute_npart / max_layout_size))
         self.layout_size = int(np.ceil(self.compute_npart / self.groups_number))
 
+        consts["LAYOUT_SIZE"] = self.layout_size
+
         self.compute_npart = min(self.compute_npart, self.npart)
         self.compute_offset = 0
 
         self.context = moderngl.create_standalone_context(require=430)
         self.compute_shader = self.context.compute_shader(gl_util.source(os.path.dirname(__file__)+'/templates/moldyn.glsl', consts))
+
+
+        self.consts = consts
 
         # Buffer de positions 1
         self._BUFFER_P = self.context.buffer(reserve=2 * 4 * self.npart)
@@ -59,8 +70,8 @@ class ForcesComputeGPU:
 
         Parameters
         ----------
-        pos : array
-            array of positions
+        pos : np.ndarray
+            Array of positions.
 
         Returns
         -------
@@ -75,7 +86,7 @@ class ForcesComputeGPU:
         Returns
         -------
         np.ndarray
-            Computed inter-atomic forces
+            Computed inter-atomic forces.
         """
         return np.frombuffer(self._BUFFER_F.read(), dtype=np.float32).reshape(self.array_shape)
 
@@ -85,7 +96,7 @@ class ForcesComputeGPU:
         Returns
         -------
         np.ndarray
-            Computed potential energy
+            Computed potential energy.
         """
         return np.frombuffer(self._BUFFER_E.read(), dtype=np.float32)
 
@@ -95,6 +106,6 @@ class ForcesComputeGPU:
         Returns
         -------
         np.ndarray
-            Average near atoms
+            Average near atoms.
         """
         return np.frombuffer(self._BUFFER_COUNT.read(), dtype=np.float32)
