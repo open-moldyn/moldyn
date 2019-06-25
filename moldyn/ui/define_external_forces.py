@@ -19,7 +19,7 @@ class EditModelDialog(QWidget):
 
     @property(set_up_lower_limit)
     def up_lower_limit(self):
-        return _float(self.ui.lowerLimitMLineEdit)
+        return _float(self.ui.lowerLimitMLineEdit, 0)
 
     def set_up_apply(self, b):
         self.ui.applyExternalForceCheckBox.setChecked(b)
@@ -34,27 +34,21 @@ class EditModelDialog(QWidget):
 
     @property(set_up_x_component)
     def up_x_component(self):
-        try:
-            return _float(self.ui.xForceComponentPerAtomNLineEdit)
-        except:
-            return 0
+        return _float(self.ui.xForceComponentPerAtomNLineEdit, 0)
 
     def set_up_y_component(self, v):
         self.ui.yForceComponentPerAtomNLineEdit.setText(str(v))
 
     @property(set_up_y_component)
     def up_y_component(self):
-        try:
-            return _float(self.ui.yForceComponentPerAtomNLineEdit)
-        except:
-            return 0
+        return _float(self.ui.yForceComponentPerAtomNLineEdit, 0)
 
     def set_low_upper_limit(self, v):
         self.ui.upperLimitMLineEdit.setText(str(v))
 
     @property(set_low_upper_limit)
     def low_upper_limit(self):
-        return _float(self.ui.upperLimitMLineEdit)
+        return _float(self.ui.upperLimitMLineEdit, 0)
 
     def set_low_block(self, b):
         self.ui.blockCheckBox.setChecked(b)
