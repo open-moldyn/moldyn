@@ -166,8 +166,8 @@ class DraggableLine:
         ydata = thisline.get_ydata()
         ind = event.ind
         points = tuple(zip(xdata[ind], ydata[ind]))
-        print('onpick points:', points)
-##        print('event contains', ind)
+        #print('onpick points:', points)
+        #print('event contains', ind)
 
         # delete points
         if self.del_key_press or self.del_pending:

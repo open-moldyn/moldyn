@@ -91,8 +91,10 @@ class ParamIO(dict):
                 self[key] = value
         except json.decoder.JSONDecodeError:
             print("File corrupted")
+            pass
         except FileNotFoundError:
-            print("File does not YET exists")
+            #print("File does not YET exists")
+            pass
 
         return self
 
@@ -117,8 +119,10 @@ class ParamIO(dict):
                 param_exists = True
         except json.decoder.JSONDecodeError:
             print("File corrupted")
+            pass
         except FileNotFoundError:
-            print("File does not YET exists")
+            #print("File does not YET exists")
+            pass
         if not param_exists or self != params:
             with open(self.file_name, mode='w') as file:
                 json.dump(self, file, ensure_ascii=False, indent=4)
