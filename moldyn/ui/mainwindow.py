@@ -11,6 +11,11 @@ from datetime import timedelta
 
 from moldyn.utils.data_mng import DynState, tmp1_path, tmp_path
 
+MODEL_FILE_FILTER = "Model file (*.mdl);;Legacy Model file (*.zip)"
+
+SIMULATION_FILE_FILTER_ = "Simulation file (*.mds);;\
+                                                                                Legacy Simulation file (*.zip)"
+
 try:
     mp.set_start_method('spawn')
 except RuntimeError:
@@ -234,7 +239,7 @@ class MoldynMainWindow(QMainWindow):
         self.emd.show()
 
     def load_simulation(self):
-        path, filter = QFileDialog.getOpenFileName(caption="Load model", filter="Model file (*.zip)")
+        path, filter = QFileDialog.getOpenFileName(caption="Load model", filter=SIMULATION_FILE_FILTER_)
         if path:
             ds = self._load_model(path)
             with ds.open(ds.STATE_FCT, 'r') as IO:
@@ -262,7 +267,7 @@ class MoldynMainWindow(QMainWindow):
         self.cmd.show()
 
     def load_model(self):
-        path, filter = QFileDialog.getOpenFileName(caption="Load model", filter="Model file (*.zip)")
+        path, filter = QFileDialog.getOpenFileName(caption="Load model", filter=MODEL_FILE_FILTER)
         if path:
             self._load_model(path)
 
@@ -286,10 +291,10 @@ class MoldynMainWindow(QMainWindow):
         return ds
 
     def _save_model(self, m):
-        path, filter = QFileDialog.getSaveFileName(caption="Save model", filter="Model file (*.zip)")
+        path, filter = QFileDialog.getSaveFileName(caption="Save model", filter=MODEL_FILE_FILTER)
+        print(filter)
         if path:
-            if not path.endswith(".zip"):
-                path += ".zip"
+            path = self._correct_path(path, filter, [".zip", ".mdl"])
             try:
                 shutil.rmtree(tmp1_path)
             except FileNotFoundError:
@@ -297,6 +302,12 @@ class MoldynMainWindow(QMainWindow):
             ds = DynState(tmp1_path)
             ds.save_model(m)
             ds.to_zip(path)
+
+    def _correct_path(self, path, filter, expected):
+        for ext in expected:
+            if not path.endswith(ext) and ext in filter:
+                path += ext
+                return path
 
     def save_model(self):
         self._save_model(self.model)
@@ -436,10 +447,9 @@ class MoldynMainWindow(QMainWindow):
         self.ui.tabWidget.setCurrentWidget(self.ui.tab_model)
 
     def save_simu_history(self):
-        path, filter = QFileDialog.getSaveFileName(caption="Save simulation history", filter="Simulation file (*.zip)")
+        path, filter = QFileDialog.getSaveFileName(caption="Save simulation history", filter=SIMULATION_FILE_FILTER_)
         if path:
-            if not path.endswith(".zip"):
-                path += ".zip"
+            path = self._correct_path(path, filter, [".zip", ".mds"])
             #shutil.rmtree('./data/tmp1')
             ds = DynState(tmp_path)
             if not self.ui.saveAllAtomsPositionCheckBox.checkState():
@@ -560,6 +570,7 @@ class MoldynMainWindow(QMainWindow):
     def make_movie(self):
         path, filter = QFileDialog.getSaveFileName(caption="Make movie", filter="Video file (*.mp4)")
         if path:
+            path = self._correct_path(path, filter, [".mp4"])
             self.ui.tab_model.setEnabled(False)
             self.ui.tab_simu.setEnabled(False)
             self.ui.groupBoxMovie.setEnabled(False)
