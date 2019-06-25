@@ -115,17 +115,14 @@ class CreateModelDialog(QWizard):
 
     def box_w_changed(self):
         try:
-            l = float(self.ui.boxWidthLineEdit.text())
+            l = _float(self.ui.boxWidthLineEdit)
         except:
             l = _float(self.ui.distanceBetweenAtoms) * (self.ui.gridWidth.value())
         self.ui.boxWidthLineEdit.setText(str(l))
         self.ui.distanceBetweenAtoms.setText(str(l / (self.ui.gridWidth.value())))
 
     def checked_distance(self):
-        try:
-            d = _float(self.ui.distanceBetweenAtoms)
-        except:
-            d = self.model.re_ab
+        d = _float(self.ui.distanceBetweenAtoms, self.model.re_ab)
         self.ui.distanceBetweenAtoms.setText(str(d))
 
         self.ui.boxWidthLineEdit.setText(str(d * (self.ui.gridWidth.value())))
@@ -148,14 +145,8 @@ class CreateModelDialog(QWizard):
         self.checked_timestep()
 
     def check_es_ab(self):
-        try:
-            epsilon_ab = _float(self.ui.epsilonJLineEdit)
-        except:
-            epsilon_ab = self.model.epsilon_ab
-        try:
-            sigma_ab = _float(self.ui.sigmaMLineEdit)
-        except:
-            sigma_ab = self.model.sigma_ab
+        epsilon_ab = _float(self.ui.epsilonJLineEdit, self.model.epsilon_ab)
+        sigma_ab = _float(self.ui.sigmaMLineEdit, self.model.sigma_ab)
         self.ui.epsilonJLineEdit.setText(str(epsilon_ab))
         self.ui.sigmaMLineEdit.setText(str(sigma_ab))
         self.model.params["epsilon_ab"] = epsilon_ab
@@ -171,24 +162,15 @@ class CreateModelDialog(QWizard):
         self.ui.r_cut_abLineEdit.setText(str(rcut_ab))
 
     def check_rcut(self):
-        try:
-            rcut_a = _float(self.ui.r_cut_aLineEdit)
-        except:
-            rcut_a = self.model.rcut_a
+        rcut_a = _float(self.ui.r_cut_aLineEdit, self.model.rcut_a)
         self.model.params["rcut_a"] = rcut_a
         self.ui.r_cut_aLineEdit.setText(str(rcut_a))
 
-        try:
-            rcut_b = _float(self.ui.r_cut_bLineEdit)
-        except:
-            rcut_b = self.model.rcut_ab
+        rcut_b = _float(self.ui.r_cut_bLineEdit, self.model.rcut_ab)
         self.model.params["rcut_b"] = rcut_b
         self.ui.r_cut_bLineEdit.setText(str(rcut_b))
 
-        try:
-            rcut_ab = _float(self.ui.r_cut_abLineEdit)
-        except:
-            rcut_ab = self.model.rcut_ab
+        rcut_ab = _float(self.ui.r_cut_abLineEdit, self.model.rcut_ab)
         self.model.params["rcut_ab"] = rcut_ab
         self.ui.r_cut_abLineEdit.setText(str(rcut_ab))
 
@@ -213,10 +195,7 @@ class CreateModelDialog(QWizard):
         self.checked_timestep()
 
     def checked_timestep(self):
-        try:
-            dt = _float(self.ui.timestepLineEdit)
-        except:
-            dt = self.model.dt
+        dt = _float(self.ui.timestepLineEdit, self.model.dt)
         self.ui.timestepLineEdit.setText(str(dt))
         self.model.dt = dt
 
@@ -229,8 +208,6 @@ class CreateModelDialog(QWizard):
         return dt
 
     def accept(self):
-        self.model.params["epsilon_ab"] = _float(self.ui.epsilonJLineEdit)
-        self.model.params["sigma_ab"] = _float(self.ui.sigmaMLineEdit)
         if self.parent_window:
             self.parent_window.set_model(self.model)
         super().accept()
