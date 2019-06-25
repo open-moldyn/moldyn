@@ -1,6 +1,5 @@
 from PyQt5.QtWidgets import QDialog
 
-from ..simulation.builder import Model
 from .qt.edit_model import Ui_EditModel
 
 
