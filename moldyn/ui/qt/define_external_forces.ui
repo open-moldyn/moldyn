@@ -62,7 +62,7 @@
        </layout>
       </item>
       <item>
-       <widget class="QWidget" name="widget" native="true">
+       <widget class="QWidget" name="up_components" native="true">
         <property name="enabled">
          <bool>false</bool>
         </property>
