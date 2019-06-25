@@ -19,7 +19,7 @@ class CreateModelDialog(QWizard):
 
         self.parent_window = parent_window
 
-        # Premier panneau (espèces)
+        # Panneau espèces
         self.species_a_params = species_params()
         self.species_b_params = species_params()
         self.ui.layout_a.addWidget(self.species_a_params)
@@ -30,8 +30,8 @@ class CreateModelDialog(QWizard):
 
         self.model = Model()
 
-        # Second panneau (conf spatiale)
-        self.ui.wizardPage1.validatePage =  self.to_spatial_conf
+        # Panneau conf spatiale
+        self.ui.speciesPage.validatePage =  self.to_spatial_conf
 
         self.ui.keepRatioCheckBox.stateChanged.connect(self.keep_ratio)
 
@@ -48,8 +48,8 @@ class CreateModelDialog(QWizard):
 
         self.ui.previewButton.clicked.connect(self.preview)
 
-        # Troisième panneau (paramètres divers)
-        self.ui.wizardPage2.validatePage = self.set_parameters
+        # Panneau paramètres divers
+        self.ui.spatialPage.validatePage = self.set_parameters
 
         self.ui.reset_ia_LJ.clicked.connect(self.reset_es_ab)
 
@@ -69,7 +69,7 @@ class CreateModelDialog(QWizard):
 
         self.show()
 
-    # Premier panneau
+    # Panneau espèces
 
     def check_species(self):
         t = (self.species_a_params, self.species_b_params)
@@ -78,7 +78,7 @@ class CreateModelDialog(QWizard):
             t[a].set_values(t[b].get_values(), False)
         return a or b
 
-    # Second panneau
+    # Panneau conf spatiale
 
     def to_spatial_conf(self):
         if not self.check_species():
@@ -139,7 +139,7 @@ class CreateModelDialog(QWizard):
         self.mv = ModelView(self.model)
         self.mv.show()
 
-    # Troisième panneau
+    # Panneau paramètres divers
 
     def reset_es_ab(self):
         self.model.calc_ab()

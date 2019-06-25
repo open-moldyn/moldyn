@@ -22,7 +22,7 @@
   <property name="wizardStyle">
    <enum>QWizard::ModernStyle</enum>
   </property>
-  <widget class="QWizardPage" name="wizardPage1">
+  <widget class="QWizardPage" name="speciesPage">
    <property name="sizePolicy">
     <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
      <horstretch>0</horstretch>
@@ -71,7 +71,7 @@
     </item>
    </layout>
   </widget>
-  <widget class="QWizardPage" name="wizardPage2">
+  <widget class="QWizardPage" name="spatialPage">
    <property name="title">
     <string>Spatial configuration</string>
    </property>
@@ -276,7 +276,7 @@
     </item>
    </layout>
   </widget>
-  <widget class="QWizardPage" name="wizardPage3">
+  <widget class="QWizardPage" name="otherPage">
    <property name="title">
     <string>Other parameters</string>
    </property>

@@ -11,7 +11,7 @@ from PyQt5 import QtCore, QtGui, QtWidgets
 class Ui_EditModel(object):
     def setupUi(self, EditModel):
         EditModel.setObjectName("EditModel")
-        EditModel.resize(435, 457)
+        EditModel.resize(493, 457)
         self.gridLayout = QtWidgets.QGridLayout(EditModel)
         self.gridLayout.setObjectName("gridLayout")
         self.buttonBox = QtWidgets.QDialogButtonBox(EditModel)
