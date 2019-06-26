@@ -581,7 +581,7 @@ class MoldynMainWindow(QMainWindow):
                     self.movie_progress_signal.emit(k)
 
                 visu.make_movie(self.simulation, DynState(tmp_path), path, self.ui.stepsByFrameSpinBox.value(),
-                                self.ui.FPSSpinBox.value(), up)
+                                self.ui.FPSSpinBox.value(), callback=up)
 
             def end():
                 self.ui.tab_model.setEnabled(True)
