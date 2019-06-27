@@ -7,12 +7,13 @@ from ._conv import _float
 
 class define_exernal_forces(QWidget):
 
-    def __init__(self, model, *args):
+    def __init__(self, *args, model=None):
         super().__init__(*args)
         self.ui = Ui_ExternalForces()
         self.ui.setupUi(self)
 
-        self.model = model
+        if model:
+            self.set_model(model)
 
         self.ui.applyExternalForceCheckBox.stateChanged.connect(self.ui.up_components.setEnabled)
 
@@ -22,14 +23,22 @@ class define_exernal_forces(QWidget):
         self.ui.lowerLimitMLineEdit.editingFinished.connect(self.up_edited)
         self.ui.upperLimitMLineEdit.editingFinished.connect(self.low_edited)
 
+        self.ui.applyExternalForceCheckBox.stateChanged.connect(self.checkbox_state_changed)
+        self.ui.blockCheckBox.stateChanged.connect(self.checkbox_state_changed)
+
+        self.ui.xForceComponentPerAtomNLineEdit.editingFinished.connect(self.component_changed)
+        self.ui.yForceComponentPerAtomNLineEdit.editingFinished.connect(self.component_changed)
+
+        self.show()
+
+    def set_model(self, model):
+        self.model = model
+
         self.up_apply = self.model.up_apply_force
         self.low_block = self.model.low_block
 
         self.up_lower_limit = self.model.up_zone_lower_limit
         self.low_upper_limit = self.model.low_zone_upper_limit
-
-        self.ui.applyExternalForceCheckBox.stateChanged.connect(self.checkbox_state_changed)
-        self.ui.blockCheckBox.stateChanged.connect(self.checkbox_state_changed)
 
         self.up_x_component = self.model.up_x_component
         self.up_y_component = self.model.up_y_component
@@ -37,7 +46,9 @@ class define_exernal_forces(QWidget):
         self.up_edited()
         self.low_edited()
 
-        self.show()
+    def component_changed(self):
+        self.model.params["up_x_component"] = self.up_x_component
+        self.model.params["up_y_component"] = self.up_y_component
 
     def checkbox_state_changed(self):
         self.model.params["up_apply_force"] = self.up_apply
@@ -83,7 +94,7 @@ class define_exernal_forces(QWidget):
 
     @property
     def up_apply(self):
-        return self.ui.applyExternalForceCheckBox.isChecked()
+        return int(self.ui.applyExternalForceCheckBox.isChecked())
 
     @up_apply.setter
     def up_apply(self, b):
@@ -116,7 +127,7 @@ class define_exernal_forces(QWidget):
 
     @property
     def low_block(self):
-        return self.ui.blockCheckBox.isChecked()
+        return int(self.ui.blockCheckBox.isChecked())
 
     @low_block.setter
     def low_block(self, b):

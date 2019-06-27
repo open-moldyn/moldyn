@@ -294,12 +294,14 @@ class DynState(dt.Treant):
         with ZipFile(path, "w") as archive:
             for leaf in self.leaves():
                 if leaf.exists:
-                    #print(leaf.relpath)
-                    if '/' in leaf.relpath:
+                    #print(path)
+                    #print(leaf.abspath)
+                    if '/' in leaf.abspath:
                         sep = '/'
                     else:
                         sep = '\\'
-                    archive.write(leaf.relpath, arcname=leaf.relpath.split(sep)[-1])
+                    archive.write(leaf.relpath, arcname=leaf.abspath.split(sep)[-1])
+                    #print(leaf.relpath.split(sep)[-1])
 
     def save_model(self, model):
 

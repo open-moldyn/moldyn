@@ -178,9 +178,9 @@ class Model:
             "y_lim_inf":0,
             "gamma":0.5,
             "up_zone_lower_limit":0.0,
-            "up_apply_force":False,
+            "up_apply_force":0,
             "low_zone_upper_limit":0.0,
-            "low_block":False,
+            "low_block":0,
             "up_x_component":0.0,
             "up_y_component":0.0,
         }

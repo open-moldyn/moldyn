@@ -308,6 +308,7 @@ class MoldynMainWindow(QMainWindow):
             if not path.endswith(ext) and ext in filter:
                 path += ext
                 return path
+        return path
 
     def save_model(self):
         self._save_model(self.model)

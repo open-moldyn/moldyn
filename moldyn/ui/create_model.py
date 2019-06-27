@@ -51,7 +51,7 @@ class CreateModelDialog(QWizard):
 
         # Panneau forces extérieures
 
-        self.external_forces = define_exernal_forces(self.model)
+        self.external_forces = define_exernal_forces()
         self.ui.layout_forces.addWidget(self.external_forces)
 
         # Panneau paramètres divers
@@ -184,6 +184,8 @@ class CreateModelDialog(QWizard):
         self.model.atom_grid(self.ui.gridWidth.value(), self.ui.gridHeight.value(), self.checked_distance())
         self.model.shuffle_atoms()
         self.model.set_dt()
+
+        self.external_forces.set_model(self.model)
 
         self.model.T = 1.0
         self.ui.temperatureKDoubleSpinBox.setValue(1.0)
