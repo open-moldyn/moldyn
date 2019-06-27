@@ -177,6 +177,12 @@ class Model:
             "x_lim_inf":0,
             "y_lim_inf":0,
             "gamma":0.5,
+            "up_zone_lower_limit":0.0,
+            "up_apply_force":False,
+            "low_zone_upper_limit":0.0,
+            "low_block":False,
+            "up_x_component":0.0,
+            "up_y_component":0.0,
         }
 
         self.x_lim_sup = 0

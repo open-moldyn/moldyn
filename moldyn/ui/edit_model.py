@@ -2,6 +2,7 @@ from PyQt5.QtWidgets import QDialog
 
 from .qt.edit_model import Ui_EditModel
 
+from .define_external_forces import define_exernal_forces
 
 class EditModelDialog(QDialog):
 
@@ -16,6 +17,9 @@ class EditModelDialog(QDialog):
 
         self.ui.enableXPeriodicBoudariesCheckBox.setChecked(self.model.x_periodic)
         self.ui.enableYPeriodicBoudariesCheckBox.setChecked(self.model.y_periodic)
+
+        self.external_forces = define_exernal_forces(self.model)
+        self.ui.verticalLayout.addWidget(self.external_forces)
 
         self.ui.buttonBox.accepted.connect(self.accept)
         self.ui.buttonBox.rejected.connect(self.reject)

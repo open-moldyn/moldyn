@@ -5,4 +5,5 @@ def _float(w, default=None):
         try:
             return _float(w)
         except:
+            w.setText(str(default))
             return default

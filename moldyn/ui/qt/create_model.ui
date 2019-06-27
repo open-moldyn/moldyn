@@ -276,6 +276,16 @@
     </item>
    </layout>
   </widget>
+  <widget class="QWizardPage" name="forcesPage">
+   <property name="title">
+    <string>External forces (yet to implement)</string>
+   </property>
+   <layout class="QHBoxLayout" name="horizontalLayout_2">
+    <item>
+     <layout class="QHBoxLayout" name="layout_forces"/>
+    </item>
+   </layout>
+  </widget>
   <widget class="QWizardPage" name="otherPage">
    <property name="title">
     <string>Other parameters</string>

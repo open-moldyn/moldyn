@@ -1,6 +1,7 @@
 from PyQt5.QtWidgets import QWizard, QMessageBox
 from .qt.create_model import Ui_CreateModel
 from .species_params import species_params
+from .define_external_forces import define_exernal_forces
 
 from ..simulation.builder import Model
 from .model_viewer import ModelView
@@ -47,6 +48,11 @@ class CreateModelDialog(QWizard):
         self.ui.firstSpeciesMoleFraction.valueChanged.connect(self.model.set_x_a)
 
         self.ui.previewButton.clicked.connect(self.preview)
+
+        # Panneau forces extérieures
+
+        self.external_forces = define_exernal_forces(self.model)
+        self.ui.layout_forces.addWidget(self.external_forces)
 
         # Panneau paramètres divers
         self.ui.spatialPage.validatePage = self.set_parameters

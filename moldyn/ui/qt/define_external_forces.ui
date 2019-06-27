@@ -11,6 +11,18 @@
    </rect>
   </property>
   <layout class="QVBoxLayout" name="verticalLayout">
+   <property name="leftMargin">
+    <number>0</number>
+   </property>
+   <property name="topMargin">
+    <number>0</number>
+   </property>
+   <property name="rightMargin">
+    <number>0</number>
+   </property>
+   <property name="bottomMargin">
+    <number>0</number>
+   </property>
    <item>
     <widget class="QGroupBox" name="upGroupBox">
      <property name="title">
@@ -27,7 +39,10 @@
          </widget>
         </item>
         <item row="0" column="1">
-         <widget class="QDoubleSpinBox" name="fractionOfSpaceDoubleSpinBox">
+         <widget class="QDoubleSpinBox" name="upFractionOfSpaceDoubleSpinBox">
+          <property name="decimals">
+           <number>4</number>
+          </property>
           <property name="maximum">
            <double>1.000000000000000</double>
           </property>
@@ -129,7 +144,10 @@
          </widget>
         </item>
         <item row="0" column="1">
-         <widget class="QDoubleSpinBox" name="fractionOfSpaceDoubleSpinBox_2">
+         <widget class="QDoubleSpinBox" name="lowFractionOfSpaceDoubleSpinBox">
+          <property name="decimals">
+           <number>4</number>
+          </property>
           <property name="maximum">
            <double>1.000000000000000</double>
           </property>
