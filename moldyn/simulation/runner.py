@@ -72,7 +72,7 @@ class Simulation:
         else:
             self._compute = ForcesComputeCPU(consts)
 
-        self.T_f = lambda t:model.T
+        self.T_f = lambda t:self.T[-1]
 
         if simulation :
             self.current_iter = simulation.current_iter
@@ -174,7 +174,11 @@ class Simulation:
             length *= (self.model.x_periodic, self.model.y_periodic)
             # on n'applique les conditions périodiques que selon le(s) axe(s) spécifié(s)
 
-        kick = "(v + (F*dtm))"
+        kick = "F"
+        if apply_up_zone_forces:
+            kick = "(F+up_mask*up_zone_force)"
+            up_mask = np.zeros(pos.shape)
+        kick = "(v + ("+kick+"*dtm))"
         if betaC:
             kick += "*sqrt(1 + gamma*(T_v/T - 1))"
         if low_zone_block:
@@ -208,6 +212,9 @@ class Simulation:
             EP = 0.5 * ne.evaluate("sum(EPgl)")
             self.EP.append(EP)
             self.ET.append(EC + EP)
+
+            if apply_up_zone_forces: # recalculage du masque, parce que ça bouge
+                up_mask[:,:] = np.array([pos[:,1] > up_zone_limit]*2).T
 
             # Thermostat
             T_v = self.T_f(t)
