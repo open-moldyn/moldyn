@@ -6,6 +6,7 @@ from matplotlib.tri import TriAnalyzer, Triangulation, UniformTriRefiner
 from scipy.spatial import Voronoi, ConvexHull
 import moderngl
 
+from moldyn.simulation.builder import Model
 from moldyn.utils import gl_util
 
 
@@ -205,3 +206,11 @@ class StrainComputeGPU:
         return np.frombuffer(self._BUFFER_F.read(), dtype=np.float32).reshape(self.array_shape)
 
 
+def compute_strain(model0:Model, model1, rcut):
+    params = model0.params
+    params["RCUT"] = rcut
+    strain_compute = StrainComputeGPU(params)
+    strain_compute.set_post(model0.pos)
+    strain_compute.set_posdt(model1.pos)
+    strain_compute.compute()
+    return strain_compute.get_eps()

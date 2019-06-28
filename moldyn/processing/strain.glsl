@@ -46,10 +46,10 @@ void main()
 	mat2 eps = mat2(0.0);
 
 	if(x < NPART) { // On vérifie qu'on est bien associé à un atome
-		for(uint i = 0; i<2; i++){
-			for(uint j = 0; j<2; j++){
-				for(uint n = 0; n<NPART; n++){
-					if (n!=x) {
+        for(uint n = 0; n<NPART; n++){
+            for(uint i = 0; i<2; i++){
+                for(uint j = 0; j<2; j++){
+                        if (n!=x) {
 						vec2 distxy = pos - inpost[n];
 
 						// Conditions périodiques de bord
