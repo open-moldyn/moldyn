@@ -15,7 +15,6 @@
 #define X_PERIODIC %%X_PERIODIC%%
 #define Y_PERIODIC %%Y_PERIODIC%%
 
-
 layout (local_size_x=LAYOUT_SIZE, local_size_y=1, local_size_z=1) in;
 
 layout (std430, binding=0) buffer in_0

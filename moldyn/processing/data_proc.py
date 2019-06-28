@@ -1,7 +1,13 @@
+import os
+
 import numpy as np
 import numexpr as ne
 from matplotlib.tri import TriAnalyzer, Triangulation, UniformTriRefiner
 from scipy.spatial import Voronoi, ConvexHull
+import moderngl
+
+from moldyn.utils import gl_util
+
 
 def PDF(pos, nb_samples, rcut, bin_count):
     """
@@ -107,3 +113,95 @@ def density(model, refinement=0):
         tri, vert_density = tri2, vert_density
 
     return tri, vert_density
+
+
+class StrainComputeGPU:
+
+    def __init__(self, consts, compute_npart=None):
+        """
+
+        Parameters
+        ----------
+        consts : dict
+            Dictionary containing constants used for calculations.
+
+        """
+
+        self.npart = consts["NPART"]
+        self.compute_npart = compute_npart or consts["NPART"]
+
+        max_layout_size = 256  # Probablement optimal (en tout cas d'après essais et guides de bonnes pratiques)
+        self.groups_number = int(np.ceil(self.compute_npart / max_layout_size))
+        self.layout_size = int(np.ceil(self.compute_npart / self.groups_number))
+
+        consts["LAYOUT_SIZE"] = self.layout_size
+
+        self.compute_npart = min(self.compute_npart, self.npart)
+        self.compute_offset = 0
+
+        self.context = moderngl.create_standalone_context(require=430)
+        self.compute_shader = self.context.compute_shader(gl_util.source(os.path.dirname(__file__)+'/strain.glsl', consts))
+
+        self.consts = consts
+
+        # Buffer de positions au temps t
+        self._BUFFER_P_T = self.context.buffer(reserve=2 * 4 * self.npart)
+        self._BUFFER_P_T.bind_to_storage_buffer(0)
+
+        # Buffer de positions au temps t - dt
+        self._BUFFER_P_DT = self.context.buffer(reserve=2 * 4 * self.npart)
+        self._BUFFER_P_DT.bind_to_storage_buffer(1)
+
+        # Buffer d'epsilon
+        self._BUFFER_E = self.context.buffer(reserve= 4 * 4 * self.npart)
+        self._BUFFER_E.bind_to_storage_buffer(2)
+
+        self.array_shape = (self.npart, 2, 2)
+
+    def set_post(self, pos):
+        """
+
+        Parameters
+        ----------
+        pos : np.ndarray
+            Array of positions.
+
+        Returns
+        -------
+
+        """
+        self._BUFFER_P_T.write(pos.astype('f4').tobytes())
+
+    def set_posdt(self, pos):
+        """
+        Parameters
+        ----------
+        pos : np.ndarray
+            Array of positions.
+
+        Returns
+        -------
+
+        """
+        self._BUFFER_P_DT.write(pos.astype('f4').tobytes())
+
+    def compute(self):
+        """
+        Compute the strain.
+        Returns
+        -------
+
+        """
+        self.compute_shader.run(group_x=self.groups_number)
+
+    def get_eps(self):
+        """
+
+        Returns
+        -------
+        np.ndarray
+            Computed inter-atomic forces.
+        """
+        return np.frombuffer(self._BUFFER_F.read(), dtype=np.float32).reshape(self.array_shape)
+
+
