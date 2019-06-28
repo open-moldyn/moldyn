@@ -153,6 +153,7 @@ class Simulation:
         npart = self.model.npart
         inv2npart = 0.5/npart
         knparts = self.model.kB * npart
+        gamma = self.model.gamma
 
         limInf = self.model.lim_inf
         limSup = self.model.lim_sup
@@ -163,11 +164,24 @@ class Simulation:
 
         periodic = self.model.x_periodic or self.model.y_periodic
 
+        apply_up_zone_forces = self.model.up_apply_force
+        up_zone_force = self.model.up_forces
+        up_zone_limit = self.model.up_zone_lower_limit
+        low_zone_block = self.model.low_block
+        low_zone_limit = self.model.low_zone_upper_limit
+
         if periodic:
             length *= (self.model.x_periodic, self.model.y_periodic)
             # on n'applique les conditions périodiques que selon le(s) axe(s) spécifié(s)
 
-        TVOULUE = 0
+        kick = "(v + (F*dtm))"
+        if betaC:
+            kick += "*sqrt(1 + gamma*(T_v/T - 1))"
+        if low_zone_block:
+            # On présélectionne les atomes bloqués, afin que leur nombre ne change pas
+            low_block_mask = pos[:,1] > low_zone_limit
+            low_block_mask = np.array([low_block_mask]*2).T
+            kick += "*low_block_mask"
 
         for i in range(n):
 
@@ -196,13 +210,9 @@ class Simulation:
             self.ET.append(EC + EP)
 
             # Thermostat
-            self.T_ctrl.append(self.T_f(t))
-            if betaC:
-                beta = np.sqrt(1+self.model.gamma*(self.T_f(t)/T-1))
-                ne.evaluate("(v + (F*dtm))*beta", out=v) # kick
-
-            else:
-                ne.evaluate("v + (F*dtm)", out=v)  # kick
+            T_v = self.T_f(t)
+            self.T_ctrl.append(T_v)
+            ne.evaluate(kick, out=v) # kick
 
             ne.evaluate("pos + v*dt2", out=pos)  # half drift
 

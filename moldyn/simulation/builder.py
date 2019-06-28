@@ -216,6 +216,7 @@ class Model:
         "length",
         "lim_sup",
         "lim_inf",
+        "up_forces",
     ]
 
     def __getattr__(self, item):
@@ -434,6 +435,9 @@ class Model:
         m = np.concatenate((self.m_a*np.ones(self.n_a), self.m_b*np.ones(self.npart - self.n_a)))
         self.m = np.transpose([m,m])
         return self.m
+
+    def get_up_forces(self):
+        return np.array([self.up_x_component, self.up_y_component])
 
     def get_EC(self): # énergie cinétique
         v = self.v
