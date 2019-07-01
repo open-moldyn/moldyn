@@ -241,6 +241,7 @@ class StrainComputeGPU:
         return np.frombuffer(self._BUFFER_F.read(), dtype=np.float32).reshape(self.array_shape)
 
 
+@cached
 def compute_strain(model0:Model, model1:Model, rcut):
     params = model0.params.copy()
     params["RCUT"] = rcut
