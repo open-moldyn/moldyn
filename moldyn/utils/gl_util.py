@@ -3,7 +3,7 @@ import os
 
 def source(uri, consts={}):
     """
-    Reads and replaces constants in a text file.
+    Reads and replaces constants (in all caps) in a text file.
 
     Parameters
     ----------
@@ -24,7 +24,7 @@ def source(uri, consts={}):
 
     # feed constant values
     for key, value in consts.items():
-        content = content.replace(f"%%{key}%%", str(value))
+        content = content.replace(f"%%{key}%%".upper(), str(value))
     return content
 
 def testGL():
