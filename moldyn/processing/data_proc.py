@@ -1,4 +1,5 @@
 import os
+from functools import wraps
 
 import numpy as np
 import numexpr as ne
@@ -10,6 +11,39 @@ from moldyn.simulation.builder import Model
 from moldyn.utils import gl_util
 
 
+_cache = dict()
+
+
+def cached(f):
+    fn = f.__repr__()
+    _cache[f] = ne.utils.CacheDict(64)
+
+    @wraps(f)
+    def cf(*args, **kwargs):
+        argscp = []
+        for arg in args:
+            try:
+                hash(arg)
+            except:
+                arg = id(arg)
+            argscp.append(arg)
+        for arg in kwargs.items():
+            try:
+                hash(arg)
+            except:
+                arg = (arg[0], id(arg[1]))
+            argscp.append(arg)
+        key = tuple(argscp)
+        try:
+            cv = _cache[f][key]
+        except KeyError:
+            cv = f(*args, **kwargs)
+            _cache[f][key] = cv
+        return cv
+    return cf
+
+
+@cached
 def PDF(pos, nb_samples, rcut, bin_count):
     """
     Pair Distribution Function. Returns normalized histogram of distance between atoms.
@@ -41,6 +75,7 @@ def PDF(pos, nb_samples, rcut, bin_count):
     return bins[:-1], hist/nb_samples
 
 
+@cached
 def density(model, refinement=0):
     """
     Create a Voronoi mesh and calculate the local particle density on its vertices.
