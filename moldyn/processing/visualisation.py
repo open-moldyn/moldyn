@@ -3,6 +3,8 @@ import os
 
 from PIL import Image
 from imageio_ffmpeg import write_frames
+
+from moldyn.processing.data_proc import compute_strain
 from . import data_proc as dp
 from mpl_toolkits.mplot3d import Axes3D
 import matplotlib.pyplot as plt
@@ -10,7 +12,6 @@ from functools import wraps
 import matplotlib
 matplotlib.use('Qt5Agg')
 import numpy as np
-import scipy as sp
 
 
 def _plot_base(*, show=False, axis='', grid=False, figure=None):
@@ -115,7 +116,7 @@ def plot_densityf(model, levels=None, refinement=0):
         levels = np.linspace(min(density), max(density), levels)
     CS = plt.tricontourf(tri, density, levels=levels, cmap=cmap)
     cbar = fig.colorbar(CS)
-    cbar.ax.set_ylabel('local density')\
+    cbar.ax.set_ylabel('local density')
 
 @_plot_base(axis='scaled', grid=False)
 def plot_particles(model):
@@ -222,3 +223,16 @@ def make_movie(simulation, dynstate, name: str, pfilm=5, fps=24, callback=None):
             pos = fix.load() # on charge a chaque pas de temps
         gen.close()
         plt.close(fig)
+
+
+@_plot_base(axis='scaled', grid=False)
+def deformation_volume(model0, model1, rcut, levels=80):
+    eps = compute_strain(model0, model1, rcut)
+    fig = plt.gcf()
+    cmap = plt.get_cmap("viridis")
+    dV = eps.trace(axis1=1, axis2=2)
+    if type(levels) == int:
+        levels = np.linspace(min(dV), max(dV), levels)
+    CS = plt.tricontourf(model1.pos, dV, levels=levels, cmap=cmap)
+    cbar = fig.colorbar(CS)
+    cbar.ax.set_ylabel('local density')
