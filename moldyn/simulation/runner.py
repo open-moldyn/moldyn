@@ -205,6 +205,9 @@ class Simulation:
             self.EC.append(EC)
             self.T.append(T)
 
+            if apply_up_zone_forces: # recalcul du masque, parce que ça bouge
+                up_mask[:,:] = np.array([pos[:,1] > up_zone_limit]*2).T
+
             F[:] = self._compute.get_F()
 
             # Énergie potentielle
@@ -212,9 +215,6 @@ class Simulation:
             EP = 0.5 * ne.evaluate("sum(EPgl)")
             self.EP.append(EP)
             self.ET.append(EC + EP)
-
-            if apply_up_zone_forces: # recalculage du masque, parce que ça bouge
-                up_mask[:,:] = np.array([pos[:,1] > up_zone_limit]*2).T
 
             # Thermostat
             T_v = self.T_f(t)
