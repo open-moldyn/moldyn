@@ -150,10 +150,16 @@ def density(model, refinement=0):
 
     return tri, vert_density
 
+def identify(func):
+    @wraps(func)
+    def wrap(*args, **kwargs):
+        print(repr(func))
+        return func(*args, **kwargs)
+    return wrap
+
 
 class StrainComputeGPU:
-
-    def __init__(self, consts, compute_npart=None):
+    def __init__(self, consts):
         """
 
         Parameters
@@ -163,22 +169,20 @@ class StrainComputeGPU:
 
         """
 
-        self.npart = consts["NPART"]
-        self.compute_npart = compute_npart or consts["NPART"]
+        self.npart = consts["npart"]
 
         max_layout_size = 256  # Probablement optimal (en tout cas d'après essais et guides de bonnes pratiques)
-        self.groups_number = int(np.ceil(self.compute_npart / max_layout_size))
-        self.layout_size = int(np.ceil(self.compute_npart / self.groups_number))
+        self.groups_number = int(np.ceil(self.npart / max_layout_size))
+        self.layout_size = int(np.ceil(self.npart / self.groups_number))
 
         consts["LAYOUT_SIZE"] = self.layout_size
 
-        self.compute_npart = min(self.compute_npart, self.npart)
-        self.compute_offset = 0
-
         self.context = moderngl.create_standalone_context(require=430)
+        #print(gl_util.source(os.path.dirname(__file__) + '/strain.glsl', consts))
         self.compute_shader = self.context.compute_shader(gl_util.source(os.path.dirname(__file__)+'/strain.glsl', consts))
 
         self.consts = consts
+
 
         # Buffer de positions au temps t
         self._BUFFER_P_T = self.context.buffer(reserve=2 * 4 * self.npart)
@@ -189,7 +193,7 @@ class StrainComputeGPU:
         self._BUFFER_P_DT.bind_to_storage_buffer(1)
 
         # Buffer d'epsilon
-        self._BUFFER_E = self.context.buffer(reserve= 4 * 4 * self.npart)
+        self._BUFFER_E = self.context.buffer(reserve=4 * 4 * self.npart)
         self._BUFFER_E.bind_to_storage_buffer(2)
 
         self.array_shape = (self.npart, 2, 2)
@@ -238,7 +242,7 @@ class StrainComputeGPU:
         np.ndarray
             Computed inter-atomic forces.
         """
-        return np.frombuffer(self._BUFFER_F.read(), dtype=np.float32).reshape(self.array_shape)
+        return np.frombuffer(self._BUFFER_E.read(), dtype=np.float32).reshape(self.array_shape)
 
 
 @cached
@@ -249,4 +253,8 @@ def compute_strain(model0:Model, model1:Model, rcut):
     strain_compute.set_post(model0.pos)
     strain_compute.set_posdt(model1.pos)
     strain_compute.compute()
-    return strain_compute.get_eps()
+    try:
+        return strain_compute.get_eps()
+    except Exception as e:
+        print(repr(e))
+        raise

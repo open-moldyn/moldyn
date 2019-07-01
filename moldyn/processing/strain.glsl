@@ -9,7 +9,7 @@
 
 #define LENGTH_X %%LENGTH_X%%
 #define LENGTH_Y %%LENGTH_Y%%
-#define SHIFT_X LENGTH_X/2 // générique et logique
+#define SHIFT_X LENGTH_X/2// générique et logique
 #define SHIFT_Y LENGTH_Y/2
 
 #define X_PERIODIC %%X_PERIODIC%%
@@ -28,7 +28,7 @@ layout (std430, binding=1) buffer in_1
 };
 
 
-layout (std430, binding=2) buffer out_1
+layout (std430, binding=2) buffer out_0
 {
     mat2 outeps[];
 };
@@ -37,60 +37,60 @@ layout (std430, binding=2) buffer out_1
 
 void main()
 {
-	const uint x = gl_GlobalInvocationID.x;
-	const vec2 pos = inpost[x];
-	const vec2 posdt = inposdt[x];
+    const uint x = gl_GlobalInvocationID.x;
 
-	mat2 X = mat2(0.0);
-	mat2 Y = mat2(0.0);
-	mat2 eps = mat2(0.0);
+    mat2 X = mat2(0.0);
+    mat2 Y = mat2(0.0);
+    mat2 eps = mat2(0.0);
 
-	if(x < NPART) { // On vérifie qu'on est bien associé à un atome
-        for(uint n = 0; n<NPART; n++){
-            for(uint i = 0; i<2; i++){
-                for(uint j = 0; j<2; j++){
-                        if (n!=x) {
-						vec2 distxy = pos - inpost[n];
+    if (x < NPART) { // On vérifie qu'on est bien associé à un atome
+        const vec2 pos = inpost[x];
+        const vec2 posdt = inposdt[x];
+        for (uint n = 0; n<NPART; n++){
+            if (n!=x) {
+                vec2 distxy = pos - inpost[n];
 
-						// Conditions périodiques de bord
-						/* On trouvera des tutos sur le net qui disent de vectoriser les tests suivants à la main
-						 * mais le compilateur est malin et le fait tout seul.
-						 */
-						#if X_PERIODIC
-							if (distxy.x<(-SHIFT_X)) {
-								distxy.x+=LENGTH_X;
-							}
-							if (distxy.x>SHIFT_X) {
-								distxy.x-=LENGTH_X;
-							}
-						#endif
+                // Conditions périodiques de bord
+                /* On trouvera des tutos sur le net qui disent de vectoriser les tests suivants à la main
+                 * mais le compilateur est malin et le fait tout seul.
+                 */
+                #if X_PERIODIC
+                if (distxy.x<(-SHIFT_X)) {
+                    distxy.x+=LENGTH_X;
+                }
+                if (distxy.x>SHIFT_X) {
+                    distxy.x-=LENGTH_X;
+                }
+                    #endif
 
-						#if Y_PERIODIC
-							if (distxy.y<(-SHIFT_Y)) {
-								distxy.y+=LENGTH_Y;
-							}
-							if (distxy.y>SHIFT_Y) {
-								distxy.y-=LENGTH_Y;
-							}
-						#endif
+                    #if Y_PERIODIC
+                if (distxy.y<(-SHIFT_Y)) {
+                    distxy.y+=LENGTH_Y;
+                }
+                if (distxy.y>SHIFT_Y) {
+                    distxy.y-=LENGTH_Y;
+                }
+                    #endif
 
 
-						/* Ce test accélère d'environ 15%, puisqu'on saute les étapes de multipication+somme du calcul de distance
-						 * pour voir si on est dans la sphère
-						 */
-						if(abs(distxy.x)<rcut && abs(distxy.y)<rcut) {
-
-							float dist = length(distxy);
-							if (dist<RCUT) {
-								X[i][j] += (pos[i]-inpost[n][i])*(posdt[j]-inposdt[n][j]);
-								Y[i][j] += (posdt[i]-inposdt[n][i])*(posdt[j]-inposdt[n][j]);
-							}
-						}
-					}
-				}
-			}
-		}
-		eps = X*transpose(inverse(Y)) - mat2(1.0);
-		outeps[x] = eps;
-	}
+                /* Ce test accélère d'environ 15%, puisqu'on saute les étapes de multipication+somme du calcul de distance
+                 * pour voir si on est dans la sphère
+                 */
+                if (abs(distxy.x)<RCUT && abs(distxy.y)<RCUT) {
+                    float dist = length(distxy);
+                    if (dist<RCUT) {
+                        for (uint i = 0; i<2; i++){
+                            for (uint j = 0; j<2; j++){
+                                X[i][j] += (pos[i]-inpost[n][i])*(posdt[j]-inposdt[n][j]);
+                                Y[i][j] += (posdt[i]-inposdt[n][i])*(posdt[j]-inposdt[n][j]);
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        eps = X*transpose(inverse(Y)) - mat2(1.0);
+        //eps = X*transpose(Y) - mat2(1.0);
+        outeps[x] = eps;
+    }
 }

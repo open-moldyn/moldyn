@@ -191,6 +191,7 @@ class MoldynMainWindow(QMainWindow):
 
         self._2d_options = {
             "density map": None,
+            "deformation (compression)":None,
             "particles": None,
         }
         for i_n in self._2d_options:
@@ -569,6 +570,10 @@ class MoldynMainWindow(QMainWindow):
         if gr_opts["density map"]:
             self.ui.statusbar.showMessage("Computing density map...")
             visu.plot_densityf(self.simulation.model, 50)
+
+        if gr_opts["deformation (compression)"]:
+            self.ui.statusbar.showMessage("Computing deformation...")
+            visu.deformation_volume(self.model, self.simulation.model, 2*max(self.model.rcut_a, self.model.rcut_b))
 
         if gr_opts["particles"]:
             visu.plot_particles(self.simulation.model)
