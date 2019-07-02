@@ -119,7 +119,7 @@ class DraggableLine:
 
         # create new point
         if self.new_pending or self.new_key_press:
-            print("new point")
+            #print("new point")
             x, y = event.xdata, event.ydata
             x_data = list(self.line.get_xdata())
             y_data = list(self.line.get_ydata())
@@ -143,7 +143,7 @@ class DraggableLine:
 
         # double-click edit
         if event.dblclick and self.obj is not None:
-            print("double clique")
+            #print("double clique")
             x0, y0, ind = self.obj
             d = MultiInputDialog(('x', 'y'), (x0, y0), {'x': '{:.3e}', 'y': '{:.3e}'})
             d.exec()
@@ -230,7 +230,7 @@ class DraggableLine:
         self.init_connect()
 
     def key_disconnect(self):
-        print("disconnect")
+        #print("disconnect")
         self.line.figure.canvas.mpl_disconnect(self.cidkpress)
         self.line.figure.canvas.mpl_disconnect(self.cidkrelease)
         self.line.figure.canvas.mpl_disconnect(self.cidaxes_enter)
