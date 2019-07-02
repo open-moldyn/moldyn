@@ -1,6 +1,5 @@
 import io
 import os
-from pprint import pprint
 
 from PIL import Image
 from imageio_ffmpeg import write_frames
@@ -230,10 +229,22 @@ def make_movie(simulation, dynstate, name: str, pfilm=5, fps=24, callback=None):
 def deformation_volume(model0, model1, rcut, levels=50):
     eps = compute_strain(model0, model1, rcut)
     fig = plt.gcf()
-    cmap = plt.get_cmap("viridis")
+    cmap = plt.get_cmap("plasma")
     dV = eps.trace(axis1=1, axis2=2)
     if type(levels) == int:
         levels = np.linspace(min(dV), max(dV), levels)
     CS = plt.tricontourf(*model1.pos.T, dV, levels=levels, cmap=cmap)
     cbar = fig.colorbar(CS)
     cbar.ax.set_ylabel('local compression')
+
+@_plot_base(axis='scaled', grid=False)
+def deformation_dev(model0, model1, rcut, levels=50):
+    eps = compute_strain(model0, model1, rcut)
+    fig = plt.gcf()
+    cmap = plt.get_cmap("plasma")
+    dV = eps[:,0,1]
+    if type(levels) == int:
+        levels = np.linspace(min(dV), max(dV), levels)
+    CS = plt.tricontourf(*model1.pos.T, dV, levels=levels, cmap=cmap)
+    cbar = fig.colorbar(CS)
+    cbar.ax.set_ylabel('local shear')
