@@ -291,7 +291,7 @@ class Ui_CreateModel(object):
         self.groupBox_3.setTitle(_translate("CreateModel", "Mixup"))
         self.firstSpeciesMoleFractionLabel.setText(_translate("CreateModel", "First species mole fraction"))
         self.previewButton.setText(_translate("CreateModel", "Preview"))
-        self.forcesPage.setTitle(_translate("CreateModel", "External forces (yet to implement)"))
+        self.forcesPage.setTitle(_translate("CreateModel", "External forces"))
         self.otherPage.setTitle(_translate("CreateModel", "Other parameters"))
         self.groupBox_5.setTitle(_translate("CreateModel", "Thermodynamics"))
         self.temperatureKLabel.setText(_translate("CreateModel", "Temperature (K)"))
