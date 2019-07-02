@@ -236,4 +236,4 @@ def deformation_volume(model0, model1, rcut, levels=50):
         levels = np.linspace(min(dV), max(dV), levels)
     CS = plt.tricontourf(*model1.pos.T, dV, levels=levels, cmap=cmap)
     cbar = fig.colorbar(CS)
-    cbar.ax.set_ylabel('local volume shift')
+    cbar.ax.set_ylabel('local compression')

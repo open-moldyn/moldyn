@@ -55,22 +55,22 @@ void main()
                  * mais le compilateur est malin et le fait tout seul.
                  */
                 #if X_PERIODIC
-                if (distxy.x<(-SHIFT_X)) {
-                    distxy.x+=LENGTH_X;
-                }
-                if (distxy.x>SHIFT_X) {
-                    distxy.x-=LENGTH_X;
-                }
-                    #endif
+                    if (distxy.x<(-SHIFT_X)) {
+                        distxy.x+=LENGTH_X;
+                    }
+                    if (distxy.x>SHIFT_X) {
+                        distxy.x-=LENGTH_X;
+                    }
+                #endif
 
-                    #if Y_PERIODIC
-                if (distxy.y<(-SHIFT_Y)) {
-                    distxy.y+=LENGTH_Y;
-                }
-                if (distxy.y>SHIFT_Y) {
-                    distxy.y-=LENGTH_Y;
-                }
-                    #endif
+                #if Y_PERIODIC
+                    if (distxy.y<(-SHIFT_Y)) {
+                        distxy.y+=LENGTH_Y;
+                    }
+                    if (distxy.y>SHIFT_Y) {
+                        distxy.y-=LENGTH_Y;
+                    }
+                #endif
 
 
                 /* Ce test accélère d'environ 15%, puisqu'on saute les étapes de multipication+somme du calcul de distance
@@ -79,10 +79,30 @@ void main()
                 if (abs(distxy.x)<RCUT && abs(distxy.y)<RCUT) {
                     float dist = length(distxy);
                     if (dist<RCUT) {
+                        vec2 distxydt = posdt - inposdt[n];
+                        #if X_PERIODIC
+                            if (distxydt.x<(-SHIFT_X)) {
+                                distxydt.x+=LENGTH_X;
+                            }
+                            if (distxydt.x>SHIFT_X) {
+                                distxydt.x-=LENGTH_X;
+                            }
+                        #endif
+
+                        #if Y_PERIODIC
+                            if (distxydt.y<(-SHIFT_Y)) {
+                                distxydt.y+=LENGTH_Y;
+                            }
+                            if (distxydt.y>SHIFT_Y) {
+                                distxydt.y-=LENGTH_Y;
+                            }
+                        #endif
                         for (uint i = 0; i<2; i++){
                             for (uint j = 0; j<2; j++){
-                                X[i][j] += (pos[i]-inpost[n][i])*(posdt[j]-inposdt[n][j]);
-                                Y[i][j] += (posdt[i]-inposdt[n][i])*(posdt[j]-inposdt[n][j]);
+                                //X[i][j] += (pos[i]-inpost[n][i])*(posdt[j]-inposdt[n][j]);
+                                //Y[i][j] += (posdt[i]-inposdt[n][i])*(posdt[j]-inposdt[n][j]);
+                                X[i][j] += distxy[i]*distxydt[j];
+                                Y[i][j] += distxydt[i]*distxydt[j];
                             }
                         }
                     }
@@ -90,7 +110,6 @@ void main()
             }
         }
         eps = X*transpose(inverse(Y)) - mat2(1.0);
-        //eps = X*transpose(Y) - mat2(1.0);
         outeps[x] = eps;
     }
 }
