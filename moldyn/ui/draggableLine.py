@@ -50,11 +50,43 @@ class MultiInputDialog(QDialog):
 
 
 class DraggableLine:
-    def __init__(self, line):
-        self.line = line
+    def __init__(self, x_data, y_data, picker, x_label, y_label, axis:tuple, *args, **kwargs):
+        self.args = args
+        self.kwargs = kwargs
+        self.picker = picker
+        self.fig = plt.figure()
+        ax = self.fig.add_subplot(111)
+        plt.subplots_adjust(bottom=0.2)
+        ax.set_xlabel(x_label)
+        ax.set_ylabel(y_label)
+        ax.grid()
+        self.x_label = x_label
+        self.y_label = y_label
+        ax.axis(axis)
+        self.line, = ax.plot(x_data, y_data, *args, picker=picker, **kwargs)
+        self.axnew = plt.axes([0.65, 0.02, 0.25, 0.05])
+        self.bnew = Button(self.axnew, 'New point (ctrl)')
+        self.axdel = plt.axes([0.39, 0.02, 0.25, 0.05])
+        self.bdel = Button(self.axdel, 'Delete point (alt)')
+        self.axsetaxis = plt.axes([0.13, 0.02, 0.25, 0.05])
+        self.bsetaxis = Button(self.axsetaxis, 'Set axis')
+        self.bnew.on_clicked(self.new)
+        self.bdel.on_clicked(self.del_point)
+        self.bsetaxis.on_clicked(self.set_axis)
         self.press = None
         self.obj = None
-        
+        self.init_connect()
+
+    def _redraw(self, x_data, y_data):
+        ax = self.line.axes
+        axis = ax.axis()
+        ax.cla()
+        self.line, = ax.plot(x_data, y_data, *self.args, picker=self.picker, **self.kwargs)
+        ax.axis(axis)
+        ax.grid()
+        ax.set_xlabel(self.x_label)
+        ax.set_ylabel(self.y_label)
+
 
     def connect(self):
         'connect to all the events we need'
@@ -128,15 +160,7 @@ class DraggableLine:
                 i += 1
             x_data = x_data[:i] + [x] + x_data[i:]
             y_data = y_data[:i] + [max(y, 0)] + y_data[i:]
-            ax = self.line.axes
-            axis = ax.axis()
-            ax.cla()
-            line, = ax.plot(x_data, y_data, 'o--', color='r', picker=5)
-            ax.axis(axis)
-            ax.grid()
-            ax.set_xlabel('Time (s)')
-            ax.set_ylabel('Temperature (K)')
-            self.__init__(line)
+            self._redraw(x_data, y_data)
             self.on_release(event)
             self.new_pending = False
             return            
@@ -174,15 +198,7 @@ class DraggableLine:
             xdata = list(xdata)
             ydata = list(ydata)
             del xdata[ind[0]], ydata[ind[0]]
-            ax = self.line.axes
-            axis = ax.axis()
-            ax.cla()
-            line, = ax.plot(xdata, ydata, 'o--', color='r', picker=5)
-            ax.axis(axis)
-            ax.grid()
-            ax.set_xlabel('Time (s)')
-            ax.set_ylabel('Temperature (K)')
-            self.__init__(line)
+            self._redraw(xdata, ydata)
             self.on_release(event)
             self.del_pending = False
             return
@@ -247,27 +263,26 @@ class DraggableLine:
 
 
 def main(queue):
+    """
+
+
+    The queue must contain a list containing the following elements in order:
+        - axis : (tuple) a four element tuple defining the axis of the figure
+        - x_data : (1d-array) the data for the x axis
+        - y_data : (1d-array) the data for the y axis
+        - xlabel : (str) the label for the x axis
+        - ylabel : (str) the label for the y axis
+    Parameters
+    ----------
+    queue
+
+    Returns
+    -------
+
+    """
     #app = QApplication(sys.argv)
-    fig = plt.figure()
-    ax = fig.add_subplot(111)
-    plt.subplots_adjust(bottom=0.2)
-    plt.grid()
-    plt.xlabel('Time (s)')
-    plt.ylabel('Temperature (K)')
-    t, T, x_data, y_data = queue.get()
-    plt.axis([0, t, 0, T])
-    line, = ax.plot(x_data, y_data, 'o--', color='r', picker=5)
-    axnew = plt.axes([0.65, 0.02, 0.25, 0.05])
-    bnew = Button(axnew, 'New point (ctrl)')
-    axdel = plt.axes([0.39, 0.02, 0.25, 0.05])
-    bdel = Button(axdel, 'Delete point (alt)')
-    axsetaxis = plt.axes([0.13, 0.02, 0.25, 0.05])
-    bsetaxis = Button(axsetaxis, 'Set axis')
-    dr = DraggableLine(line)
-    bnew.on_clicked(dr.new)
-    bdel.on_clicked(dr.del_point)
-    bsetaxis.on_clicked(dr.set_axis)
-    dr.init_connect()
+    axis, x_data, y_data, xlabel, ylabel = queue.get()
+    dr = DraggableLine(x_data, y_data, 5, xlabel, ylabel, axis, 'o--', color='r')
     plt.show()
     queue.put(dr.line.get_data())
 
