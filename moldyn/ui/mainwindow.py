@@ -6,6 +6,7 @@ from PyQt5.QtCore import QThread, pyqtSignal
 from mpl_toolkits.axisartist.parasite_axes import HostAxes, ParasiteAxes
 from pyqtgraph import PlotWidget
 import time
+import csv
 import multiprocessing as mp
 from datetime import timedelta
 
@@ -153,6 +154,8 @@ class MoldynMainWindow(QMainWindow):
         self.ui.saveRModelBtn.clicked.connect(self.save_final_model)
         self.ui.saveSimuBtn.clicked.connect(self.save_simu_history)
         self.ui.reuseModelBtn.clicked.connect(self.reuse_model)
+
+        self.ui.exportBtn.clicked.connect(self.export_to_csv)
 
         self.ui.PDFButton.clicked.connect(self.PDF)
 
@@ -475,6 +478,15 @@ class MoldynMainWindow(QMainWindow):
                     pass
             ds.save_model(self.simulation.model)
             ds.to_zip(path)
+
+    def export_to_csv(self):
+        path, filter = QFileDialog.getSaveFileName(caption="Export to CSV", filter="CSV file (*.csv)")
+        if path:
+            path = self._correct_path(path, filter, [".csv"])
+            with open(path, "w", newline='') as csvfile:
+                csvwriter = csv.writer(csvfile)
+                csvwriter.writerow(self.temporal_variables.keys())
+                csvwriter.writerows(zip(*(self.simulation.state_fct[s[0]] for s in self.temporal_variables.values())))
 
     def line_graph(self):
         ords = [i.text() for i in self.temp_variables_w if i.checkState()]

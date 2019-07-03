@@ -428,6 +428,13 @@
              </property>
             </widget>
            </item>
+           <item row="0" column="4">
+            <widget class="QToolButton" name="exportBtn">
+             <property name="text">
+              <string>Export to CSV</string>
+             </property>
+            </widget>
+           </item>
           </layout>
          </widget>
         </item>
