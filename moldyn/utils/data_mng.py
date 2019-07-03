@@ -1,4 +1,6 @@
 import os, sys
+from functools import wraps
+
 import numpy as np
 import json
 import datetime
@@ -12,8 +14,8 @@ from zipfile import *
 from . import appdirs
 
 data_path = appdirs.user_data_dir("open-moldyn")
-tmp_path = data_path + "/tmp"
-tmp1_path = data_path + "/tmp1"
+tmp_path = data_path + "/tmp_sim"
+tmp1_path = data_path + "/tmp_mdl"
 
 CATEGORY_LIST = [
     "npart",
@@ -129,7 +131,7 @@ class ParamIO(dict):
             #self.dynState.categories['last modified'] = datetime.datetime.now().strftime('%d/%m/%Y-%X')
         #self._update_categories()
 
-    def from_dict(self, rdict : dict):
+    def from_dict(self, rdict: dict):
         """
         Copy rdict into itself
 
@@ -309,7 +311,7 @@ class DynState(dt.Treant):
         with self.open(self.VEL, 'w') as IO:
             IO.save(model.v)
 
-
+@wraps(dt.discover)
 def discover(dirpath=data_path, *args, **kwargs):
     return dt.discover(dirpath=dirpath, *args, **kwargs)
 
