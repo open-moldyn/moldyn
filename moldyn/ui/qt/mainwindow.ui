@@ -369,69 +369,100 @@
         <string>Processing</string>
        </attribute>
        <layout class="QGridLayout" name="gridLayout_5">
-        <item row="3" column="0" colspan="2">
-         <widget class="QGroupBox" name="groupBox2d">
+        <item row="2" column="0">
+         <widget class="QGroupBox" name="groupBox1d">
           <property name="title">
-           <string>2D graphics</string>
+           <string>1D graphics</string>
           </property>
-          <layout class="QHBoxLayout" name="horizontalLayout_3">
-           <item>
-            <widget class="QListWidget" name="surfListW"/>
+          <layout class="QGridLayout" name="gridLayout">
+           <item row="0" column="0" rowspan="2">
+            <widget class="QListWidget" name="lineListW"/>
            </item>
-           <item>
-            <widget class="QToolButton" name="drawSurfButton">
-             <property name="text">
-              <string>Draw</string>
-             </property>
-            </widget>
+           <item row="0" column="1">
+            <layout class="QFormLayout" name="formLayout_3">
+             <item row="0" column="0">
+              <widget class="QLabel" name="asAFunctionOfLabel">
+               <property name="text">
+                <string>as a function of</string>
+               </property>
+              </widget>
+             </item>
+             <item row="0" column="1">
+              <widget class="QComboBox" name="lineComboW"/>
+             </item>
+             <item row="1" column="1">
+              <widget class="QPushButton" name="plotB">
+               <property name="text">
+                <string>Plot</string>
+               </property>
+              </widget>
+             </item>
+            </layout>
            </item>
           </layout>
          </widget>
         </item>
-        <item row="0" column="0" colspan="2">
-         <widget class="QGroupBox" name="groupBox_data_mgt">
+        <item row="2" column="1">
+         <widget class="QGroupBox" name="groupBox_1doptions">
           <property name="title">
-           <string>Data management</string>
+           <string>1D options</string>
           </property>
-          <layout class="QGridLayout" name="gridLayout_7">
-           <item row="0" column="3">
-            <spacer name="horizontalSpacer_5">
-             <property name="orientation">
-              <enum>Qt::Horizontal</enum>
-             </property>
-             <property name="sizeHint" stdset="0">
-              <size>
-               <width>40</width>
-               <height>20</height>
-              </size>
-             </property>
-            </spacer>
+          <layout class="QHBoxLayout" name="horizontalLayout_4">
+           <item>
+            <widget class="QListWidget" name="list1DOptions"/>
            </item>
+          </layout>
+         </widget>
+        </item>
+        <item row="5" column="0" colspan="2">
+         <widget class="QGroupBox" name="groupBoxMovie">
+          <property name="title">
+           <string>Movie</string>
+          </property>
+          <layout class="QGridLayout" name="gridLayout_8">
            <item row="0" column="2">
-            <widget class="QToolButton" name="saveSimuBtn">
+            <widget class="QToolButton" name="makeMovieBtn">
              <property name="text">
-              <string>Save simulation history</string>
+              <string>Make movie</string>
              </property>
             </widget>
            </item>
            <item row="0" column="0">
-            <widget class="QToolButton" name="saveRModelBtn">
-             <property name="text">
-              <string>Save resulting model</string>
-             </property>
-            </widget>
+            <layout class="QFormLayout" name="formLayout_4">
+             <item row="0" column="0">
+              <widget class="QLabel" name="fPSLabel">
+               <property name="text">
+                <string>FPS</string>
+               </property>
+              </widget>
+             </item>
+             <item row="0" column="1">
+              <widget class="QSpinBox" name="FPSSpinBox">
+               <property name="value">
+                <number>24</number>
+               </property>
+              </widget>
+             </item>
+             <item row="1" column="0">
+              <widget class="QLabel" name="stepsByFrameLabel">
+               <property name="text">
+                <string>Steps by frame</string>
+               </property>
+              </widget>
+             </item>
+             <item row="1" column="1">
+              <widget class="QSpinBox" name="stepsByFrameSpinBox">
+               <property name="value">
+                <number>10</number>
+               </property>
+              </widget>
+             </item>
+            </layout>
            </item>
            <item row="0" column="1">
-            <widget class="QToolButton" name="reuseModelBtn">
-             <property name="text">
-              <string>New simulation with resulting model</string>
-             </property>
-            </widget>
-           </item>
-           <item row="0" column="4">
-            <widget class="QToolButton" name="exportBtn">
-             <property name="text">
-              <string>Export to CSV</string>
+            <widget class="QProgressBar" name="movieProgressBar">
+             <property name="value">
+              <number>0</number>
              </property>
             </widget>
            </item>
@@ -507,100 +538,95 @@
           </layout>
          </widget>
         </item>
-        <item row="2" column="0">
-         <widget class="QGroupBox" name="groupBox1d">
+        <item row="0" column="0" colspan="2">
+         <widget class="QGroupBox" name="groupBox_data_mgt">
           <property name="title">
-           <string>1D graphics</string>
+           <string>Data management</string>
           </property>
-          <layout class="QGridLayout" name="gridLayout">
-           <item row="0" column="0" rowspan="2">
-            <widget class="QListWidget" name="lineListW"/>
+          <layout class="QGridLayout" name="gridLayout_7">
+           <item row="0" column="3">
+            <spacer name="horizontalSpacer_5">
+             <property name="orientation">
+              <enum>Qt::Horizontal</enum>
+             </property>
+             <property name="sizeHint" stdset="0">
+              <size>
+               <width>40</width>
+               <height>20</height>
+              </size>
+             </property>
+            </spacer>
+           </item>
+           <item row="0" column="2">
+            <widget class="QToolButton" name="saveSimuBtn">
+             <property name="text">
+              <string>Save simulation history</string>
+             </property>
+            </widget>
+           </item>
+           <item row="0" column="0">
+            <widget class="QToolButton" name="saveRModelBtn">
+             <property name="text">
+              <string>Save resulting model</string>
+             </property>
+            </widget>
            </item>
            <item row="0" column="1">
-            <layout class="QFormLayout" name="formLayout_3">
-             <item row="0" column="0">
-              <widget class="QLabel" name="asAFunctionOfLabel">
-               <property name="text">
-                <string>as a function of</string>
-               </property>
-              </widget>
-             </item>
-             <item row="0" column="1">
-              <widget class="QComboBox" name="lineComboW"/>
-             </item>
-             <item row="1" column="1">
-              <widget class="QPushButton" name="plotB">
-               <property name="text">
-                <string>Plot</string>
-               </property>
-              </widget>
-             </item>
-            </layout>
+            <widget class="QToolButton" name="reuseModelBtn">
+             <property name="text">
+              <string>New simulation with resulting model</string>
+             </property>
+            </widget>
+           </item>
+           <item row="0" column="4">
+            <widget class="QToolButton" name="exportBtn">
+             <property name="text">
+              <string>Export to CSV</string>
+             </property>
+            </widget>
            </item>
           </layout>
          </widget>
         </item>
-        <item row="2" column="1">
-         <widget class="QGroupBox" name="groupBox_1doptions">
+        <item row="3" column="0" colspan="2">
+         <widget class="QGroupBox" name="groupBox2d">
           <property name="title">
-           <string>1D options</string>
+           <string>2D graphics</string>
           </property>
-          <layout class="QHBoxLayout" name="horizontalLayout_4">
-           <item>
-            <widget class="QListWidget" name="list1DOptions"/>
+          <layout class="QGridLayout" name="gridLayout_10">
+           <item row="0" column="0">
+            <widget class="QListWidget" name="surfListW"/>
+           </item>
+           <item row="0" column="2">
+            <widget class="QToolButton" name="drawSurfButton">
+             <property name="text">
+              <string>Draw</string>
+             </property>
+            </widget>
            </item>
           </layout>
          </widget>
         </item>
         <item row="4" column="0" colspan="2">
-         <widget class="QGroupBox" name="groupBoxMovie">
+         <widget class="QGroupBox" name="groupBox_2">
           <property name="title">
-           <string>Movie</string>
+           <string>2D parameters</string>
           </property>
-          <layout class="QGridLayout" name="gridLayout_8">
-           <item row="0" column="2">
-            <widget class="QToolButton" name="makeMovieBtn">
+          <layout class="QFormLayout" name="formLayout">
+           <item row="0" column="0">
+            <widget class="QLabel" name="deformationDistLabel">
              <property name="text">
-              <string>Make movie</string>
+              <string>Maximum distance for calculation (times r_cut)</string>
              </property>
             </widget>
            </item>
-           <item row="0" column="0">
-            <layout class="QFormLayout" name="formLayout_4">
-             <item row="0" column="0">
-              <widget class="QLabel" name="fPSLabel">
-               <property name="text">
-                <string>FPS</string>
-               </property>
-              </widget>
-             </item>
-             <item row="0" column="1">
-              <widget class="QSpinBox" name="FPSSpinBox">
-               <property name="value">
-                <number>24</number>
-               </property>
-              </widget>
-             </item>
-             <item row="1" column="0">
-              <widget class="QLabel" name="stepsByFrameLabel">
-               <property name="text">
-                <string>Steps by frame</string>
-               </property>
-              </widget>
-             </item>
-             <item row="1" column="1">
-              <widget class="QSpinBox" name="stepsByFrameSpinBox">
-               <property name="value">
-                <number>10</number>
-               </property>
-              </widget>
-             </item>
-            </layout>
-           </item>
            <item row="0" column="1">
-            <widget class="QProgressBar" name="movieProgressBar">
+            <widget class="QDoubleSpinBox" name="deformationDistSpinBox">
+             <property name="singleStep">
+              <double>0.100000000000000</double>
+             </property>
              <property name="value">
-              <number>0</number>
+              <double>2.000000000000000</double>
              </property>
             </widget>
            </item>

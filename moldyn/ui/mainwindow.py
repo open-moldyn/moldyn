@@ -552,7 +552,7 @@ class MoldynMainWindow(QMainWindow):
         self.ui.statusbar.showMessage("Computing Pair Distribution Function...")
 
         visu.plt.ioff()
-        d = PDF(self.simulation.model.pos, self.ui.PDFNSpinBox.value(), self.ui.PDFDistSpinBox.value()*max(self.model.rcut_a, self.model.rcut_b), 100)
+        d = PDF(self.simulation.model.pos, self.ui.PDFNSpinBox.value(), self.ui.PDFDistSpinBox.value()*max(self.model.rcut_a, self.model.rcut_b, self.model.rcut_ab), 100)
         visu.plt.figure()
         visu.plt.plot(*d)
         visu.plt.xlabel("Distance (m)")
@@ -575,11 +575,11 @@ class MoldynMainWindow(QMainWindow):
 
         if gr_opts["deformation (compression)"]:
             self.ui.statusbar.showMessage("Computing deformation...")
-            visu.deformation_volume(self.model, self.simulation.model, 2*max(self.model.rcut_a, self.model.rcut_b))
+            visu.deformation_volume(self.model, self.simulation.model, self.ui.deformationDistSpinBox.value()*max(self.model.rcut_a, self.model.rcut_b, self.model.rcut_ab))
 
         if gr_opts["deformation (shear)"]:
             self.ui.statusbar.showMessage("Computing deformation...")
-            visu.deformation_dev(self.model, self.simulation.model, 2*max(self.model.rcut_a, self.model.rcut_b))
+            visu.deformation_dev(self.model, self.simulation.model, self.ui.deformationDistSpinBox.value()*max(self.model.rcut_a, self.model.rcut_b, self.model.rcut_ab))
 
         if gr_opts["particles"]:
             visu.plot_particles(self.simulation.model)
