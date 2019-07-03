@@ -1,7 +1,6 @@
 from PyQt5.QtWidgets import QWizard, QMessageBox
 from .qt.create_model import Ui_CreateModel
 from .species_params import species_params
-from .define_external_forces import define_exernal_forces
 
 from ..simulation.builder import Model
 from .model_viewer import ModelView
@@ -180,8 +179,6 @@ class CreateModelDialog(QWizard):
         self.model.shuffle_atoms()
         self.model.set_dt()
 
-        self.external_forces.set_simulation(self.model)
-
         self.model.T = 1.0
         self.ui.temperatureKDoubleSpinBox.setValue(1.0)
 
@@ -212,5 +209,5 @@ class CreateModelDialog(QWizard):
 
     def accept(self):
         if self.parent_window:
-            self.parent_window.set_simulation(self.model)
+            self.parent_window.set_model(self.model)
         super().accept()
