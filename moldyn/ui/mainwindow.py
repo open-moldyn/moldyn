@@ -93,18 +93,6 @@ class MoldynMainWindow(QMainWindow):
                 "x_periodic" : ["Periodic condition on x"],
                 "y_periodic" : ["Periodic condition on y"],
             },
-            "External forces" : {
-                "Upper zone" : {
-                    "up_apply_force" : ["Apply external forces"],
-                    "up_zone_lower_limit" : ["Lower limit", "m"],
-                    "up_x_component" : ["x component", "N"],
-                    "up_y_component" : ["y component", "N"],
-                },
-                "Lower zone" : {
-                    "low_block" : ["Block atoms"],
-                    "low_zone_upper_limit" : ["Upper limit", "m"],
-                }
-            }
         }
 
         def sub_items(item, parent):

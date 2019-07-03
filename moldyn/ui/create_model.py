@@ -49,11 +49,6 @@ class CreateModelDialog(QWizard):
 
         self.ui.previewButton.clicked.connect(self.preview)
 
-        # Panneau forces extérieures
-
-        self.external_forces = define_exernal_forces()
-        self.ui.layout_forces.addWidget(self.external_forces)
-
         # Panneau paramètres divers
         self.ui.spatialPage.validatePage = self.set_parameters
 
@@ -185,7 +180,7 @@ class CreateModelDialog(QWizard):
         self.model.shuffle_atoms()
         self.model.set_dt()
 
-        self.external_forces.set_model(self.model)
+        self.external_forces.set_simulation(self.model)
 
         self.model.T = 1.0
         self.ui.temperatureKDoubleSpinBox.setValue(1.0)
@@ -217,5 +212,5 @@ class CreateModelDialog(QWizard):
 
     def accept(self):
         if self.parent_window:
-            self.parent_window.set_model(self.model)
+            self.parent_window.set_simulation(self.model)
         super().accept()

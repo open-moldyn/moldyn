@@ -73,6 +73,8 @@ class Simulation:
             self._compute = ForcesComputeCPU(consts)
 
         self.T_f = lambda t:self.T[-1]
+        self.Fx_f = lambda t:0.0
+        self.Fy_f = lambda t:0.0
 
         if simulation :
             self.current_iter = simulation.current_iter
@@ -82,6 +84,8 @@ class Simulation:
             self.T_cntl = simulation.T_cntl
             if self.T_cntl:
                 self.T_f = simulation.T_f
+            self.Fx_f = simulation.Fx_f
+            self.Fy_f = simulation.Fy_f
 
             self.F = simulation.F
         else:
@@ -92,6 +96,9 @@ class Simulation:
             self.state_fct["T"] = []
             self.state_fct["T_ctrl"] = []
             self.state_fct["T_ramps"] = [[],[]]
+
+            self.state_fct["Fy_ramps"] = [[],[]]
+            self.state_fct["Fx_ramps"] = [[],[]]
 
             self.state_fct["EC"] = []
             self.state_fct["EP"] = []
@@ -164,8 +171,8 @@ class Simulation:
 
         periodic = self.model.x_periodic or self.model.y_periodic
 
-        apply_up_zone_forces = self.model.up_apply_force
-        up_zone_force = self.model.up_forces
+        apply_up_zone_forces = self.model.up_apply_force_x or self.model.up_apply_force_y
+        #up_zone_force = self.model.up_forces
         up_zone_limit = self.model.up_zone_lower_limit
         low_zone_block = self.model.low_block
         low_zone_limit = self.model.low_zone_upper_limit
@@ -206,6 +213,7 @@ class Simulation:
             self.T.append(T)
 
             if apply_up_zone_forces: # recalcul du masque, parce que ça bouge
+                up_zone_force = self.F_f(t)
                 up_mask[:,:] = np.array([pos[:,1] > up_zone_limit]*2).T
 
             F[:] = self._compute.get_F()
@@ -233,6 +241,19 @@ class Simulation:
                 callback(self)
 
             self.current_iter += 1
+
+    def _f(self, t, y):
+        f2 = inter.interp1d(t, y)
+
+        def f(x):
+            if x<t[0]:
+                return y[0]
+            elif x>t[-1]:
+                return y[-1]
+            else:
+                return float(f2(x)) # pour la consistance des types
+
+        return f
 
     def set_T_f(self, f):
         """
@@ -268,15 +289,22 @@ class Simulation:
         -------
 
         """
-        f2 = inter.interp1d(t, T)
-        self.state_fct["T_ramps"] = [list(t), list(T)]
-        self.T_ramps = self.state_fct["T_ramps"]
+        if len(t)>1:
+            self.state_fct["T_ramps"] = [list(t), list(T)]
+            self.T_ramps = self.state_fct["T_ramps"]
+            self.set_T_f(self._f(t, T))
 
-        def f(x):
-            if x<t[0]:
-                return T[0]
-            elif x>t[-1]:
-                return T[-1]
-            else:
-                return float(f2(x)) # pour la consistance des types
-        self.set_T_f(f)
+    def F_f(self, t):
+        return np.array((self.Fx_f(t), self.Fy_f(t)))
+
+    def set_Fx_ramps(self, t, Fx):
+        if len(t)>1:
+            self.state_fct["Fx_ramps"] = [list(t), list(Fx)]
+            self.Fx_ramps = self.state_fct["Fx_ramps"]
+            self.Fx_f = self._f(t, Fx)
+
+    def set_Fy_ramps(self, t, Fy):
+        if len(t)>1:
+            self.state_fct["Fy_ramps"] = [list(t), list(Fy)]
+            self.Fy_ramps = self.state_fct["Fy_ramps"]
+            self.Fy_f = self._f(t, Fy)

@@ -28,101 +28,66 @@
      <property name="title">
       <string>Upper zone (y+)</string>
      </property>
-     <layout class="QVBoxLayout" name="verticalLayout_2">
-      <item>
-       <layout class="QFormLayout" name="formLayout">
-        <item row="0" column="0">
-         <widget class="QLabel" name="fractionOfSpaceLabel">
-          <property name="text">
-           <string>Fraction of space</string>
-          </property>
-         </widget>
-        </item>
-        <item row="0" column="1">
-         <widget class="QDoubleSpinBox" name="upFractionOfSpaceDoubleSpinBox">
-          <property name="decimals">
-           <number>4</number>
-          </property>
-          <property name="maximum">
-           <double>1.000000000000000</double>
-          </property>
-          <property name="singleStep">
-           <double>0.010000000000000</double>
-          </property>
-          <property name="value">
-           <double>0.050000000000000</double>
-          </property>
-         </widget>
-        </item>
-        <item row="1" column="0">
-         <widget class="QLabel" name="lowerLimitMLabel">
-          <property name="text">
-           <string>Lower limit (m)</string>
-          </property>
-         </widget>
-        </item>
-        <item row="1" column="1">
-         <widget class="QLineEdit" name="lowerLimitMLineEdit"/>
-        </item>
-        <item row="2" column="0">
-         <widget class="QLabel" name="applyExternalForceLabel">
-          <property name="text">
-           <string>Apply external force</string>
-          </property>
-         </widget>
-        </item>
-        <item row="2" column="1">
-         <widget class="QCheckBox" name="applyExternalForceCheckBox"/>
-        </item>
-       </layout>
-      </item>
-      <item>
-       <widget class="QWidget" name="up_components" native="true">
-        <property name="enabled">
-         <bool>false</bool>
+     <layout class="QFormLayout" name="formLayout">
+      <item row="0" column="0">
+       <widget class="QLabel" name="fractionOfSpaceLabel">
+        <property name="text">
+         <string>Fraction of space</string>
         </property>
-        <layout class="QFormLayout" name="formLayout_3">
-         <property name="leftMargin">
-          <number>0</number>
-         </property>
-         <property name="topMargin">
-          <number>0</number>
-         </property>
-         <property name="rightMargin">
-          <number>0</number>
-         </property>
-         <property name="bottomMargin">
-          <number>0</number>
-         </property>
-         <item row="0" column="0">
-          <widget class="QLabel" name="xForceComponentPerAtomNLabel">
-           <property name="text">
-            <string>x force component per atom (N)</string>
-           </property>
-          </widget>
-         </item>
-         <item row="2" column="0">
-          <widget class="QLabel" name="yForceComponentPerAtomNLabel">
-           <property name="text">
-            <string>y force component per atom (N)</string>
-           </property>
-          </widget>
-         </item>
-         <item row="0" column="1">
-          <widget class="QLineEdit" name="xForceComponentPerAtomNLineEdit">
-           <property name="text">
-            <string>0</string>
-           </property>
-          </widget>
-         </item>
-         <item row="2" column="1">
-          <widget class="QLineEdit" name="yForceComponentPerAtomNLineEdit">
-           <property name="text">
-            <string>0</string>
-           </property>
-          </widget>
-         </item>
-        </layout>
+       </widget>
+      </item>
+      <item row="0" column="1">
+       <widget class="QDoubleSpinBox" name="upFractionOfSpaceDoubleSpinBox">
+        <property name="decimals">
+         <number>4</number>
+        </property>
+        <property name="maximum">
+         <double>1.000000000000000</double>
+        </property>
+        <property name="singleStep">
+         <double>0.010000000000000</double>
+        </property>
+        <property name="value">
+         <double>0.050000000000000</double>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="0">
+       <widget class="QLabel" name="lowerLimitMLabel">
+        <property name="text">
+         <string>Lower limit (m)</string>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="1">
+       <widget class="QLineEdit" name="lowerLimitMLineEdit"/>
+      </item>
+      <item row="2" column="0">
+       <widget class="QToolButton" name="xUpBtn">
+        <property name="text">
+         <string>force x component</string>
+        </property>
+       </widget>
+      </item>
+      <item row="2" column="1">
+       <widget class="QCheckBox" name="applyXUp">
+        <property name="text">
+         <string>Apply</string>
+        </property>
+       </widget>
+      </item>
+      <item row="3" column="0">
+       <widget class="QToolButton" name="yUpBtn">
+        <property name="text">
+         <string>force y component</string>
+        </property>
+       </widget>
+      </item>
+      <item row="3" column="1">
+       <widget class="QCheckBox" name="applyYUp">
+        <property name="text">
+         <string>Apply</string>
+        </property>
        </widget>
       </item>
      </layout>
