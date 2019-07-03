@@ -58,7 +58,7 @@ class define_exernal_forces(QWidget):
         queue = Queue(1)
         decent_force = self.model.epsilon_ab / self.model.sigma_ab
         axis = (0, (self.until+self.simulation.current_iter)*self.model.dt, -decent_force, decent_force)
-        queue.put((axis, *default, "Time (s)", "Force, "+axis_name+" component (N)"))
+        queue.put((axis, *default, "Time (s)", "Force, "+axis_name+" component (N)", None))
         design_thread = Process(target=draggableLine.main, args=(queue,))
         design_thread.start()
         design_thread.join()

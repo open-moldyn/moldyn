@@ -50,9 +50,10 @@ class MultiInputDialog(QDialog):
 
 
 class DraggableLine:
-    def __init__(self, x_data, y_data, picker, x_label, y_label, axis:tuple, *args, **kwargs):
+    def __init__(self, x_data, y_data, picker, x_label, y_label, axis, y_min=None, *args, **kwargs):
         self.args = args
         self.kwargs = kwargs
+        self.y_min = y_min
         self.picker = picker
         self.fig = plt.figure()
         ax = self.fig.add_subplot(111)
@@ -114,7 +115,6 @@ class DraggableLine:
             'key_release_event', self.key_press)
 
     def key_press(self, event):
-        #sys.stdout.flush()
         if event.key == 'control':
             self.new_key_press = not self.new_key_press
             print("New point :", self.new_key_press)
@@ -124,7 +124,6 @@ class DraggableLine:
 
     def key_release(self, event):
         print('release', event.key)
-        #sys.stdout.flush()
         if event.key == 'control':
             self.new_key_press = False
         elif event.key ==  "alt":
@@ -159,7 +158,10 @@ class DraggableLine:
             while i<len(x_data) and x > x_data[i]:
                 i += 1
             x_data = x_data[:i] + [x] + x_data[i:]
-            y_data = y_data[:i] + [max(y, 0)] + y_data[i:]
+            if self.y_min is None:
+                y_data = y_data[:i] + [y] + y_data[i:]
+            else:
+                y_data = y_data[:i] + [max(y, self.y_min)] + y_data[i:]
             self._redraw(x_data, y_data)
             self.on_release(event)
             self.new_pending = False
@@ -174,7 +176,10 @@ class DraggableLine:
             x, y = map(float, d.result())
             x_data = self.line.get_xdata()
             y_data = self.line.get_ydata()
-            x_data[ind], y_data[ind] = x, max(y, 0)
+            if self.y_min is None:
+                x_data[ind], y_data[ind] = x, y
+            else:
+                x_data[ind], y_data[ind] = x, max(y, self.y_min)
             self.line.set_xdata(x_data)
             self.line.set_ydata(y_data)
             self.on_release(event)
@@ -281,8 +286,8 @@ def main(queue):
 
     """
     #app = QApplication(sys.argv)
-    axis, x_data, y_data, xlabel, ylabel = queue.get()
-    dr = DraggableLine(x_data, y_data, 5, xlabel, ylabel, axis, 'o--', color='r')
+    axis, x_data, y_data, xlabel, ylabel, y_min = queue.get()
+    dr = DraggableLine(x_data, y_data, 5, xlabel, ylabel, axis, y_min, 'o--', color='r')
     plt.show()
     queue.put(dr.line.get_data())
 
