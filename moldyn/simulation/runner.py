@@ -97,8 +97,8 @@ class Simulation:
             self.state_fct["T_ctrl"] = []
             self.state_fct["T_ramps"] = [[],[]]
 
-            self.state_fct["Fy_ramps"] = [[],[]]
             self.state_fct["Fx_ramps"] = [[],[]]
+            self.state_fct["Fy_ramps"] = [[],[]]
 
             self.state_fct["EC"] = []
             self.state_fct["EP"] = []
