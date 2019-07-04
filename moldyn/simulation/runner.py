@@ -207,7 +207,8 @@ class Simulation:
             self._compute.set_pos(pos)
 
             # Énergie cinétique et température
-            EC = 0.5 * ne.evaluate("sum(m*v*v)")
+            v_avg = np.average(v, axis=0)
+            EC = 0.5 * ne.evaluate("sum(m*(v-v_avg)**2)")
             T = EC / knparts
             self.EC.append(EC)
             self.T.append(T)
