@@ -258,6 +258,12 @@ class MoldynMainWindow(QMainWindow):
             t, T = self.simulation.state_fct["T_ramps"]
             if len(t)>1:
                 self.simulation.set_T_ramps(t, T)
+            t, Fx = self.simulation.state_fct["Fx_ramps"]
+            if len(t)>1:
+                self.simulation.set_Fx_ramps(t, Fx)
+            t, Fy = self.simulation.state_fct["Fy_ramps"]
+            if len(t)>1:
+                self.simulation.set_Fy_ramps(t, Fy)
             sp = self.simulation.model.params["save_pos_history"]
             self.ui.groupBoxMovie.setEnabled(sp)
             self.ui.saveAllAtomsPositionCheckBox.setCheckState(sp)

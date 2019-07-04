@@ -444,13 +444,18 @@ class Model:
         return 0.5*ne.evaluate("sum(m*v*v)")
 
     def get_T(self):
-        return self.EC/(self.kB*self.npart)
+        v = self.v
+        m = self.m
+        v_avg = np.average(v, axis=0)
+        return 0.5*ne.evaluate("sum(m*(v-v_avg)**2)")/(self.kB*self.npart)
 
     def set_T(self, T : float):
         T = max(0,T)
         if not self.T:
             self.random_speed()
-        self.v *= np.sqrt(T/self.T)
+        v = self.v
+        v_avg = np.average(v, axis=0)
+        self.v = v_avg+v*np.sqrt(T/self.T)
 
     def get_mass(self):
         return self.n_a*self.m_a + (self.npart-self.n_a)*self.m_b
