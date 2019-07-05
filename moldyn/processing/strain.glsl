@@ -109,7 +109,7 @@ void main()
                 }
             }
         }
-        eps = X*transpose(inverse(Y)) - mat2(1.0);
+        eps = X*inverse(Y) - mat2(1.0);
         outeps[x] = eps;
     }
 }

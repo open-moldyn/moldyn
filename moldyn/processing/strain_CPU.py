@@ -59,10 +59,10 @@ def _iterate(current_pos, x, pos, posdt, NPART, rcut, LENGTH_X, LENGTH_Y, SHIFT_
 
                 for i in range(2):
                     for j in range(2):
-                        X[i,j] += distxy[i]*distxydt[j]
-                        Y[i,j] += distxydt[i] * distxydt[j]
+                        X[j,i] += distxy[i]*distxydt[j]
+                        Y[j,i] += distxydt[i]*distxydt[j]
 
-    eps[:] = X*inv(Y.transpose()) - np.eye(2)
+    eps[:] = X*inv(Y) - np.eye(2)
     return eps
 
 

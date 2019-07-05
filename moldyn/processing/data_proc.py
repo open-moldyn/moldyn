@@ -268,11 +268,28 @@ def compute_strain_CPU(model0:Model, model1:Model, rcut):
 
 @cached
 def compute_strain(model0:Model, model1:Model, rcut):
+    params = model0.params.copy()
+    params["RCUT"] = rcut
+    try:
+        strain_compute = StrainComputeGPU(params)
+    except:
+        strain_compute = StrainComputeCPU(params)
+    strain_compute.set_post(model0.pos)
+    strain_compute.set_posdt(model1.pos)
+    strain_compute.compute()
+    return strain_compute.get_eps()
+
+"""
+@cached
+def compute_strain(model0:Model, model1:Model, rcut):
     try:
         eps = compute_strain_CPU(model0, model1, rcut)
         eps2 = compute_strain_GPU(model0, model1, rcut)
-        pprint(eps[:10]-eps2[:10])
+        #pprint(eps[:10]-eps2[:10])
+        pprint(eps[:10])
+        pprint(eps2[:10])
+        pprint((eps[:10]-eps2[:10])/eps[:10])
         return eps-eps2
     except Exception as e:
         raise
-        return compute_strain_GPU(model0, model1, rcut)
+        return compute_strain_GPU(model0, model1, rcut)"""
