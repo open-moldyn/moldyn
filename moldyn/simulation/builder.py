@@ -211,6 +211,7 @@ class Model:
     _derived_values = [  # Les valeurs calculables à partir des autres
         "T",
         "EC",
+        "total_EC",
         "mass",
         "length",
         "lim_sup",
@@ -438,16 +439,22 @@ class Model:
     def get_up_forces(self):
         return np.array([self.up_x_component, self.up_y_component])
 
-    def get_EC(self): # énergie cinétique
+    def get_total_EC(self): # énergie cinétique totale
         v = self.v
         m = self.m
-        return 0.5*ne.evaluate("sum(m*v*v)")
+        return 0.5*ne.evaluate("sum(m*v**2)")
+
+    def get_EC(self): # énergie cinétique microscopique
+        v = self.v
+        m = self.m
+        v_avg = np.average(v, axis=0)
+        return 0.5*ne.evaluate("sum(m*(v-v_avg)**2)")
 
     def get_T(self):
         v = self.v
         m = self.m
         v_avg = np.average(v, axis=0)
-        return 0.5*ne.evaluate("sum(m*(v-v_avg)**2)")/(self.kB*self.npart)
+        return self.EC/(self.kB*self.npart)
 
     def set_T(self, T : float):
         T = max(0,T)
