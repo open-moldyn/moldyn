@@ -232,7 +232,7 @@ def deformation_volume(model0, model1, rcut, levels=50):
     cmap = plt.get_cmap("plasma")
     dV = eps.trace(axis1=1, axis2=2)
     if type(levels) == int:
-        levels = np.linspace(min(dV), max(dV), levels)
+        levels = np.linspace(min(dV), max(dV)+1e-30, levels)
     CS = plt.tricontourf(*model1.pos.T, dV, levels=levels, cmap=cmap)
     cbar = fig.colorbar(CS)
     cbar.ax.set_ylabel('local compression')
@@ -244,7 +244,7 @@ def deformation_dev(model0, model1, rcut, levels=50):
     cmap = plt.get_cmap("plasma")
     dV = eps[:,0,1]
     if type(levels) == int:
-        levels = np.linspace(min(dV), max(dV), levels)
+        levels = np.linspace(min(dV), max(dV)+1e-30, levels)
     CS = plt.tricontourf(*model1.pos.T, dV, levels=levels, cmap=cmap)
     cbar = fig.colorbar(CS)
     cbar.ax.set_ylabel('local shear')

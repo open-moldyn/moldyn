@@ -1,5 +1,6 @@
 import os
 from functools import wraps
+from pprint import pprint
 
 import numpy as np
 import numexpr as ne
@@ -7,6 +8,7 @@ from matplotlib.tri import TriAnalyzer, Triangulation, UniformTriRefiner
 from scipy.spatial import Voronoi, ConvexHull
 import moderngl
 
+from moldyn.processing.strain_CPU import StrainComputeCPU
 from moldyn.simulation.builder import Model
 from moldyn.utils import gl_util
 
@@ -245,16 +247,32 @@ class StrainComputeGPU:
         return np.frombuffer(self._BUFFER_E.read(), dtype=np.float32).reshape(self.array_shape)
 
 
-@cached
-def compute_strain(model0:Model, model1:Model, rcut):
+
+def compute_strain_GPU(model0:Model, model1:Model, rcut):
     params = model0.params.copy()
     params["RCUT"] = rcut
     strain_compute = StrainComputeGPU(params)
     strain_compute.set_post(model0.pos)
     strain_compute.set_posdt(model1.pos)
     strain_compute.compute()
+    return strain_compute.get_eps()
+
+def compute_strain_CPU(model0:Model, model1:Model, rcut):
+    params = model0.params.copy()
+    params["RCUT"] = rcut
+    strain_compute = StrainComputeCPU(params)
+    strain_compute.set_post(model0.pos)
+    strain_compute.set_posdt(model1.pos)
+    strain_compute.compute()
+    return strain_compute.get_eps()
+
+@cached
+def compute_strain(model0:Model, model1:Model, rcut):
     try:
-        return strain_compute.get_eps()
+        eps = compute_strain_CPU(model0, model1, rcut)
+        eps2 = compute_strain_GPU(model0, model1, rcut)
+        pprint(eps[:10]-eps2[:10])
+        return eps-eps2
     except Exception as e:
-        print(repr(e))
         raise
+        return compute_strain_GPU(model0, model1, rcut)

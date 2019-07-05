@@ -1,9 +1,11 @@
 """
-Forces calculator.
+Strain calculator.
 Runs on CPU.
 """
+import weakref
+from pprint import pprint
+
 from numpy.linalg import inv
-from numpy.matlib import eye
 
 """
 installer icc-rt et tbb sur les machines à processeur intel
@@ -19,12 +21,9 @@ import ctypes
 
 @numba.njit(nogil=True, cache=True)
 def _iterate(current_pos, x, pos, posdt, NPART, rcut, LENGTH_X, LENGTH_Y, SHIFT_X, SHIFT_Y, X_PERIODIC, Y_PERIODIC):
-    f = np.zeros((2,))
-    e = 0.0
-    m = 0.0
-    X = np.matrix(np.zeros((2,2)))
-    Y = np.matrix(np.zeros((2,2)))
-    eps = np.matrix(np.zeros((2,2)))
+    X = np.zeros((2,2))
+    Y = np.zeros((2,2))
+    eps = np.zeros((2,2))
     for n in range(NPART):
         if x==n:
             continue
@@ -63,7 +62,7 @@ def _iterate(current_pos, x, pos, posdt, NPART, rcut, LENGTH_X, LENGTH_Y, SHIFT_
                         X[i,j] += distxy[i]*distxydt[j]
                         Y[i,j] += distxydt[i] * distxydt[j]
 
-    eps = X*inv(Y.T) - eye(2)
+    eps[:] = X*inv(Y.transpose()) - np.eye(2)
     return eps
 
 
@@ -78,6 +77,7 @@ def _par_iterate(current_pos, i, RCUT, NPART, LENGTH_X, LENGTH_Y, X_PERIODIC, Y_
 
 def _p_compute_strain(pool, _pos, _posdt, eps_arr, RCUT, NPART, LENGTH_X, LENGTH_Y, X_PERIODIC, Y_PERIODIC, SHIFT_X, SHIFT_Y,
                       offset, end):
+
     pos = np.array(_pos).reshape(NPART,2)
 
     gen = ((pos[i,:], i, RCUT, NPART, LENGTH_X, LENGTH_Y, X_PERIODIC, Y_PERIODIC, SHIFT_X, SHIFT_Y)
@@ -85,7 +85,7 @@ def _p_compute_strain(pool, _pos, _posdt, eps_arr, RCUT, NPART, LENGTH_X, LENGTH
 
     sortie = np.array(pool.starmap(_par_iterate, gen))
 
-    eps_arr[:, :, :] = sortie.copy()
+    eps_arr[:] = sortie[:]
 
 _pos_array = None
 _posdt_array = None
@@ -100,12 +100,14 @@ class StrainComputeCPU:
 
     def __init__(self, consts, compute_npart=None, compute_offset=0):
 
-        self.consts = consts
+        self.consts = dict()
+        for key, item in consts.items():
+            self.consts[key.upper()] = item
 
         self.compute_offset = max(0, compute_offset)
 
-        self.npart = consts["NPART"]
-        self.compute_npart = compute_npart or (consts["NPART"] - self.compute_offset)
+        self.npart = self.consts["NPART"]
+        self.compute_npart = compute_npart or (self.consts["NPART"] - self.compute_offset)
 
         self.compute_npart = min(self.compute_npart, self.npart)
 
@@ -122,7 +124,6 @@ class StrainComputeCPU:
 
     def _compute_strain(self):
         RCUT = self.consts["RCUT"]
-        N_A = self.consts["N_A"]
         NPART = self.consts["NPART"]
         LENGTH_X = self.consts["LENGTH_X"]
         LENGTH_Y = self.consts["LENGTH_Y"]
@@ -132,8 +133,8 @@ class StrainComputeCPU:
         SHIFT_X = LENGTH_X / 2
         SHIFT_Y = LENGTH_Y / 2
         end = NPART
-        _p_compute_strain(self._pool, self._POS, self._POSDT, self._F, self._PE, RCUT, N_A, NPART, LENGTH_X, LENGTH_Y, X_PERIODIC,
-                          Y_PERIODIC, SHIFT_X, SHIFT_Y)
+        _p_compute_strain(self._pool, self._POS, self._POSDT, self._EPS, RCUT, NPART, LENGTH_X, LENGTH_Y, X_PERIODIC,
+                          Y_PERIODIC, SHIFT_X, SHIFT_Y, self.compute_offset, end)
 
     def _join_thr(self):
         if self._thr_run:
@@ -146,10 +147,11 @@ class StrainComputeCPU:
     def set_posdt(self, pos):
         self._POSDT[:] = pos.reshape((self.npart * 2,))
 
-    def compute(self):
-        self._thread = threading.Thread(target=self._compute_strain)
-        self._thread.start()
-
     def get_eps(self):
         self._join_thr()
         return self._EPS[:]
+
+    def compute(self):
+        self._thr_run = True
+        self._thread = threading.Thread(target=self._compute_strain)
+        self._thread.start()
