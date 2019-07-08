@@ -276,6 +276,7 @@ def compute_strain(model0:Model, model1:Model, rcut):
         strain_compute = StrainComputeCPU(params)
     strain_compute.set_post(model0.pos)
     strain_compute.set_posdt(model1.pos)
+
     strain_compute.compute()
     return strain_compute.get_eps()
 

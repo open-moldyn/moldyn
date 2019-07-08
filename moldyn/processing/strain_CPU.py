@@ -67,12 +67,14 @@ def _iterate(current_pos, x, pos, posdt, NPART, rcut, LENGTH_X, LENGTH_Y, SHIFT_
 
 
 def _par_iterate(current_pos, i, RCUT, NPART, LENGTH_X, LENGTH_Y, X_PERIODIC, Y_PERIODIC, SHIFT_X, SHIFT_Y):
-    ret = np.zeros((2,2))
+    #ret = np.zeros((2,2))
     pos = np.array(_pos_array).reshape(NPART,2)
     posdt = np.array(_posdt_array).reshape(NPART,2)
-    ret += _iterate(current_pos, i, pos, posdt, NPART, RCUT, LENGTH_X, LENGTH_Y, SHIFT_X, SHIFT_Y, X_PERIODIC,
+    #ret += _iterate(current_pos, i, pos, posdt, NPART, RCUT, LENGTH_X, LENGTH_Y, SHIFT_X, SHIFT_Y, X_PERIODIC,
+    #                Y_PERIODIC)
+    return _iterate(current_pos, i, pos, posdt, NPART, RCUT, LENGTH_X, LENGTH_Y, SHIFT_X, SHIFT_Y, X_PERIODIC,
                     Y_PERIODIC)
-    return ret
+    #return ret
 
 
 def _p_compute_strain(pool, _pos, _posdt, eps_arr, RCUT, NPART, LENGTH_X, LENGTH_Y, X_PERIODIC, Y_PERIODIC, SHIFT_X, SHIFT_Y,
