@@ -192,6 +192,7 @@ class Simulation:
             micro_ke = "sum(m*(v-v_avg-rotative_term)**2)"
             rotative_term = np.zeros(pos.shape)
             y_middle = (self.model.y_lim_sup + self.model.y_lim_inf)/2
+            from_y_middle = np.zeros(npart)
         kick = "(v + ("+kick+"*dtm))"
         if betaC:
             kick += "*sqrt(1 + gamma*(T_v/T - 1))"
@@ -219,7 +220,8 @@ class Simulation:
                 up_zone_force = self.F_f(t)
                 up_mask[:,:] = np.array([pos[:,1] > up_zone_limit]*2).T
             if compute_rotative_term:
-                rotative_term[:,0] = v[:,0]*(pos[:,1]-y_middle)
+                from_y_middle[:] = (pos[:,1]-y_middle)
+                rotative_term[:,0] = np.sum(v[:,0]/from_y_middle)*from_y_middle
 
             # Énergie cinétique et température
             EC = 0.5 * ne.evaluate(micro_ke)
