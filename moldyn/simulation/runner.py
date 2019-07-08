@@ -220,8 +220,8 @@ class Simulation:
                 up_zone_force = self.F_f(t)
                 up_mask[:,:] = np.array([pos[:,1] > up_zone_limit]*2).T
             if compute_rotative_term:
-                from_y_middle[:] = (pos[:,1]-y_middle)
-                rotative_term[:,0] = np.sum(v[:,0]/from_y_middle)*from_y_middle
+                from_y_middle[:] = pos[:,1]-y_middle
+                rotative_term[:,0] = (np.sum(v[:,0]/from_y_middle)/npart)*from_y_middle
 
             # Énergie cinétique et température
             EC = 0.5 * ne.evaluate(micro_ke)
