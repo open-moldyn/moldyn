@@ -182,9 +182,16 @@ class Simulation:
             # on n'applique les conditions périodiques que selon le(s) axe(s) spécifié(s)
 
         kick = "F"
+        micro_ke = "sum(m*(v-v_avg)**2)"
         if apply_up_zone_forces:
             kick = "(F+up_mask*up_zone_force)"
             up_mask = np.zeros(pos.shape)
+
+        compute_rotative_term = apply_up_zone_forces and not(self.model.y_periodic)
+        if compute_rotative_term:
+            micro_ke = "sum(m*(v-v_avg-rotative_term)**2)"
+            rotative_term = np.zeros(pos.shape)
+            y_middle = (self.model.y_lim_sup + self.model.y_lim_inf)/2
         kick = "(v + ("+kick+"*dtm))"
         if betaC:
             kick += "*sqrt(1 + gamma*(T_v/T - 1))"
@@ -206,16 +213,19 @@ class Simulation:
 
             self._compute.set_pos(pos)
 
-            # Énergie cinétique et température
             v_avg = np.average(v, axis=0)
-            EC = 0.5 * ne.evaluate("sum(m*(v-v_avg)**2)")
-            T = EC / knparts
-            self.EC.append(EC)
-            self.T.append(T)
 
             if apply_up_zone_forces: # recalcul du masque, parce que ça bouge
                 up_zone_force = self.F_f(t)
                 up_mask[:,:] = np.array([pos[:,1] > up_zone_limit]*2).T
+            if compute_rotative_term:
+                rotative_term[:,0] = v[:,0]*(pos[:,1]-y_middle)
+
+            # Énergie cinétique et température
+            EC = 0.5 * ne.evaluate(micro_ke)
+            T = EC / knparts
+            self.EC.append(EC)
+            self.T.append(T)
 
             F[:] = self._compute.get_F()
 
