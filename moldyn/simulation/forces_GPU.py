@@ -1,3 +1,4 @@
+# -*-encoding: utf-8 -*-
 """
 Forces calculator.
 Runs on GPU.

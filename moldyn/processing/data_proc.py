@@ -1,3 +1,5 @@
+# -*-encoding: utf-8 -*-
+
 import os
 from functools import wraps
 from pprint import pprint

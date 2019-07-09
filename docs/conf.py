@@ -33,7 +33,8 @@ release = '0.0.1'
 extensions = [
     'sphinx.ext.napoleon',
     'sphinx.ext.autodoc',
-    'sphinx.ext.viewcode'
+    'sphinx.ext.viewcode',
+    'recommonmark'
 ]
 
 # Add any paths that contain templates here, relative to this directory.
@@ -58,3 +59,11 @@ html_theme = 'sphinx_rtd_theme'
 html_static_path = ['_static']
 
 autoclass_content = "both"
+
+source_suffix = {
+    '.rst': 'restructuredtext',
+    '.txt': 'markdown',
+    '.md': 'markdown',
+}
+
+source_encoding = 'utf-8-sig'

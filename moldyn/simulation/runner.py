@@ -1,3 +1,4 @@
+# -*-encoding: utf-8 -*-
 """
 Simulator.
 Simulates the dynamics of a model (on the CPU or GPU).

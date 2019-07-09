@@ -1,3 +1,4 @@
+# -*-encoding: utf-8 -*-
 import sys
 from PyQt5.QtWidgets import QApplication
 from moldyn.ui.mainwindow import MoldynMainWindow
