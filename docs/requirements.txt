@@ -9,3 +9,10 @@ scandir
 six
 fuzzywuzzy
 pyparsing
+asciitree
+pathlib2
+scandir
+six
+fuzzywuzzy
+pyparsing
+sphinx-autodoc-typehints
