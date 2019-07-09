@@ -308,15 +308,48 @@ class Simulation:
             self.set_T_f(self._f(t, T))
 
     def F_f(self, t):
+        """
+
+        Parameters
+        ----------
+        t
+            Time in seconds.
+        Returns
+        -------
+        np.ndarray
+              External forces applied at time `t` (2-component vector).
+        """
         return np.array((self.Fx_f(t), self.Fy_f(t)))
 
     def set_Fx_ramps(self, t, Fx):
+        """
+        Creates a function based on ramps and uses it for external forces control along axis x.
+        See `set_T_ramps` for further details.
+
+        Parameters
+        ----------
+        t : array
+            Time.
+        Fx : array
+            Associated forces.
+        """
         if len(t)>1:
             self.state_fct["Fx_ramps"] = [list(t), list(Fx)]
             self.Fx_ramps = self.state_fct["Fx_ramps"]
             self.Fx_f = self._f(t, Fx)
 
     def set_Fy_ramps(self, t, Fy):
+        """
+        Creates a function based on ramps and uses it for external forces control along axis y.
+        See `set_T_ramps` for further details.
+
+        Parameters
+        ----------
+        t : array
+            Time.
+        Fy : array
+            Associated forces.
+        """
         if len(t)>1:
             self.state_fct["Fy_ramps"] = [list(t), list(Fy)]
             self.Fy_ramps = self.state_fct["Fy_ramps"]
