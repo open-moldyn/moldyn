@@ -34,7 +34,8 @@ extensions = [
     'sphinx.ext.napoleon',
     'sphinx.ext.autodoc',
     'sphinx.ext.viewcode',
-    'recommonmark'
+    'recommonmark',
+    'sphinx_autodoc_typehints'
 ]
 
 # Add any paths that contain templates here, relative to this directory.
@@ -62,7 +63,6 @@ autoclass_content = "both"
 
 source_suffix = {
     '.rst': 'restructuredtext',
-    '.txt': 'markdown',
     '.md': 'markdown',
 }
 
