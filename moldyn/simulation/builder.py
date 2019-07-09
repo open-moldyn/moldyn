@@ -46,11 +46,17 @@ class Model:
         Is calculated from the average kinetic energy of the atoms.
         May be set to any positive value, in which case atoms' speed will be scaled to match the desired temperature.
     EC : float
-        Total kinetic energy.
+        Microscopic kinetic energy.
 
         Note
         ----
         Cannot be changed as-is, but setting :py:attr:`T` is one way to do so.
+    total_EC : float
+        Total kinetic energy.
+
+        Note
+        ----
+        Cannot be changed as-is.
     kB : float
         Boltzmann constant. If changed, will affect the way the model behaves regarding temperature.
     pos

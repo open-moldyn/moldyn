@@ -17,7 +17,7 @@ def source(uri, consts={}):
     -------
 
     str
-        File contents with replacements
+        File contents with replacements.
 
     """
     with open(uri, 'r') as fp:
@@ -36,7 +36,7 @@ def testGL():
     -------
 
     bool
-        initialisation success
+        Initialisation success.
 
     """
     f = source(os.path.dirname(__file__)+'/dummy.glsl', {"X":50})
