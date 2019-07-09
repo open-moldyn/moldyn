@@ -1,3 +1,4 @@
+# -*-encoding: utf-8 -*-
 """
 Model builder.
 Stores and defines physical properties of a group of atoms.

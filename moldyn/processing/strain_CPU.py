@@ -1,3 +1,4 @@
+# -*-encoding: utf-8 -*-
 """
 Strain calculator.
 Runs on CPU.

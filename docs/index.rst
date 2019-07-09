@@ -6,6 +6,21 @@
 Welcome to open-moldyn's documentation!
 =======================================
 
+Presentation
+============
+
+Open-moldyn is the result of an internship project at
+the IPR (*Institut de Physique de Rennes*)
+aiming at creating an (hopefully) fast and easy to
+use 2D molecular dynamics simulation tool with python.
+
+This tool features a GUI (graphical interface) and is
+meant to be installed with pip (as every respectable
+python packages should be).
+
+Some links bellow:
+ - Github reposatory : https://pypi.org/project/open-moldyn/
+ - PyPI depot : https://github.com/open-moldyn/moldyn
 
 
 .. toctree::
@@ -22,3 +37,17 @@ Indices and tables
 * :ref:`genindex`
 * :ref:`modindex`
 * :ref:`search`
+
+Credits
+=======
+
+Open-moldyn is made by Alexandre Faye-Bedrin and
+Arthur Luciani (at the time students of the *ENS Rennes*
+and interns of the *IPR*) with the supervision of
+Yann Gueguen.
+
+This package also includes datreant_ and appdirs_ to help
+managing data and files.
+
+.. _datreant: https://github.com/datreant/datreant
+.. _appdirs: https://github.com/ActiveState/appdirs/blob/master/LICENSE.txt

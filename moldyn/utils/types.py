@@ -1,3 +1,4 @@
+# -*-encoding: utf-8 -*-
 """
 Types personnalisés utilisés pour moldyn
 """
