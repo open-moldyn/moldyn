@@ -102,10 +102,13 @@ def density(model, refinement=0):
     vert_density : numpy.array
         the array containing the local denstity associated with the tri mesh
 
-    Examples
-    -----
+
+    Example
+    -------
     To plot the result using matplotlib use :
+
     .. code-block:: python
+
         import matplotlib.pyplot as plt
         tri, density = data_proc.density(model)
         plt.tricontour(tri, density) # to draw contours
