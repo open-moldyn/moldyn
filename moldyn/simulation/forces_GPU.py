@@ -67,6 +67,7 @@ class ForcesComputeGPU:
 
     def set_pos(self, pos):
         """
+        Set position array and launches forces computation.
 
         Parameters
         ----------
