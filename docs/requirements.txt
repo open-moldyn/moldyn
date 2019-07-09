@@ -15,4 +15,6 @@ scandir
 six
 fuzzywuzzy
 pyparsing
+autodoc
 sphinx-autodoc-typehints
+recommonmark
