@@ -1,8 +1,4 @@
 # -*-encoding: utf-8 -*-
-"""
-Forces calculator.
-Runs on GPU.
-"""
 
 from ..utils import gl_util
 import os
@@ -15,16 +11,25 @@ if not gl_util.testGL():
 
 
 class ForcesComputeGPU:
+    """
+    Compute module. Runs on GPU.
+
+
+    Parameters
+    ----------
+    consts : dict
+        Dictionary containing constants used for calculations.
+
+    Attributes
+    ----------
+    npart : int
+        number of atoms
+    consts : dict
+        Dictionary containing constants used for calculations, and some parameters to run the compute shader.
+
+    """
 
     def __init__(self, consts, compute_npart=None):
-        """
-
-        Parameters
-        ----------
-        consts : dict
-            Dictionary containing constants used for calculations.
-
-        """
 
         self.npart = consts["NPART"]
         self.compute_npart = compute_npart or consts["NPART"]

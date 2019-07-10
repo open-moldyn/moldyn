@@ -1,10 +1,7 @@
 # -*-encoding: utf-8 -*-
 """
-Forces calculator.
-Runs on CPU, using `numba` for JIT and `multiprocessing` for multicore.
-See `ForcesComputeGPU` for documentation.
-"""
 
+"""
 """
 installer icc-rt et tbb sur les machines à processeur intel
 """
@@ -119,6 +116,12 @@ def initProcess(array):
     _pos_array = array
 
 class ForcesComputeCPU:
+    """
+    Compute module.
+    Runs on CPU.
+    Uses `numba` for JIT and `multiprocessing` for multicore.
+    See `ForcesComputeGPU` for documentation.
+    """
 
     def __init__(self, consts, compute_npart=None, compute_offset=0):
 

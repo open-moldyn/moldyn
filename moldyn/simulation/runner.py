@@ -44,7 +44,7 @@ class Simulation:
         Number of iterations already computed, since initialisation.
     context : moderngl.Context
         ModernGL context used to build and run compute shader.
-    F : np.array
+    F : numpy.ndarray
         Last computed forces applied to atoms. Initialized to zeros.
 
         Warning
@@ -317,7 +317,7 @@ class Simulation:
             Time in seconds.
         Returns
         -------
-        np.ndarray
+        numpy.ndarray
               External forces applied at time `t` (2-component vector).
         """
         return np.array((self.Fx_f(t), self.Fy_f(t)))
