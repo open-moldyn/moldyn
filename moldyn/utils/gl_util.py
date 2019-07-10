@@ -46,4 +46,4 @@ def testGL():
     except:
         return False
     else:
-        return  True
+        return True

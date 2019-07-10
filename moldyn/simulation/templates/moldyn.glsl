@@ -32,22 +32,22 @@ layout (local_size_x=LAYOUT_SIZE, local_size_y=1, local_size_z=1) in;
 
 layout (std430, binding=0) buffer in_0
 {
-    vec2 inxs[];
+    vec2 inxs[NPART];
 };
 
 layout (std430, binding=1) buffer out_0
 {
-    vec2 outfs[];
+    vec2 outfs[NPART];
 };
 
 layout (std430, binding=2) buffer out_1
 {
-    float outes[];
+    float outes[NPART];
 };
 
 layout (std430, binding=3) buffer out_2
 {
-    float outms[];
+    float outms[NPART];
 };
 
 layout (std430, binding=4) buffer in_params

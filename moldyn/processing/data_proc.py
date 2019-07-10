@@ -14,13 +14,20 @@ from moldyn.processing.strain_CPU import StrainComputeCPU
 from moldyn.simulation.builder import Model
 from moldyn.utils import gl_util
 
+def cached(f, _cache=dict()):
+    """
 
-_cache = dict()
+    Parameters
+    ----------
+    f
 
 
-def cached(f):
+    Returns
+    -------
+
+    """
     fn = f.__repr__()
-    _cache[f] = ne.utils.CacheDict(64)
+    _cache[f] = ne.utils.CacheDict(12)
 
     @wraps(f)
     def cf(*args, **kwargs):
@@ -253,26 +260,6 @@ class StrainComputeGPU:
 
 
 @cached
-def compute_strain_GPU(model0:Model, model1:Model, rcut):
-    params = model0.params.copy()
-    params["RCUT"] = rcut
-    strain_compute = StrainComputeGPU(params)
-    strain_compute.set_post(model0.pos)
-    strain_compute.set_posdt(model1.pos)
-    strain_compute.compute()
-    return strain_compute.get_eps()
-
-@cached
-def compute_strain_CPU(model0:Model, model1:Model, rcut):
-    params = model0.params.copy()
-    params["RCUT"] = rcut
-    strain_compute = StrainComputeCPU(params)
-    strain_compute.set_post(model0.pos)
-    strain_compute.set_posdt(model1.pos)
-    strain_compute.compute()
-    return strain_compute.get_eps()
-
-@cached
 def compute_strain(model0:Model, model1:Model, rcut: float):
     """
     Compute the local deformation tensor for each atom.
@@ -301,25 +288,15 @@ def compute_strain(model0:Model, model1:Model, rcut: float):
     params["RCUT"] = rcut
     try:
         strain_compute = StrainComputeGPU(params)
-    except:
+    except Exception as e:
+        print(e)
         strain_compute = StrainComputeCPU(params)
     strain_compute.set_post(model0.pos)
     strain_compute.set_posdt(model1.pos)
 
     strain_compute.compute()
-    return strain_compute.get_eps()
+    eps = strain_compute.get_eps()
+    del strain_compute
+    return eps
 
-"""
-@cached
-def compute_strain(model0:Model, model1:Model, rcut):
-    try:
-        eps = compute_strain_CPU(model0, model1, rcut)
-        eps2 = compute_strain_GPU(model0, model1, rcut)
-        #pprint(eps[:10]-eps2[:10])
-        pprint(eps[:10])
-        pprint(eps2[:10])
-        pprint((eps[:10]-eps2[:10])/eps[:10])
-        return eps-eps2
-    except Exception as e:
-        raise
-        return compute_strain_GPU(model0, model1, rcut)"""
+
