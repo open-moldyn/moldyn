@@ -1,6 +1,8 @@
 #version 430
 
+// nécéssaire pour que ça ne plante pas avec des cartes nvidia sur des petits échantillons
 #pragma optionNV(unroll none)
+
 // %%VARIABLE%% will be replaced with consts by python code
 #define LAYOUT_SIZE %%LAYOUT_SIZE%%
 #define NPART %%NPART%%
