@@ -119,7 +119,7 @@ class ForcesComputeCPU:
     """
     Compute module.
     Runs on CPU.
-    Uses `numba` for JIT and `multiprocessing` for multicore.
+    Uses `numba` for JIT compilation and `multiprocessing` for multicore.
     See `ForcesComputeGPU` for documentation.
     """
 

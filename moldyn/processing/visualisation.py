@@ -125,7 +125,7 @@ def plot_densityf(model, levels=None, refinement=0):
 @_plot_base(axis='scaled', grid=False)
 def plot_particles(model):
     """
-    Plot the position stored in model
+    Plot the position stored in model.
 
     Parameters
     ----------

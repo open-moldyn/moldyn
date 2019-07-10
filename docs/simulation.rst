@@ -8,4 +8,3 @@ Simulation
 
    simulation.builder
    simulation.runner
-   simulation.compute_forces

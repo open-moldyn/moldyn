@@ -26,7 +26,7 @@ class Simulation:
         The simulation is copied, and the computing module reinitialized.
     prefer_gpu : bool
         Specifies if GPU should be used to compute inter-atomic forces.
-        Defaults to `True`, as it often results in a significant speed gain.
+        Defaults to `True`, as it generally results in a significant speed gain.
 
     Attributes
     ----------
