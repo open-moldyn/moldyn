@@ -252,7 +252,7 @@ class StrainComputeGPU:
         return np.frombuffer(self._BUFFER_E.read(), dtype=np.float32).reshape(self.array_shape)
 
 
-
+@cached
 def compute_strain_GPU(model0:Model, model1:Model, rcut):
     params = model0.params.copy()
     params["RCUT"] = rcut
@@ -262,6 +262,7 @@ def compute_strain_GPU(model0:Model, model1:Model, rcut):
     strain_compute.compute()
     return strain_compute.get_eps()
 
+@cached
 def compute_strain_CPU(model0:Model, model1:Model, rcut):
     params = model0.params.copy()
     params["RCUT"] = rcut
@@ -272,7 +273,30 @@ def compute_strain_CPU(model0:Model, model1:Model, rcut):
     return strain_compute.get_eps()
 
 @cached
-def compute_strain(model0:Model, model1:Model, rcut):
+def compute_strain(model0:Model, model1:Model, rcut: float):
+    """
+    Compute the local deformation tensor for each atom.
+
+    It will try to use GPU but will fallback on CPU if not available
+
+    Parameters
+    ----------
+    model0: simulation.builder.Model
+        The model at time t
+    model1: simulation.builder.Model
+        The model at time t-dt
+    rcut: float
+    Returns
+    -------
+    A vector containing the 2D deformation tensor of each atom
+    (in the order of model.pos).
+
+    Note
+    ----
+    Due to numerical calculation imprecision the deformation tensor may not
+    be quantitatively accurate (or even symmetrical).
+
+    """
     params = model0.params.copy()
     params["RCUT"] = rcut
     try:

@@ -202,6 +202,7 @@ class NumpyIO:
         The file name of the .npy file associated with it.
     file : file object
         the file that is opened (contains None until entering a context manager)
+
     Example
     -------
     .. code-block:: python
@@ -220,13 +221,21 @@ class NumpyIO:
         self.file = None
 
     def __enter__(self):
-        self.file = open(self.file_name, mode=self.mode)
+        self.open()
         return self
 
     def __exit__(self, exc_type, exc_val, exc_tb):
+        self.close()
+
+    def open(self):
         """
-        if False and self.file.readable():
-            self.dynState.categories['last modified'] = datetime.datetime.now().strftime('%d/%m/%Y-%X')
+        Open the internal file.
+        """
+        self.file = open(self.file_name, mode=self.mode)
+
+    def close(self):
+        """
+        Close the internal file.
         """
         self.file.close()
 
@@ -247,6 +256,7 @@ class NumpyIO:
     def load(self):
         """
         Load an array stored in the file.
+
         Returns
         -------
         arr : ndarray
@@ -259,13 +269,24 @@ class DynState(dt.Treant):
     """
     A Treant specialized for handling .npy and .json files for moldyn
 
-
+    Attributes
+    ----------
+    POS: str
+        standard name of the position file ("pos.npy")
+    POS_H: str
+        standard name of the position history file ("pos_history.npy")
+    VEL: str
+        standard name of the velocity file ("velocities.npy")
+    STATE_FCT: str
+        standard name of the state function file ("state_fct.json")
+    PAR: str
+        standard name of the parameter file ("parameters.json")
     """
-    POS = "pos.npy" # position of particles
-    POS_H = "pos_history.npy" # history of position
-    VEL = "velocities.npy" # final velocities
-    STATE_FCT = "state_fct.json" # state functions (energy, temperature...)
-    PAR = "parameters.json" # parameters of model and simulation
+    POS = "pos.npy"  # position of particles
+    POS_H = "pos_history.npy"  # history of position
+    VEL = "velocities.npy"  # final velocities
+    STATE_FCT = "state_fct.json"  # state functions (energy, temperature...)
+    PAR = "parameters.json"  # parameters of model and simulation
 
     def __init__(self, treant, *, extraction_path : str = data_path+'/tmp'):
         if isinstance(treant, dt.Treant):
@@ -281,6 +302,44 @@ class DynState(dt.Treant):
             super().__init__(treant)
 
     def open(self, file, mode='r'):
+        """
+        Open the file in this tree (ie. directory and subdir).
+        Return the appropriate IO class depending of the type of the file.
+
+        If the type is not recognize, it opens the file and return the
+        BytesIO or StringIO object.
+
+        Parameters
+        ----------
+        file: str
+            The name of the file. This file must be in this tree (ie. directory and subdir).
+        mode: str (default='r')
+            The mode with which to open the file :
+                - 'r' to read
+                - 'w' to write
+                - 'a' to append
+                - 'b' to read or write bytes (eg. 'w+b' to write bytes)
+
+        Returns
+        -------
+        If file is a .npy file, return a NumpyIO object.
+        If file is a .json file, return a ParamIO object.
+        Else, return a StringIO or a BytesIO depending on mode.
+
+        Note
+        ----
+
+        This method is designed to be used wih a context manager like this
+
+        .. code-block:: python
+
+            t = DynState(dirpath)
+            # here t.open returns a NumpyIO object as the file is .npy
+            with t.open("pos.npy", 'r') as IO:
+                arr = IO.load() #load an array
+            with t.open("pos.npy", 'w') as IO:
+                IO.save(arr) #save an array
+        """
         if file.endswith(".npy"):
             if not(mode.endswith("+b")):
                 mode += "+b"
@@ -293,7 +352,15 @@ class DynState(dt.Treant):
     def add_tag(self,*tags):
         self.tags.add(*tags)
 
-    def to_zip(self, path):
+    def to_zip(self, path: str):
+        """
+        Zip every leaf (aka. file) of the dynState treant into an archive at path.
+
+        Parameters
+        ----------
+        path : str
+            The path of the archive.
+        """
         with ZipFile(path, "w") as archive:
             for leaf in self.leaves():
                 if leaf.exists:
@@ -301,6 +368,17 @@ class DynState(dt.Treant):
                     archive.write(leaf.relpath, arcname=leaf_path)
 
     def save_model(self, model):
+        """
+        Save the positions, the velocities and the parameters of the model.
+
+        The position and velocity arrays are saved as numpy files and
+        the parameter dictionary as a .json file
+
+        Parameters
+        ----------
+        model : simulation.builder.Model
+            The model to be saved.
+        """
 
         # position of particles
         with self.open(self.POS, 'w') as IO:
