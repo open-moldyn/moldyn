@@ -10,7 +10,7 @@ Data management
    :members:
    :special-members: __enter__, __exit__
 
-GLSL utility tools
-++++++++++++++++++
+OpenGL utility tools
+++++++++++++++++++++
 .. automodule:: moldyn.utils.gl_util
    :members:

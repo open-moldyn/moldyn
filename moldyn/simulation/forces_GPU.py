@@ -23,7 +23,7 @@ class ForcesComputeGPU:
     Attributes
     ----------
     npart : int
-        number of atoms
+        Number of atoms.
     consts : dict
         Dictionary containing constants used for calculations, and some parameters to run the compute shader.
 
@@ -73,7 +73,7 @@ class ForcesComputeGPU:
 
     def set_pos(self, pos):
         """
-        Set position array and launches forces computation.
+        Set position array and start computing forces.
 
         Parameters
         ----------
@@ -113,6 +113,6 @@ class ForcesComputeGPU:
         Returns
         -------
         np.ndarray
-            Average near atoms.
+            Average near atoms (one could count this as bonds).
         """
         return np.frombuffer(self._BUFFER_COUNT.read(), dtype=np.float32)
