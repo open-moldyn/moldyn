@@ -113,6 +113,6 @@ class ForcesComputeGPU:
         Returns
         -------
         np.ndarray
-            Average near atoms (one could count this as bonds).
+            Near atoms (one could count this as bonds).
         """
         return np.frombuffer(self._BUFFER_COUNT.read(), dtype=np.float32)
