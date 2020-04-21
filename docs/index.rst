@@ -19,8 +19,8 @@ meant to be installed with pip (as every respectable
 python packages should be).
 
 Some links bellow:
- - Github repository : https://pypi.org/project/open-moldyn/
- - PyPI depot : https://github.com/open-moldyn/moldyn
+ - Github repository : https://github.com/open-moldyn/moldyn
+ - PyPI depot : https://pypi.org/project/open-moldyn/
 
 
 .. toctree::
