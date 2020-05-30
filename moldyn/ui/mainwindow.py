@@ -416,6 +416,7 @@ class MoldynMainWindow(QMainWindow):
         def run():
             # Pour continuer la simu précedente. On est obligés d'en créer une nouvelle pour des questions de scope.
             # On pourrait créer et conserver le thread une bonne fois pour toutes, pour que ce bricolage cesse.
+            del(self.simulation._compute) # le module de calcul risque de continuer à exister sinon
             self.c_i = self.simulation.current_iter
             self.simulation = Simulation(simulation=self.simulation, prefer_gpu=self.ui.tryToUseGPUCheckBox.checkState())
             self.model_view = ModelView(self.simulation.model)
