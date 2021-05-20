@@ -244,7 +244,8 @@ class MoldynMainWindow(QMainWindow):
         self.emd.show()
 
     def load_simulation(self):
-        path, filter = QFileDialog.getOpenFileName(caption="Load model", filter=SIMULATION_FILE_FILTER_)
+        path, filter = QFileDialog.getOpenFileName(caption="Load model", filter=SIMULATION_FILE_FILTER_,
+                                                   options=QFileDialog.DontUseNativeDialog)
         if path:
             ds = self._load_model(path)
             with ds.open(ds.STATE_FCT, 'r') as IO:
@@ -278,7 +279,8 @@ class MoldynMainWindow(QMainWindow):
         self.cmd.show()
 
     def load_model(self):
-        path, filter = QFileDialog.getOpenFileName(caption="Load model", filter=MODEL_FILE_FILTER)
+        path, filter = QFileDialog.getOpenFileName(caption="Load model", filter=MODEL_FILE_FILTER,
+                                                   options=QFileDialog.DontUseNativeDialog)
         if path:
             self._load_model(path)
 
@@ -302,7 +304,8 @@ class MoldynMainWindow(QMainWindow):
         return ds
 
     def _save_model(self, m):
-        path, filter = QFileDialog.getSaveFileName(caption="Save model", filter=MODEL_FILE_FILTER)
+        path, filter = QFileDialog.getSaveFileName(caption="Save model", filter=MODEL_FILE_FILTER,
+                                                   options=QFileDialog.DontUseNativeDialog)
         print(filter)
         if path:
             path = self._correct_path(path, filter, [".zip", ".mdl"])
@@ -461,7 +464,8 @@ class MoldynMainWindow(QMainWindow):
         self.ui.tabWidget.setCurrentWidget(self.ui.tab_model)
 
     def save_simu_history(self):
-        path, filter = QFileDialog.getSaveFileName(caption="Save simulation history", filter=SIMULATION_FILE_FILTER_)
+        path, filter = QFileDialog.getSaveFileName(caption="Save simulation history", filter=SIMULATION_FILE_FILTER_,
+                                                   options=QFileDialog.DontUseNativeDialog)
         if path:
             path = self._correct_path(path, filter, [".zip", ".mds"])
             #shutil.rmtree('./data/tmp1')
@@ -475,7 +479,8 @@ class MoldynMainWindow(QMainWindow):
             ds.to_zip(path)
 
     def export_to_csv(self):
-        path, filter = QFileDialog.getSaveFileName(caption="Export to CSV", filter="CSV file (*.csv)")
+        path, filter = QFileDialog.getSaveFileName(caption="Export to CSV", filter="CSV file (*.csv)",
+                                                   options=QFileDialog.DontUseNativeDialog)
         if path:
             path = self._correct_path(path, filter, [".csv"])
             with open(path, "w", newline='') as csvfile:
@@ -599,7 +604,8 @@ class MoldynMainWindow(QMainWindow):
         self.ui.statusbar.showMessage(self.old_status)
 
     def make_movie(self):
-        path, filter = QFileDialog.getSaveFileName(caption="Make movie", filter="Video file (*.mp4)")
+        path, filter = QFileDialog.getSaveFileName(caption="Make movie", filter="Video file (*.mp4)",
+                                                   options=QFileDialog.DontUseNativeDialog)
         if path:
             path = self._correct_path(path, filter, [".mp4"])
             self.ui.tab_model.setEnabled(False)
